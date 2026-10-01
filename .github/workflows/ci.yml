@@ -43,5 +43,9 @@ jobs:
       - name: Build extension with Vite
         run: npm run build:vite
 
+      - name: Run Extension Host smoke test
+        if: matrix.node-version == 22
+        run: xvfb-run -a npm run test:integration
+
       - name: Validate VSIX packaging
         run: npm run package -- --no-dependencies
