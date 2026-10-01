@@ -141,9 +141,9 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: ${{ inputs.target-directory }}
-        run: npm test
+        run: npm run test:coverage
 
       - name: Run lint
         working-directory: ${{ inputs.target-directory }}
