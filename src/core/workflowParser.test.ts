@@ -55,7 +55,7 @@ describe('WorkflowParser', () => {
     it('rejects YAML documents that are not objects', () => {
       const root = fs.mkdtempSync(path.join(os.tmpdir(), 'workflow-parser-'));
       const file = path.join(root, 'invalid.yml');
-      fs.writeFileSync(file, '- one\n- two\n');
+      fs.writeFileSync(file, 'plain scalar document\n');
 
       try {
         expect(() => workflowParser.parse(file)).toThrow(/Invalid YAML/i);
