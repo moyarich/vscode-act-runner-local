@@ -231,7 +231,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "build": "webpack --mode production --config webpack.extension.config.js && webpack --mode production --config webpack.webview.config.js",
+    "build": "npm run build:webpack",
     "watch": "webpack --mode development --watch --config webpack.extension.config.js",
     "watch:webview": "webpack --mode development --watch --config webpack.webview.config.js",
     "test": "jest",
@@ -250,7 +250,8 @@
     "watch:vite": "concurrently -k -n extension,webview \"npm run watch:vite:extension\" \"npm run watch:vite:webview\"",
     "dev:extension": "node ./scripts/run-extension-dev.mjs",
     "test:integration": "npm run build && vscode-test",
-    "package:ls": "npm run build && vsce ls --tree"
+    "package:ls": "npm run build && vsce ls --tree",
+    "build:webpack": "webpack --mode production --config webpack.extension.config.js && webpack --mode production --config webpack.webview.config.js"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
