@@ -37,8 +37,11 @@ jobs:
       - name: Run typecheck
         run: npm run typecheck
 
-      - name: Build extension
+      - name: Build extension with Webpack
         run: npm run build
+
+      - name: Build extension with Vite
+        run: npm run build:vite
 
       - name: Validate VSIX packaging
         run: npm run package -- --no-dependencies
