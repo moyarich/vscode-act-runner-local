@@ -1,0 +1,176 @@
+name: "Jest to Vitest"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target-directory:
+        description: "Directory to migrate (repository-relative)"
+        required: true
+        default: "."
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jest-to-vitest-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: "Codemod · Jest → Vitest"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Validate target directory
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          target="${{ inputs.target-directory }}"
+
+          if [[ "$target" == /* || "$target" == *".."* ]]; then
+            echo "::error::target-directory must be a repository-relative path and cannot contain '..'."
+            exit 1
+          fi
+
+          if [[ ! -d "$target" ]]; then
+            echo "::error::Directory does not exist: $target"
+            exit 1
+          fi
+
+      - name: Run Jest to Vitest codemod
+        working-directory: ${{ inputs.target-directory }}
+        run: npx --yes codemod jest/vitest
+
+      - name: Show migration changes
+        shell: bash
+        run: |
+          git status --short
+          git diff --stat
+          git diff
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Create migration patch
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git add --all
+          git diff --cached --binary > jest-to-vitest.patch
+
+      - name: Upload migration patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-to-vitest-patch
+          path: jest-to-vitest.patch
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Write migration summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Jest → Vitest codemod"
+            echo
+            echo "- Target: \`${{ inputs.target-directory }}\`"
+            echo "- Branch: \`${{ github.ref_name }}\`"
+            echo
+            echo "### Changed files"
+            echo
+            echo '~~~text'
+            git status --short
+            echo '~~~'
+            echo
+            echo "The migration must be approved before changes are committed and pushed."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  commit:
+    name: "Approve and commit migration"
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: jest-to-vitest-approval
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Download migration patch
+        uses: actions/download-artifact@v5
+        with:
+          name: jest-to-vitest-patch
+
+      - name: Apply migration patch
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -s jest-to-vitest.patch ]]; then
+            echo "No migration changes to commit."
+            exit 0
+          fi
+
+          git apply --index --binary jest-to-vitest.patch
+          rm jest-to-vitest.patch
+
+      - name: Commit and push migration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git diff --cached --quiet; then
+            echo "No migration changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "refactor: migrate Jest tests to Vitest"
+          git push origin "HEAD:${{ github.ref_name }}"
+
+      - name: Write commit summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Jest → Vitest commit"
+            echo
+            echo "- Branch: \`${{ github.ref_name }}\`"
+            echo "- Environment: \`jest-to-vitest-approval\`"
+            echo
+            echo "The approved migration was committed and pushed."
+          } >> "$GITHUB_STEP_SUMMARY"
