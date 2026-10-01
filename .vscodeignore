@@ -9,6 +9,7 @@ tests/**
 scripts/**
 tsconfig*.json
 webpack*.js
+vite*.ts
 jest.config.ts
 package-lock.json
 *.vsix
