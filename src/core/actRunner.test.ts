@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActRunner } from '../core/actRunner';
 import { eventBus } from '../core/eventBus';
+import * as fs from 'fs';
+import * as vscode from 'vscode';
 
 // Mockar child_process para não executar o CLI de verdade
 jest.mock('child_process', () => ({
@@ -182,4 +184,239 @@ describe('ActRunner', () => {
     expect(logEvent.payload.line).toContain('\u001b[31m');
     expect(logEvent.payload.line).toContain('falha colorida');
   });
+
+  it('isActInstalled() returns false when spawning the executable errors', async () => {
+    const proc = new EventEmitter() as any;
+    proc.on = proc.on.bind(proc);
+    (spawn as jest.Mock).mockReturnValueOnce(proc);
+    setImmediate(() => proc.emit('error', new Error('ENOENT')));
+
+    await expect(runner.isActInstalled('/missing/act')).resolves.toBe(false);
+  });
+
+  it('autoDetect() keeps a configured act executable when it works', async () => {
+    const update = jest.fn();
+    (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
+      get: jest.fn(() => '/configured/act'),
+      update,
+    });
+    jest.spyOn(runner, 'isActInstalled').mockResolvedValue(true);
+
+    await expect(runner.autoDetect()).resolves.toBe('/configured/act');
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('autoDetect() persists the first working known candidate', async () => {
+    const update = jest.fn().mockResolvedValue(undefined);
+    (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
+      get: jest.fn(() => '/missing/configured'),
+      update,
+    });
+    const exists = jest.spyOn(fs, 'existsSync').mockImplementation((candidate: fs.PathLike) =>
+      String(candidate) === '/usr/local/bin/act'
+    );
+    jest.spyOn(runner, 'isActInstalled').mockImplementation(async (candidate?: string) =>
+      candidate === '/usr/local/bin/act'
+    );
+
+    await expect(runner.autoDetect()).resolves.toBe('/usr/local/bin/act');
+    expect(update).toHaveBeenCalledWith('actPath', '/usr/local/bin/act', vscode.ConfigurationTarget.Global);
+
+    exists.mockRestore();
+  });
+
+  it('run() rejects when no project root can be resolved', async () => {
+    (vscode.workspace as any).workspaceFolders = undefined;
+
+    await expect(runner.run('exec-no-root', {} as any)).rejects.toThrow(/No project selected/i);
+  });
+
+  it('run() captures stderr and reports a failed process exit', async () => {
+    const mockProc = createMockProcess([], ['::error:: compiler failed'], 2);
+    (runner as any).cleanupActContainers = jest.fn().mockResolvedValue(undefined);
+    (spawn as jest.Mock).mockReturnValueOnce(mockProc);
+
+    await expect(runner.run('exec-failed', {
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: '/repo',
+    })).rejects.toThrow(/code 2/i);
+
+    expect(runner.getLogs()).toContain('compiler failed');
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'execution:end',
+      payload: expect.objectContaining({ status: 'failed' }),
+    }));
+  });
+
+  it('run() propagates child-process spawn errors as execution errors', async () => {
+    const proc = new EventEmitter() as any;
+    proc.stdout = new EventEmitter();
+    proc.stderr = new EventEmitter();
+    proc.kill = jest.fn();
+    (runner as any).cleanupActContainers = jest.fn().mockResolvedValue(undefined);
+    (spawn as jest.Mock).mockReturnValueOnce(proc);
+    setImmediate(() => proc.emit('error', new Error('spawn ENOENT')));
+
+    await expect(runner.run('exec-error', {
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: '/repo',
+    })).rejects.toThrow('spawn ENOENT');
+
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      type: 'execution:error',
+      payload: { executionId: 'exec-error', error: 'spawn ENOENT' },
+    });
+  });
+
+  it('stop() terminates an active process and clears accumulated execution state', () => {
+    const proc = { kill: jest.fn() } as any;
+    (runner as any).activeProcess = proc;
+    (runner as any).pendingJobStatus.set('build', { status: 'success', completedAt: 'now' });
+    (runner as any).runningJobs.add('build');
+    (runner as any).currentStep.set('build', 'Test');
+    (runner as any).summaryLines = ['summary'];
+    (runner as any).cleanupActContainers = jest.fn().mockResolvedValue(undefined);
+
+    runner.stop();
+
+    expect(proc.kill).toHaveBeenCalledWith('SIGTERM');
+    expect((runner as any).activeProcess).toBeNull();
+    expect((runner as any).pendingJobStatus.size).toBe(0);
+    expect((runner as any).runningJobs.size).toBe(0);
+    expect((runner as any).currentStep.size).toBe(0);
+  });
+
+  it('clearLogs() removes logs accumulated from parsed output', () => {
+    (runner as any).processLine('exec-001', '[build/Test] | hello');
+    expect(runner.getLogs()).toContain('hello');
+
+    runner.clearLogs();
+
+    expect(runner.getLogs()).toEqual([]);
+  });
+
+  it('buildArgs() includes optional execution inputs and sanitizes unsafe argument characters', () => {
+    const read = jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+      throw new Error('missing');
+    });
+
+    const args = (runner as any).buildArgs({
+      workflowPath: '/repo/.github/workflows/ci.yml',
+      workspaceRoot: '/repo',
+      jobId: 'build;rm',
+      dryRun: true,
+      eventType: 'workflow_dispatch',
+      eventPayloadPath: '/repo/event.json',
+      envFile: '/repo/.env',
+      varFile: '/repo/.vars',
+      secretsFile: '/repo/.secrets',
+    }, 'test/image:latest', '/repo');
+
+    expect(args).toEqual(expect.arrayContaining([
+      '-j', 'buildrm',
+      '-n',
+      'workflow_dispatch',
+      '-e', '/repo/event.json',
+      '--env-file', '/repo/.env',
+      '--var-file', '/repo/.vars',
+      '--secret-file', '/repo/.secrets',
+      '--rm',
+      '-P', 'ubuntu-latest=test/image:latest',
+    ]));
+
+    read.mockRestore();
+  });
+
+  it('buildArgs() respects a project .actrc platform mapping', () => {
+    const read = jest.spyOn(fs, 'readFileSync').mockImplementation((file: fs.PathOrFileDescriptor) => {
+      if (String(file).endsWith('.actrc')) return '-P ubuntu-latest=custom/image\n';
+      throw new Error('unexpected file');
+    });
+
+    const args = (runner as any).buildArgs({
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: '/repo',
+    }, 'fallback/image', '/repo');
+
+    expect(args).not.toContain('-P');
+    expect(args).toContain('--rm');
+
+    read.mockRestore();
+  });
+
+  it('processLine() emits step lifecycle events including timing cleanup', () => {
+    (runner as any).processLine('exec-steps', '[build/Test] ⭐ Run npm test');
+    (runner as any).processLine('exec-steps', '[build/Test] ✅ Success - npm test [52.5ms]');
+    (runner as any).processLine('exec-steps', '[build/Test] ❌ Failure - lint [1.2s]');
+    (runner as any).processLine('exec-steps', '[build/Test] ⏭️ Skipping deploy [5ms]');
+
+    const events = dispatchSpy.mock.calls.map((args) => args[0]);
+    expect(events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'npm test', status: 'running' }) }),
+      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'npm test', status: 'success' }) }),
+      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'lint', status: 'failed' }) }),
+      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'deploy', status: 'skipped' }) }),
+    ]));
+  });
+
+  it('processLine() tracks reusable inner jobs separately from their outer job', () => {
+    (runner as any).processLine('exec-reuse', '[caller/shared/inner] 🚀 Start image');
+    (runner as any).processLine('exec-reuse', '[caller/shared/inner] 🏁 Job succeeded');
+
+    const events = dispatchSpy.mock.calls.map((args) => args[0]);
+    expect(events).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        type: 'job:update',
+        payload: expect.objectContaining({ jobId: 'inner', outerJobId: 'caller', status: 'running' }),
+      }),
+      expect.objectContaining({
+        type: 'job:update',
+        payload: expect.objectContaining({ jobId: 'inner', outerJobId: 'caller', status: 'success' }),
+      }),
+    ]));
+  });
+
+  it('processLine() captures and flushes step summaries', () => {
+    (runner as any).processLine('exec-summary', '[build] ◎ Summary - first line');
+    (runner as any).processLine('exec-summary', 'second line');
+    (runner as any).processLine('exec-summary', '[build] unrelated output');
+
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      type: 'summary:update',
+      payload: {
+        executionId: 'exec-summary',
+        content: 'first line\nsecond line',
+      },
+    });
+  });
+
+  it('processLine() strips the configured workflow display-name prefix', () => {
+    (runner as any).workflowDisplayName = 'CI/CD Pipeline';
+
+    (runner as any).processLine(
+      'exec-prefix',
+      '[CI/CD Pipeline/build/Test] | workflow-prefixed log'
+    );
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'log',
+      payload: expect.objectContaining({
+        jobId: 'build',
+        line: 'workflow-prefixed log',
+      }),
+    }));
+  });
+
+  it('truncates oversized persisted and UI log lines', () => {
+    const longLine = 'x'.repeat(5000);
+    (runner as any).processLine('exec-long', `[build/Test] | ${longLine}`);
+
+    const stored = runner.getLogs()[0];
+    const logEvent = dispatchSpy.mock.calls.map((args) => args[0]).find((event) => event.type === 'log');
+
+    expect(stored.length).toBeLessThan(longLine.length);
+    expect(stored).toContain('[truncated]');
+    expect(logEvent.payload.line.length).toBeLessThan(stored.length);
+  });
+
 });
