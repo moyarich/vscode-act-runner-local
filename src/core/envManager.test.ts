@@ -160,4 +160,9 @@ describe('EnvManager', () => {
     expect(fs.readFileSync(gitignorePath, 'utf-8')).toBe('node_modules\n');
   });
 
+
+  it('returns the project .actrc path', () => {
+    expect(manager.getActrcFilePath(tempRoot)).toBe(path.join(tempRoot, '.actrc'));
+  });
+
 });
