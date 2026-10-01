@@ -83,4 +83,48 @@ describe('WorkflowExplorer', () => {
     expect(explorer.getTreeItem(item)).toBe(item);
     expect(explorer.getChildren(item)).toEqual([]);
   });
+
+  it('falls back to the first VS Code workspace folder when no explicit project root is set', () => {
+    (vscode.workspace as any).workspaceFolders = [{ uri: { fsPath: '/workspace/project' } }];
+    const explorer = new WorkflowExplorer();
+
+    expect(explorer.getProjectRoot()).toBe('/workspace/project');
+  });
+
+  it('refresh clears cached workflows so discovery runs again', () => {
+    discover.mockReturnValue(['/repo/.github/workflows/ci.yml']);
+    parse.mockReturnValue({
+      name: 'CI',
+      filePath: '/repo/.github/workflows/ci.yml',
+      jobs: {},
+    });
+
+    const explorer = new WorkflowExplorer();
+    explorer.setProjectRoot('/repo');
+
+    explorer.getChildren();
+    expect(discover).toHaveBeenCalledTimes(1);
+
+    explorer.getChildren();
+    expect(discover).toHaveBeenCalledTimes(1);
+
+    explorer.refresh();
+    explorer.getChildren();
+
+    expect(discover).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns no job children when the workflow item is not in the loaded workflow set', () => {
+    const explorer = new WorkflowExplorer();
+    explorer.setProjectRoot('/repo');
+    const item = new WorkflowTreeItem(
+      'Missing',
+      vscode.TreeItemCollapsibleState.Collapsed,
+      'workflow',
+      '/repo/.github/workflows/missing.yml'
+    );
+
+    expect(explorer.getChildren(item)).toEqual([]);
+  });
+
 });
