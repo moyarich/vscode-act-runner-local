@@ -1,4 +1,16 @@
+import * as vscode from 'vscode';
 import { eventBus } from './eventBus';
+import type { ActEvent, ExecutionErrorPayload } from '../types/events.types';
+
+function createPanel(disposeCallbacks: Array<() => void> = []): vscode.WebviewPanel {
+  return {
+    webview: { postMessage: jest.fn() },
+    onDidDispose: jest.fn((cb: () => void) => {
+      disposeCallbacks.push(cb);
+      return { dispose: jest.fn() };
+    }),
+  } as unknown as vscode.WebviewPanel;
+}
 
 describe('eventBus', () => {
   afterEach(() => {
@@ -7,31 +19,31 @@ describe('eventBus', () => {
 
   it('dispatches events to registered panels and backend listeners', () => {
     const disposeCallbacks: Array<() => void> = [];
-    const panel = {
-      webview: { postMessage: jest.fn() },
-      onDidDispose: jest.fn((cb: () => void) => disposeCallbacks.push(cb)),
-    } as any;
+    const panel = createPanel(disposeCallbacks);
+    const listener = jest.fn((_payload: ExecutionErrorPayload) => undefined);
 
-    const listener = jest.fn();
     eventBus.registerPanel(panel);
-    eventBus.on('execution:error' as any, listener as any);
+    eventBus.on('execution:error', listener);
 
-    const event = { type: 'execution:error', payload: { message: 'boom' } } as any;
+    const event: ActEvent = {
+      type: 'execution:error',
+      payload: { executionId: 'exec-1', error: 'boom' },
+    };
     eventBus.dispatch(event);
 
     expect(panel.webview.postMessage).toHaveBeenCalledWith(event);
-    expect(listener).toHaveBeenCalledWith({ message: 'boom' });
+    expect(listener).toHaveBeenCalledWith({ executionId: 'exec-1', error: 'boom' });
 
     disposeCallbacks[0]();
-    panel.webview.postMessage.mockClear();
+    (panel.webview.postMessage as jest.Mock).mockClear();
 
     eventBus.dispatch(event);
     expect(panel.webview.postMessage).not.toHaveBeenCalled();
   });
 
   it('sends snapshots to every registered panel', () => {
-    const panelA = { webview: { postMessage: jest.fn() }, onDidDispose: jest.fn() } as any;
-    const panelB = { webview: { postMessage: jest.fn() }, onDidDispose: jest.fn() } as any;
+    const panelA = createPanel();
+    const panelB = createPanel();
 
     eventBus.registerPanel(panelA);
     eventBus.registerPanel(panelB);
@@ -44,20 +56,23 @@ describe('eventBus', () => {
   });
 
   it('supports once and off semantics for backend listeners', () => {
-    const onceListener = jest.fn();
-    const persistentListener = jest.fn();
+    const onceListener = jest.fn((_payload: ExecutionErrorPayload) => undefined);
+    const persistentListener = jest.fn((_payload: ExecutionErrorPayload) => undefined);
 
-    eventBus.once('execution:error' as any, onceListener as any);
-    eventBus.on('execution:error' as any, persistentListener as any);
+    eventBus.once('execution:error', onceListener);
+    eventBus.on('execution:error', persistentListener);
 
-    const event = { type: 'execution:error', payload: { message: 'boom' } } as any;
+    const event: ActEvent = {
+      type: 'execution:error',
+      payload: { executionId: 'exec-1', error: 'boom' },
+    };
     eventBus.dispatch(event);
     eventBus.dispatch(event);
 
     expect(onceListener).toHaveBeenCalledTimes(1);
     expect(persistentListener).toHaveBeenCalledTimes(2);
 
-    eventBus.off('execution:error' as any, persistentListener as any);
+    eventBus.off('execution:error', persistentListener);
     eventBus.dispatch(event);
     expect(persistentListener).toHaveBeenCalledTimes(2);
   });
