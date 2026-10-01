@@ -206,23 +206,17 @@ describe('ActRunner', () => {
     expect(update).not.toHaveBeenCalled();
   });
 
-  it('autoDetect() persists the first working known candidate', async () => {
+  it('autoDetect() persists a path resolved through the interactive shell fallback', async () => {
     const update = jest.fn().mockResolvedValue(undefined);
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
       get: jest.fn(() => '/missing/configured'),
       update,
     });
-    const exists = jest.spyOn(fs, 'existsSync').mockImplementation((candidate: fs.PathLike) =>
-      String(candidate) === '/usr/local/bin/act'
-    );
-    jest.spyOn(runner, 'isActInstalled').mockImplementation(async (candidate?: string) =>
-      candidate === '/usr/local/bin/act'
-    );
+    jest.spyOn(runner, 'isActInstalled').mockResolvedValue(false);
+    jest.spyOn(runner as any, 'resolveViaShell').mockResolvedValue('/shell/act');
 
-    await expect(runner.autoDetect()).resolves.toBe('/usr/local/bin/act');
-    expect(update).toHaveBeenCalledWith('actPath', '/usr/local/bin/act', vscode.ConfigurationTarget.Global);
-
-    exists.mockRestore();
+    await expect(runner.autoDetect()).resolves.toBe('/shell/act');
+    expect(update).toHaveBeenCalledWith('actPath', '/shell/act', vscode.ConfigurationTarget.Global);
   });
 
   it('run() rejects when no project root can be resolved', async () => {
@@ -296,52 +290,53 @@ describe('ActRunner', () => {
   });
 
   it('buildArgs() includes optional execution inputs and sanitizes unsafe argument characters', () => {
-    const read = jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
-      throw new Error('missing');
-    });
+    const root = fs.mkdtempSync('/tmp/act-runner-args-');
 
-    const args = (runner as any).buildArgs({
-      workflowPath: '/repo/.github/workflows/ci.yml',
-      workspaceRoot: '/repo',
-      jobId: 'build;rm',
-      dryRun: true,
-      eventType: 'workflow_dispatch',
-      eventPayloadPath: '/repo/event.json',
-      envFile: '/repo/.env',
-      varFile: '/repo/.vars',
-      secretsFile: '/repo/.secrets',
-    }, 'test/image:latest', '/repo');
+    try {
+      const workflowPath = `${root}/.github/workflows/ci.yml`;
+      const args = (runner as any).buildArgs({
+        workflowPath,
+        workspaceRoot: root,
+        jobId: 'build;rm',
+        dryRun: true,
+        eventType: 'workflow_dispatch',
+        eventPayloadPath: `${root}/event.json`,
+        envFile: `${root}/.env`,
+        varFile: `${root}/.vars`,
+        secretsFile: `${root}/.secrets`,
+      }, 'test/image:latest', root);
 
-    expect(args).toEqual(expect.arrayContaining([
-      '-j', 'buildrm',
-      '-n',
-      'workflow_dispatch',
-      '-e', '/repo/event.json',
-      '--env-file', '/repo/.env',
-      '--var-file', '/repo/.vars',
-      '--secret-file', '/repo/.secrets',
-      '--rm',
-      '-P', 'ubuntu-latest=test/image:latest',
-    ]));
-
-    read.mockRestore();
+      expect(args).toEqual(expect.arrayContaining([
+        '-j', 'buildrm',
+        '-n',
+        'workflow_dispatch',
+        '-e', `${root}/event.json`,
+        '--env-file', `${root}/.env`,
+        '--var-file', `${root}/.vars`,
+        '--secret-file', `${root}/.secrets`,
+        '--rm',
+        '-P', 'ubuntu-latest=test/image:latest',
+      ]));
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it('buildArgs() respects a project .actrc platform mapping', () => {
-    const read = jest.spyOn(fs, 'readFileSync').mockImplementation((file: fs.PathOrFileDescriptor) => {
-      if (String(file).endsWith('.actrc')) return '-P ubuntu-latest=custom/image\n';
-      throw new Error('unexpected file');
-    });
+    const root = fs.mkdtempSync('/tmp/act-runner-actrc-');
+    fs.writeFileSync(`${root}/.actrc`, '-P ubuntu-latest=custom/image\n', 'utf-8');
 
-    const args = (runner as any).buildArgs({
-      workflowPath: '.github/workflows/ci.yml',
-      workspaceRoot: '/repo',
-    }, 'fallback/image', '/repo');
+    try {
+      const args = (runner as any).buildArgs({
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: root,
+      }, 'fallback/image', root);
 
-    expect(args).not.toContain('-P');
-    expect(args).toContain('--rm');
-
-    read.mockRestore();
+      expect(args).not.toContain('-P');
+      expect(args).toContain('--rm');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it('processLine() emits step lifecycle events including timing cleanup', () => {
