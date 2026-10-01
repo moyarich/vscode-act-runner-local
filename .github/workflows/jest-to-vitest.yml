@@ -1,12 +1,12 @@
-name: "Jest to Vitest"
+name: 'Jest to Vitest'
 
 on:
   workflow_dispatch:
     inputs:
       target-directory:
-        description: "Directory to migrate (repository-relative)"
+        description: 'Directory to migrate (repository-relative)'
         required: true
-        default: "."
+        default: '.'
         type: string
 
 permissions:
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   migrate:
-    name: "Codemod · Jest → Vitest"
+    name: 'Codemod · Jest → Vitest'
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "24"
+          node-version: '24'
           cache: npm
 
       - name: Validate target directory
@@ -134,7 +134,7 @@ jobs:
           git diff --cached --binary > jest-to-vitest.patch
 
       - name: Upload migration patch
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jest-to-vitest-patch
           path: jest-to-vitest.patch
@@ -178,7 +178,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   commit:
-    name: "Approve and commit migration"
+    name: 'Approve and commit migration'
     needs: migrate
     runs-on: ubuntu-latest
     environment: jest-to-vitest-approval
@@ -194,7 +194,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download migration patch
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: jest-to-vitest-patch
 
