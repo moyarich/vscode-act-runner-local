@@ -441,4 +441,89 @@ describe('ExecutionEngine', () => {
     expect(actRunner.run).not.toHaveBeenCalled();
   });
 
+
+  it('accepts a browsed act executable and persists it before running', async () => {
+    const update = jest.fn().mockResolvedValue(undefined);
+    (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
+      get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
+      update,
+    });
+    (actRunner.isActInstalled as jest.Mock)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+    (vscode.window.showErrorMessage as jest.Mock).mockResolvedValue('Browse for file...');
+    (vscode.window.showOpenDialog as jest.Mock).mockResolvedValue([{ fsPath: '/tools/act' }]);
+
+    const result = await engine.run({
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: tempRoot,
+    });
+
+    expect(result).toEqual(expect.any(String));
+    expect(update).toHaveBeenCalledWith('actPath', '/tools/act', vscode.ConfigurationTarget.Global);
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('/tools/act'));
+    expect(actRunner.run).toHaveBeenCalled();
+  });
+
+  it('cancels when the browsed act executable cannot be executed', async () => {
+    (actRunner.isActInstalled as jest.Mock)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(false);
+    (vscode.window.showErrorMessage as jest.Mock).mockResolvedValue('Browse for file...');
+    (vscode.window.showOpenDialog as jest.Mock).mockResolvedValue([{ fsPath: '/bad/act' }]);
+
+    await expect(engine.run({
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: tempRoot,
+    })).resolves.toBe('cancelled');
+
+    expect(actRunner.run).not.toHaveBeenCalled();
+  });
+
+  it('cancels when browsing for act is dismissed', async () => {
+    (actRunner.isActInstalled as jest.Mock).mockResolvedValue(false);
+    (vscode.window.showErrorMessage as jest.Mock).mockResolvedValue('Browse for file...');
+    (vscode.window.showOpenDialog as jest.Mock).mockResolvedValue(undefined);
+
+    await expect(engine.run({
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: tempRoot,
+    })).resolves.toBe('cancelled');
+  });
+
+  it('accepts a manually entered act executable and trims the configured value', async () => {
+    const update = jest.fn().mockResolvedValue(undefined);
+    (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
+      get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
+      update,
+    });
+    (actRunner.isActInstalled as jest.Mock)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+    (vscode.window.showErrorMessage as jest.Mock).mockResolvedValue('Enter path');
+    (vscode.window.showInputBox as jest.Mock).mockResolvedValue('  /tools/act  ');
+
+    const result = await engine.run({
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: tempRoot,
+    });
+
+    expect(result).toEqual(expect.any(String));
+    expect(update).toHaveBeenCalledWith('actPath', '/tools/act', vscode.ConfigurationTarget.Global);
+    expect(actRunner.run).toHaveBeenCalled();
+  });
+
+  it('truncates an oversized persisted log summary by character count', async () => {
+    (actRunner.getLogs as jest.Mock).mockReturnValue(['x'.repeat(90_000)]);
+
+    await engine.run({
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: tempRoot,
+    });
+
+    const saved = (historyService.save as jest.Mock).mock.calls[0][0];
+    expect(saved.logSummary).toContain('...[log summary truncated to keep history lightweight]');
+    expect(saved.logSummary.length).toBeLessThan(81_000);
+  });
+
 });
