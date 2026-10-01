@@ -414,4 +414,254 @@ describe('ActRunner', () => {
     expect(logEvent.payload.line.length).toBeLessThan(stored.length);
   });
 
+
+  it('resolveViaShell() returns the discovered executable path from shell output', async () => {
+    jest.useFakeTimers();
+    const proc = new EventEmitter() as any;
+    proc.stdout = new EventEmitter();
+    proc.kill = jest.fn();
+    (spawn as jest.Mock).mockReturnValueOnce(proc);
+
+    const resolved = (runner as any).resolveViaShell();
+    proc.stdout.emit('data', Buffer.from('/opt/homebrew/bin/act\n'));
+    proc.emit('close', 0);
+
+    await expect(resolved).resolves.toBe('/opt/homebrew/bin/act');
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
+  it('resolveViaShell() rejects ambiguous shell output and handles spawn errors', async () => {
+    jest.useFakeTimers();
+
+    const ambiguous = new EventEmitter() as any;
+    ambiguous.stdout = new EventEmitter();
+    ambiguous.kill = jest.fn();
+    (spawn as jest.Mock).mockReturnValueOnce(ambiguous);
+
+    const ambiguousResult = (runner as any).resolveViaShell();
+    ambiguous.stdout.emit('data', Buffer.from('alias act=act --container-architecture linux/amd64\n'));
+    ambiguous.emit('close', 0);
+
+    await expect(ambiguousResult).resolves.toBeUndefined();
+
+    const failed = new EventEmitter() as any;
+    failed.stdout = new EventEmitter();
+    failed.kill = jest.fn();
+    (spawn as jest.Mock).mockReturnValueOnce(failed);
+
+    const failedResult = (runner as any).resolveViaShell();
+    failed.emit('error', new Error('shell failed'));
+
+    await expect(failedResult).resolves.toBeUndefined();
+
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
+  it('run() flushes pending job status when the process closes', async () => {
+    const mockProc = createMockProcess([
+      '[build] 🏁 Job succeeded',
+    ]);
+    (runner as any).cleanupActContainers = jest.fn().mockResolvedValue(undefined);
+    (spawn as jest.Mock).mockReturnValueOnce(mockProc);
+
+    await runner.run('exec-pending-close', {
+      workflowPath: '.github/workflows/ci.yml',
+      workspaceRoot: '/repo',
+    });
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'job:update',
+      payload: expect.objectContaining({
+        executionId: 'exec-pending-close',
+        jobId: 'build',
+        status: 'success',
+      }),
+    }));
+  });
+
+  it('cleanupActContainers() resolves cleanly when docker is unavailable', async () => {
+    const find = new EventEmitter() as any;
+    find.stdout = new EventEmitter();
+    (spawn as jest.Mock).mockReturnValueOnce(find);
+
+    const cleanup = (runner as any).cleanupActContainers();
+    find.emit('error', new Error('docker missing'));
+
+    await expect(cleanup).resolves.toBeUndefined();
+  });
+
+  it('cleanupActContainers() removes discovered act containers', async () => {
+    const find = new EventEmitter() as any;
+    find.stdout = new EventEmitter();
+    const rm = new EventEmitter() as any;
+    (spawn as jest.Mock)
+      .mockReturnValueOnce(find)
+      .mockReturnValueOnce(rm);
+
+    const cleanup = (runner as any).cleanupActContainers();
+    find.stdout.emit('data', Buffer.from('abc123\ndef456\n'));
+    find.emit('close', 0);
+    rm.emit('close', 0);
+
+    await expect(cleanup).resolves.toBeUndefined();
+    expect(spawn).toHaveBeenNthCalledWith(
+      2,
+      'docker',
+      ['rm', '-f', 'abc123', 'def456'],
+      { stdio: 'ignore' }
+    );
+  });
+
+  it('cleanupActContainers() skips removal when no act containers are found', async () => {
+    const find = new EventEmitter() as any;
+    find.stdout = new EventEmitter();
+    (spawn as jest.Mock).mockReturnValueOnce(find);
+
+    const cleanup = (runner as any).cleanupActContainers();
+    find.emit('close', 0);
+
+    await expect(cleanup).resolves.toBeUndefined();
+    expect(spawn).toHaveBeenCalledTimes(1);
+  });
+
+  it('stripWorkflowPrefix() leaves unrelated lines unchanged', () => {
+    (runner as any).workflowDisplayName = 'CI/CD Pipeline';
+
+    expect((runner as any).stripWorkflowPrefix('[build] | hello')).toBe('[build] | hello');
+  });
+
+  it('processLine() infers successful outer reusable job completion when the next outer job starts', () => {
+    (runner as any).processLine('exec-transition', '[caller/shared/inner] | hello');
+    dispatchSpy.mockClear();
+
+    (runner as any).processLine('exec-transition', '[next] | world');
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'job:update',
+      payload: expect.objectContaining({
+        jobId: 'caller',
+        status: 'success',
+      }),
+    }));
+  });
+
+  it('processLine() infers failed outer reusable job completion after an inner failure', () => {
+    (runner as any).processLine('exec-transition-fail', '[caller/shared/inner] 🏁 Job failed');
+    dispatchSpy.mockClear();
+
+    (runner as any).processLine('exec-transition-fail', '[next] | world');
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'job:update',
+      payload: expect.objectContaining({
+        jobId: 'caller',
+        status: 'failed',
+      }),
+    }));
+  });
+
+  it('processLine() confirms pending status when output moves to another outer job', () => {
+    (runner as any).processLine('exec-pending', '[build] 🏁 Job succeeded');
+    dispatchSpy.mockClear();
+
+    (runner as any).processLine('exec-pending', '[test] | starting');
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'job:update',
+      payload: expect.objectContaining({
+        jobId: 'build',
+        status: 'success',
+      }),
+    }));
+  });
+
+  it('processLine() cancels pending status when the same outer job emits more work', () => {
+    (runner as any).processLine('exec-pending-same', '[build] 🏁 Job succeeded');
+    expect((runner as any).pendingJobStatus.has('build')).toBe(true);
+
+    (runner as any).processLine('exec-pending-same', '[build] | more work');
+
+    expect((runner as any).pendingJobStatus.has('build')).toBe(false);
+  });
+
+  it('processLine() stores regular job success and failure as pending statuses', () => {
+    (runner as any).processLine('exec-jobs', '[build] 🏁 Job succeeded');
+    expect((runner as any).pendingJobStatus.get('build')?.status).toBe('success');
+
+    (runner as any).processLine('exec-jobs', '[test] 🏁 Job failed');
+    expect((runner as any).pendingJobStatus.get('test')?.status).toBe('failed');
+  });
+
+  it('processLine() dispatches reusable inner job failure and records outer failure', () => {
+    (runner as any).processLine('exec-inner-fail', '[caller/shared/inner] 🏁 Job failed');
+
+    expect((runner as any).failedInnerByOuter.has('caller')).toBe(true);
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'job:update',
+      payload: expect.objectContaining({
+        jobId: 'inner',
+        outerJobId: 'caller',
+        status: 'failed',
+      }),
+    }));
+  });
+
+  it('flushDroppedLogNotice() reports and resets dropped UI log events', () => {
+    (runner as any).uiLogEventsDropped = 3;
+
+    (runner as any).flushDroppedLogNotice('exec-dropped');
+
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      type: 'log',
+      payload: expect.objectContaining({
+        executionId: 'exec-dropped',
+        level: 'warn',
+        line: expect.stringContaining('3 log lines omitted'),
+      }),
+    });
+    expect((runner as any).uiLogEventsDropped).toBe(0);
+  });
+
+  it('dispatchLog() starts dropping UI events after the configured limit', () => {
+    (runner as any).uiLogEventsSent = 1500;
+
+    (runner as any).dispatchLog({
+      executionId: 'exec-limit',
+      line: 'hidden',
+      level: 'info',
+      timestamp: new Date().toISOString(),
+    });
+
+    expect((runner as any).uiLogEventsDropped).toBe(1);
+    expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('pushSummaryLine() truncates long lines and marks overflowed summaries', () => {
+    (runner as any).pushSummaryLine('x'.repeat(2500));
+    expect((runner as any).summaryLines[0]).toContain('[truncated]');
+
+    (runner as any).summaryLines = Array.from({ length: 1200 }, () => 'line');
+    (runner as any).pushSummaryLine('overflow');
+
+    expect((runner as any).summaryTruncated).toBe(true);
+    expect((runner as any).summaryLines).toHaveLength(1200);
+  });
+
+  it('dispatchSummary() includes the summary truncated marker when needed', () => {
+    (runner as any).summaryLines = ['first'];
+    (runner as any).summaryTruncated = true;
+
+    (runner as any).dispatchSummary('exec-summary-truncated');
+
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      type: 'summary:update',
+      payload: {
+        executionId: 'exec-summary-truncated',
+        content: 'first\n...[summary truncated]',
+      },
+    });
+  });
+
 });
