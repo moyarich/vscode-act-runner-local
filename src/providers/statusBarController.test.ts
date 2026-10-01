@@ -50,7 +50,8 @@ describe('StatusBarController', () => {
 
     expect(item.text).toContain('$(sync~spin)');
     expect(item.command).toBe('actRunner.stopExecution');
-    expect(item.backgroundColor.id).toBe('statusBarItem.warningBackground');
+    expect(item.backgroundColor).toBeInstanceOf(vscode.ThemeColor);
+    expect((item.backgroundColor as vscode.ThemeColor).id).toBe('statusBarItem.warningBackground');
 
     controller.dispose();
     expect(item.dispose).toHaveBeenCalled();
@@ -70,7 +71,8 @@ describe('StatusBarController', () => {
     });
 
     expect(item.text).toContain('$(check)');
-    expect(item.color.id).toBe('charts.green');
+    expect(item.color).toBeInstanceOf(vscode.ThemeColor);
+    expect((item.color as vscode.ThemeColor).id).toBe('charts.green');
 
     jest.advanceTimersByTime(5000);
     expect(item.text).toBe('$(run) Act Runner');
@@ -95,7 +97,8 @@ describe('StatusBarController', () => {
       type: 'execution:error',
       payload: { executionId: 'exec-1', error: 'boom' },
     });
-    expect(item.backgroundColor.id).toBe('statusBarItem.errorBackground');
+    expect(item.backgroundColor).toBeInstanceOf(vscode.ThemeColor);
+    expect((item.backgroundColor as vscode.ThemeColor).id).toBe('statusBarItem.errorBackground');
   });
 
   it('returns to idle immediately for cancelled executions before timeout reset', () => {
