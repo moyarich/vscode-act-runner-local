@@ -25,6 +25,13 @@ describe('ExecutionEngine', () => {
     engine = new ExecutionEngine();
     tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'act-runner-test-'));
     jest.clearAllMocks();
+    (vscode.window.showErrorMessage as jest.Mock).mockReset().mockResolvedValue(undefined);
+    (vscode.window.showWarningMessage as jest.Mock).mockReset().mockResolvedValue(undefined);
+    (vscode.window.showOpenDialog as jest.Mock).mockReset().mockResolvedValue(undefined);
+    (vscode.window.showInputBox as jest.Mock).mockReset().mockResolvedValue(undefined);
+    (vscode.window.showInformationMessage as jest.Mock).mockReset();
+    (vscode.env.openExternal as jest.Mock).mockReset();
+
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
       get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
       update: jest.fn().mockResolvedValue(undefined),
