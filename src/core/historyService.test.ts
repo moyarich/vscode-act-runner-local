@@ -1,6 +1,40 @@
 import { HistoryService } from '../core/historyService';
-import type { ExecutionRecord } from '../types/execution.types';
+import type { ExecutionGraphHistory, ExecutionGraphSnapshot, ExecutionRecord } from '../types/execution.types';
 import * as vscode from 'vscode';
+
+
+const makeGraphSnapshot = (summaryContent: string): ExecutionGraphSnapshot => ({
+  execution: {
+    executionId: 'exec-001',
+    status: 'success',
+    workflowName: 'CI Node.js',
+    workflowPath: '.github/workflows/ci.yml',
+    startedAt: '2026-01-01T00:00:00Z',
+    completedAt: '2026-01-01T00:01:00Z',
+    duration: 60_000,
+  },
+  nodes: [],
+  edges: [],
+  summaryContent,
+});
+
+const makeGraphHistory = (
+  summaryContent: string,
+  withTimeline = false
+): ExecutionGraphHistory => {
+  const snapshot = makeGraphSnapshot(summaryContent);
+  return {
+    final: snapshot,
+    timeline: withTimeline
+      ? [{
+          line: 'workflow completed',
+          level: 'info',
+          timestamp: '2026-01-01T00:01:00Z',
+          snapshot,
+        }]
+      : [],
+  };
+};
 
 describe('HistoryService', () => {
   let service: HistoryService;
@@ -116,10 +150,7 @@ describe('HistoryService', () => {
   });
 
   it('stores graph history that arrives before the execution record', async () => {
-    const graphHistory = {
-      final: { summaryContent: 'summary' },
-      timeline: [{ at: '2026-01-01T00:00:00Z' }],
-    } as any;
+    const graphHistory: ExecutionGraphHistory = makeGraphHistory('summary', true);
 
     await service.updateGraphHistory('exec-pending', graphHistory);
 
@@ -137,10 +168,7 @@ describe('HistoryService', () => {
   });
 
   it('updates graph history for an existing record', async () => {
-    const graphHistory = {
-      final: { summaryContent: 'summary' },
-      timeline: [],
-    } as any;
+    const graphHistory: ExecutionGraphHistory = makeGraphHistory('summary');
     (mockContext.workspaceState.get as jest.Mock).mockReturnValue([sample]);
 
     await service.updateGraphHistory('exec-001', graphHistory);
@@ -172,14 +200,11 @@ describe('HistoryService', () => {
   });
 
   it('compacts large log and graph summaries for the webview', () => {
-    const record = {
+    const record: ExecutionRecord = {
       ...sample,
       logSummary: 'x'.repeat(40_100),
-      graphHistory: {
-        final: { summaryContent: 'y'.repeat(20_100) },
-        timeline: [{ at: '2026-01-01T00:00:00Z' }],
-      },
-    } as any;
+      graphHistory: makeGraphHistory('y'.repeat(20_100), true),
+    };
     (mockContext.workspaceState.get as jest.Mock).mockReturnValue([record]);
 
     const [result] = service.getAllForWebview();
