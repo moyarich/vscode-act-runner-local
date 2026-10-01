@@ -10,6 +10,10 @@ describe('EnvManager', () => {
   let workspaceState: { get: jest.Mock; update: jest.Mock };
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    (vscode.window.showWarningMessage as jest.Mock).mockReset().mockResolvedValue(undefined);
+    (vscode.window.showInformationMessage as jest.Mock).mockReset();
+
     tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'act-env-manager-test-'));
     workspaceState = {
       get: jest.fn(),
@@ -90,4 +94,75 @@ describe('EnvManager', () => {
 
     expect(manager.read(secretsPath).get('GH_APP_PRIVATE_KEY')).toBe(value);
   });
+
+  it('returns defaults and resolves workspace-relative paths', () => {
+    expect(manager.getDefaultFilePath(tempRoot, 'envFile')).toBe(path.join(tempRoot, '.env'));
+    expect(manager.getDefaultFilePath(tempRoot, 'varFile')).toBe(path.join(tempRoot, '.vars'));
+    expect(manager.getDefaultFilePath(tempRoot, 'secretsFile')).toBe(path.join(tempRoot, '.secrets'));
+
+    const inside = path.join(tempRoot, 'config', 'vars.env');
+    const outside = path.join(os.tmpdir(), 'outside.env');
+
+    expect(manager.toWorkspaceRelative(tempRoot, inside)).toBe(path.join('config', 'vars.env'));
+    expect(manager.toWorkspaceRelative(tempRoot, outside)).toBe(outside);
+    expect(manager.resolveFilePath(tempRoot, 'nested/file.env')).toBe(path.join(tempRoot, 'nested/file.env'));
+  });
+
+  it('writes and reads simple environment values', () => {
+    const envPath = path.join(tempRoot, '.env');
+    manager.write(envPath, new Map([
+      ['FOO', 'bar'],
+      ['EMPTY', ''],
+    ]));
+
+    expect(manager.read(envPath)).toEqual(new Map([
+      ['FOO', 'bar'],
+      ['EMPTY', ''],
+    ]));
+  });
+
+  it('returns an empty map for a missing env file', () => {
+    expect(manager.read(path.join(tempRoot, 'missing.env'))).toEqual(new Map());
+  });
+
+  it('adds missing secret files to .gitignore when approved', async () => {
+    const gitignorePath = path.join(tempRoot, '.gitignore');
+    fs.writeFileSync(gitignorePath, 'node_modules\n', 'utf-8');
+    (vscode.window.showWarningMessage as jest.Mock).mockResolvedValue('Add to .gitignore');
+
+    await manager.ensureSecretsIgnored(tempRoot);
+
+    const content = fs.readFileSync(gitignorePath, 'utf-8');
+    expect(content).toContain('.secrets');
+    expect(content).toContain('.env.local');
+    expect(content).toContain('.env.production');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalled();
+  });
+
+  it('does not rewrite .gitignore when all secret patterns are already present', async () => {
+    const gitignorePath = path.join(tempRoot, '.gitignore');
+    const content = ['.secrets', '.env.local', '.env.production'].join('\n');
+    fs.writeFileSync(gitignorePath, content, 'utf-8');
+
+    await manager.ensureSecretsIgnored(tempRoot);
+
+    expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
+    expect(fs.readFileSync(gitignorePath, 'utf-8')).toBe(content);
+  });
+
+  it('leaves .gitignore unchanged when the warning is ignored', async () => {
+    const gitignorePath = path.join(tempRoot, '.gitignore');
+    fs.writeFileSync(gitignorePath, 'node_modules\n', 'utf-8');
+    (vscode.window.showWarningMessage as jest.Mock).mockResolvedValue('Ignore');
+
+    await manager.ensureSecretsIgnored(tempRoot);
+
+    expect(fs.readFileSync(gitignorePath, 'utf-8')).toBe('node_modules\n');
+  });
+
+
+  it('returns the project .actrc path', () => {
+    expect(manager.getActrcFilePath(tempRoot)).toBe(path.join(tempRoot, '.actrc'));
+  });
+
 });

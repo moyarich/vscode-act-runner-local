@@ -6,6 +6,7 @@ const vscode = {
     showErrorMessage: jest.fn(),
     showQuickPick: jest.fn(),
     showOpenDialog: jest.fn(),
+    showInputBox: jest.fn(),
     createStatusBarItem: jest.fn(() => ({
       show: jest.fn(),
       hide: jest.fn(),
@@ -57,6 +58,7 @@ const vscode = {
   },
   TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
   StatusBarAlignment: { Left: 1, Right: 2 },
+  ConfigurationTarget: { Global: 1, Workspace: 2, WorkspaceFolder: 3 },
   ViewColumn: { One: 1, Two: 2, Beside: -2 },
   ThemeIcon: class { constructor(public id: string) {} },
   ThemeColor: class { constructor(public id: string) {} },

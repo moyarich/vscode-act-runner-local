@@ -114,4 +114,79 @@ describe('HistoryService', () => {
       expect.arrayContaining([expect.objectContaining({ id: 'exec-001' })])
     );
   });
+
+  it('stores graph history that arrives before the execution record', async () => {
+    const graphHistory = {
+      final: { summaryContent: 'summary' },
+      timeline: [{ at: '2026-01-01T00:00:00Z' }],
+    } as any;
+
+    await service.updateGraphHistory('exec-pending', graphHistory);
+
+    await service.save({ ...sample, id: 'exec-pending' });
+
+    expect(mockContext.workspaceState.update).toHaveBeenCalledWith(
+      'actRunner.executionHistory',
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'exec-pending',
+          graphHistory,
+        }),
+      ])
+    );
+  });
+
+  it('updates graph history for an existing record', async () => {
+    const graphHistory = {
+      final: { summaryContent: 'summary' },
+      timeline: [],
+    } as any;
+    (mockContext.workspaceState.get as jest.Mock).mockReturnValue([sample]);
+
+    await service.updateGraphHistory('exec-001', graphHistory);
+
+    expect(mockContext.workspaceState.update).toHaveBeenCalledWith(
+      'actRunner.executionHistory',
+      [expect.objectContaining({ id: 'exec-001', graphHistory })]
+    );
+  });
+
+  it('filters by workflow path and start time together', () => {
+    const other = {
+      ...sample,
+      id: 'exec-002',
+      workflowPath: '.github/workflows/release.yml',
+      startedAt: '2024-01-02T10:00:00.000Z',
+    };
+    const later = {
+      ...sample,
+      id: 'exec-003',
+      startedAt: '2024-01-03T10:00:00.000Z',
+    };
+    (mockContext.workspaceState.get as jest.Mock).mockReturnValue([sample, other, later]);
+
+    expect(service.filter({
+      workflowPath: '.github/workflows/ci.yml',
+      since: '2024-01-02T00:00:00.000Z',
+    })).toEqual([later]);
+  });
+
+  it('compacts large log and graph summaries for the webview', () => {
+    const record = {
+      ...sample,
+      logSummary: 'x'.repeat(40_100),
+      graphHistory: {
+        final: { summaryContent: 'y'.repeat(20_100) },
+        timeline: [{ at: '2026-01-01T00:00:00Z' }],
+      },
+    } as any;
+    (mockContext.workspaceState.get as jest.Mock).mockReturnValue([record]);
+
+    const [result] = service.getAllForWebview();
+
+    expect(result.logSummary).toContain('...[truncated for webview]');
+    expect(result.graphHistory?.final.summaryContent).toContain('...[truncated for webview]');
+    expect(result.graphHistory?.timeline).toEqual([]);
+  });
+
 });
