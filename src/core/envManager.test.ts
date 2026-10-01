@@ -10,6 +10,10 @@ describe('EnvManager', () => {
   let workspaceState: { get: jest.Mock; update: jest.Mock };
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    (vscode.window.showWarningMessage as jest.Mock).mockReset().mockResolvedValue(undefined);
+    (vscode.window.showInformationMessage as jest.Mock).mockReset();
+
     tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'act-env-manager-test-'));
     workspaceState = {
       get: jest.fn(),
