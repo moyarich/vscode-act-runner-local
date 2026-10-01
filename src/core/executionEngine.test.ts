@@ -371,8 +371,10 @@ describe('ExecutionEngine', () => {
   });
 
   it('forceReset stops the runner and clears execution state', () => {
-    (engine as any).activeExecutionId = 'exec-running';
-    (engine as any).startTime = 123;
+    Object.defineProperties(engine, {
+      activeExecutionId: { value: 'exec-running', writable: true },
+      startTime: { value: 123, writable: true },
+    });
 
     engine.forceReset();
 

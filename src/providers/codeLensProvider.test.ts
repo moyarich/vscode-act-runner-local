@@ -27,7 +27,7 @@ describe('WorkflowCodeLensProvider', () => {
     const document = {
       uri: { fsPath: '/repo/.github/workflows/ci.yml' },
       getText: () => 'jobs:\n  build:\n',
-    } as any;
+    } as unknown as vscode.TextDocument;
 
     expect(provider.provideCodeLenses(document)).toEqual([]);
     expect(parse).not.toHaveBeenCalled();
@@ -38,7 +38,7 @@ describe('WorkflowCodeLensProvider', () => {
     const document = {
       uri: { fsPath: '/repo/src/index.yml' },
       getText: () => '',
-    } as any;
+    } as unknown as vscode.TextDocument;
 
     expect(provider.provideCodeLenses(document)).toEqual([]);
   });
@@ -55,14 +55,14 @@ describe('WorkflowCodeLensProvider', () => {
     const document = {
       uri: { fsPath: '/repo/.github/workflows/ci.yaml' },
       getText: () => 'name: CI\njobs:\n  build:\n    runs-on: ubuntu-latest\n  test:\n    runs-on: ubuntu-latest\n',
-    } as any;
+    } as unknown as vscode.TextDocument;
 
     const lenses = provider.provideCodeLenses(document);
 
     expect(lenses).toHaveLength(6);
-    expect((lenses[0] as any).command.command).toBe('actRunner.runWorkflow');
-    expect((lenses[4] as any).command.arguments).toEqual([document.uri.fsPath, 'build']);
-    expect((lenses[5] as any).command.arguments).toEqual([document.uri.fsPath, 'test']);
+    expect(lenses[0].command?.command).toBe('actRunner.runWorkflow');
+    expect(lenses[4].command?.arguments).toEqual([document.uri.fsPath, 'build']);
+    expect(lenses[5].command?.arguments).toEqual([document.uri.fsPath, 'test']);
   });
 
   it('keeps top-level lenses when workflow parsing fails', () => {
@@ -74,7 +74,7 @@ describe('WorkflowCodeLensProvider', () => {
     const document = {
       uri: { fsPath: '/repo/.github/workflows/broken.yml' },
       getText: () => 'not: [valid',
-    } as any;
+    } as unknown as vscode.TextDocument;
 
     expect(provider.provideCodeLenses(document)).toHaveLength(4);
   });
@@ -90,12 +90,12 @@ describe('WorkflowCodeLensProvider', () => {
     const document = {
       uri: { fsPath: '/repo/.github/workflows/ci.yml' },
       getText: () => 'name: CI\njobs:\n  build:\n    runs-on: ubuntu-latest\n',
-    } as any;
+    } as unknown as vscode.TextDocument;
 
     const lenses = provider.provideCodeLenses(document);
 
     expect(lenses).toHaveLength(4);
-    expect(lenses.some((lens: any) => lens.command?.command === 'actRunner.runJob')).toBe(false);
+    expect(lenses.some((lens: vscode.CodeLens) => lens.command?.command === 'actRunner.runJob')).toBe(false);
   });
 
 });

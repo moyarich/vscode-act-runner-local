@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import path from 'path';
 import { workflowParser } from '../core/workflowParser';
+import type { WorkflowDefinition } from '../types/workflow.types';
 
 const FIXTURES = path.resolve(__dirname, '../__fixtures__');
 
@@ -65,7 +66,7 @@ describe('WorkflowParser', () => {
     });
 
     it('parses optional step metadata and ignores non-array steps', () => {
-      expect(workflowParser.parseSteps(undefined as any)).toEqual([]);
+      expect(workflowParser.parseSteps(undefined)).toEqual([]);
 
       const [step] = workflowParser.parseSteps([{
         name: 'Deploy',
@@ -132,7 +133,7 @@ describe('WorkflowParser', () => {
     });
 
     it('chooses meaningful step labels from name, uses, run, then id', () => {
-      const workflow = {
+      const workflow: WorkflowDefinition = {
         name: 'Labels',
         filePath: '/repo/.github/workflows/labels.yml',
         on: {},
@@ -149,7 +150,7 @@ describe('WorkflowParser', () => {
             ],
           },
         },
-      } as any;
+      };
 
       const graph = workflowParser.buildGraph(workflow);
       const labels = graph.nodes.filter((n) => n.type === 'step').map((n) => n.label);

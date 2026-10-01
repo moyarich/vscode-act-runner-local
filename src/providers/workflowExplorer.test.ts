@@ -15,7 +15,10 @@ describe('WorkflowExplorer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (vscode.workspace as any).workspaceFolders = undefined;
+    Object.defineProperty(vscode.workspace, 'workspaceFolders', {
+      configurable: true,
+      value: undefined,
+    });
   });
 
   it('shows a project-selection hint when no root is available', () => {
@@ -60,7 +63,8 @@ describe('WorkflowExplorer', () => {
     expect(jobs).toHaveLength(2);
     expect(jobs[0].label).toBe('Build');
     expect(jobs[1].description).toBe('reusable');
-    expect((jobs[1].iconPath as any).id).toBe('references');
+    expect(jobs[1].iconPath).toBeInstanceOf(vscode.ThemeIcon);
+    expect((jobs[1].iconPath as vscode.ThemeIcon).id).toBe('references');
   });
 
   it('shows an empty-state item when the project has no workflows', () => {
@@ -85,7 +89,15 @@ describe('WorkflowExplorer', () => {
   });
 
   it('falls back to the first VS Code workspace folder when no explicit project root is set', () => {
-    (vscode.workspace as any).workspaceFolders = [{ uri: { fsPath: '/workspace/project' } }];
+    const workspaceFolder = {
+      uri: { fsPath: '/workspace/project' },
+      name: 'project',
+      index: 0,
+    } as unknown as vscode.WorkspaceFolder;
+    Object.defineProperty(vscode.workspace, 'workspaceFolders', {
+      configurable: true,
+      value: [workspaceFolder],
+    });
     const explorer = new WorkflowExplorer();
 
     expect(explorer.getProjectRoot()).toBe('/workspace/project');

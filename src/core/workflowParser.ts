@@ -55,7 +55,7 @@ export class WorkflowParser {
     };
   }
 
-  parseSteps(rawSteps: unknown[]): StepDefinition[] {
+  parseSteps(rawSteps: unknown): StepDefinition[] {
     if (!Array.isArray(rawSteps)) return [];
     return rawSteps.map((s, index) => {
       const step = (s ?? {}) as Record<string, unknown>;
