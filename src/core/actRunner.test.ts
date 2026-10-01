@@ -47,6 +47,8 @@ describe('ActRunner', () => {
     dispatchSpy.mockRestore();
   });
 
+  // --- Installation detection -------------------------------------------------
+
   it('isActInstalled() deve retornar true quando act está disponível', async () => {
     (spawn as jest.Mock).mockReturnValueOnce(createMockProcess(['act version 0.2.60']));
     const result = await runner.isActInstalled('act');
@@ -58,6 +60,8 @@ describe('ActRunner', () => {
     const result = await runner.isActInstalled('act-nao-existe');
     expect(result).toBe(false);
   });
+
+  // --- Argument construction -------------------------------------------------
 
   it('buildArgs() deve incluir varFile quando informado', () => {
     const args = (runner as any).buildArgs(
@@ -76,6 +80,8 @@ describe('ActRunner', () => {
       '--var-file', '/repo/.vars',
     ]));
   });
+
+  // --- Process execution lifecycle ------------------------------------------
 
   it('run() deve resolver ao finalizar com sucesso', async () => {
     const mockProc = createMockProcess([
@@ -98,6 +104,8 @@ describe('ActRunner', () => {
       expect.objectContaining({ cwd: '/repo' })
     );
   });
+
+  // --- Output parsing and job/step lifecycle --------------------------------
 
   it('processLine() deve mapear ::notice:: para level notice removendo o comando', () => {
     (runner as any).processLine('exec-001', '[build/Test] | ::notice:: deploy em andamento');
@@ -262,6 +270,8 @@ describe('ActRunner', () => {
     });
   });
 
+  // --- Stop, cleanup, and retained state ------------------------------------
+
   it('stop() terminates an active process and clears accumulated execution state', () => {
     const proc = { kill: jest.fn() } as any;
     (runner as any).activeProcess = proc;
@@ -414,6 +424,8 @@ describe('ActRunner', () => {
     expect(logEvent.payload.line.length).toBeLessThan(stored.length);
   });
 
+
+  // --- Shell and Docker fallbacks -------------------------------------------
 
   it('resolveViaShell() returns the discovered executable path from shell output', async () => {
     jest.useFakeTimers();
@@ -608,6 +620,8 @@ describe('ActRunner', () => {
     }));
   });
 
+  // --- Log and summary resource limits --------------------------------------
+
   it('flushDroppedLogNotice() reports and resets dropped UI log events', () => {
     (runner as any).uiLogEventsDropped = 3;
 
@@ -662,6 +676,79 @@ describe('ActRunner', () => {
         content: 'first\n...[summary truncated]',
       },
     });
+  });
+
+
+  it('autoDetect() returns undefined when configured, known paths, and shell lookup all fail', async () => {
+    const update = jest.fn();
+    (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
+      get: jest.fn(() => '/missing/configured'),
+      update,
+    });
+    jest.spyOn(runner, 'isActInstalled').mockResolvedValue(false);
+    jest.spyOn(runner as any, 'resolveViaShell').mockResolvedValue(undefined);
+
+    await expect(runner.autoDetect()).resolves.toBeUndefined();
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('buildArgs() makes the workflow path relative to an alternate act working directory', () => {
+    const root = fs.mkdtempSync('/tmp/act-runner-cwd-');
+    const project = `${root}/project`;
+    const workflowPath = `${project}/.github/workflows/ci.yml`;
+    fs.mkdirSync(`${project}/.github/workflows`, { recursive: true });
+    fs.writeFileSync(workflowPath, 'name: CI\n', 'utf-8');
+
+    try {
+      const args = (runner as any).buildArgs({
+        workflowPath,
+        workspaceRoot: project,
+      }, 'fallback/image', root);
+
+      expect(args).toEqual(expect.arrayContaining([
+        '-W',
+        'project/.github/workflows/ci.yml',
+      ]));
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('cleanupActContainers() tolerates docker rm failure after discovering containers', async () => {
+    const find = new EventEmitter() as any;
+    find.stdout = new EventEmitter();
+    const rm = new EventEmitter() as any;
+    (spawn as jest.Mock)
+      .mockReturnValueOnce(find)
+      .mockReturnValueOnce(rm);
+
+    const cleanup = (runner as any).cleanupActContainers();
+    find.stdout.emit('data', Buffer.from('abc123\n'));
+    find.emit('close', 0);
+    rm.emit('error', new Error('docker rm failed'));
+
+    await expect(cleanup).resolves.toBeUndefined();
+  });
+
+  it('retains only the newest accumulated log lines after exceeding the history cap', () => {
+    for (let index = 0; index < 3005; index++) {
+      (runner as any).pushAccumulatedLog(`line-${index}`);
+    }
+
+    const logs = runner.getLogs();
+
+    expect(logs).toHaveLength(3000);
+    expect(logs[0]).toBe('line-5');
+    expect(logs.at(-1)).toBe('line-3004');
+  });
+
+  it('getLogs() returns a defensive copy of accumulated logs', () => {
+    (runner as any).pushAccumulatedLog('original');
+
+    const logs = runner.getLogs();
+    logs.push('mutated');
+
+    expect(runner.getLogs()).toEqual(['original']);
   });
 
 });
