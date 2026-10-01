@@ -78,4 +78,24 @@ describe('WorkflowCodeLensProvider', () => {
 
     expect(provider.provideCodeLenses(document)).toHaveLength(4);
   });
+
+  it('does not add a job lens when the parsed job is absent from document text', () => {
+    parse.mockReturnValue({
+      jobs: {
+        generated: { id: 'generated' },
+      },
+    });
+
+    const provider = new WorkflowCodeLensProvider();
+    const document = {
+      uri: { fsPath: '/repo/.github/workflows/ci.yml' },
+      getText: () => 'name: CI\njobs:\n  build:\n    runs-on: ubuntu-latest\n',
+    } as any;
+
+    const lenses = provider.provideCodeLenses(document);
+
+    expect(lenses).toHaveLength(4);
+    expect(lenses.some((lens: any) => lens.command?.command === 'actRunner.runJob')).toBe(false);
+  });
+
 });
