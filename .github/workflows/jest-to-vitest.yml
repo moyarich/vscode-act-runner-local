@@ -51,9 +51,72 @@ jobs:
             exit 1
           fi
 
+          if [[ ! -f "$target/package.json" ]]; then
+            echo "::error::No package.json found in: $target"
+            exit 1
+          fi
+
       - name: Run Jest to Vitest codemod
         working-directory: ${{ inputs.target-directory }}
         run: npx --yes codemod jest/vitest
+
+      - name: Update test scripts
+        working-directory: ${{ inputs.target-directory }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          npm pkg set 'scripts.test=vitest run'
+          npm pkg set 'scripts.test:watch=vitest'
+          npm pkg set 'scripts.test:coverage=vitest run --coverage'
+
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          const path = 'package.json';
+          const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+          if (pkg.scripts?.checks) {
+            pkg.scripts.checks = pkg.scripts.checks
+              .replace(/npm run test:coverage -- --runInBand/g, 'npm run test:coverage')
+              .replace(/npm test -- --runInBand/g, 'npm test');
+          }
+
+          fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+          NODE
+
+      - name: Replace Jest dependencies
+        working-directory: ${{ inputs.target-directory }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          npm uninstall --save-dev jest ts-jest @types/jest
+          npm install --save-dev @types/node@^22 vitest@^5 @vitest/coverage-v8@^5
+
+      - name: Update CI Jest-only arguments
+        if: ${{ inputs.target-directory == '.' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -f .github/workflows/ci.yml ]]; then
+            python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path(".github/workflows/ci.yml")
+          text = path.read_text()
+          text = text.replace(
+              "npm run test:coverage -- --runInBand",
+              "npm run test:coverage",
+          )
+          text = text.replace(
+              "npm test -- --runInBand",
+              "npm test",
+          )
+          path.write_text(text)
+          PY
+          fi
 
       - name: Show migration changes
         shell: bash
@@ -61,21 +124,6 @@ jobs:
           git status --short
           git diff --stat
           git diff
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
-
-      - name: Run lint
-        run: npm run lint
-
-      - name: Run typecheck
-        run: npm run typecheck
-
-      - name: Build extension
-        run: npm run build
 
       - name: Create migration patch
         shell: bash
@@ -93,6 +141,22 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Run tests
+        working-directory: ${{ inputs.target-directory }}
+        run: npm test
+
+      - name: Run lint
+        working-directory: ${{ inputs.target-directory }}
+        run: npm run lint
+
+      - name: Run typecheck
+        working-directory: ${{ inputs.target-directory }}
+        run: npm run typecheck
+
+      - name: Build extension
+        working-directory: ${{ inputs.target-directory }}
+        run: npm run build
+
       - name: Write migration summary
         if: always()
         shell: bash
@@ -109,7 +173,8 @@ jobs:
             git status --short
             echo '~~~'
             echo
-            echo "The migration must be approved before changes are committed and pushed."
+            echo "The migration patch is uploaded before validation."
+            echo "A successful migration must be approved before changes are committed and pushed."
           } >> "$GITHUB_STEP_SUMMARY"
 
   commit:
