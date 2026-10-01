@@ -251,6 +251,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "typecheck": "tsc --noEmit && tsc --noEmit --project tsconfig.webview.json",
+    "checks": "npm run lint && npm run typecheck && npm run test:coverage -- --runInBand",
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "package": "vsce package",
     "package:ls": "npm run build && vsce ls --tree"
