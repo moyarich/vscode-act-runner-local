@@ -1,6 +1,7 @@
 node_modules/**
 src/**
 tests/**
+test/**
 **/*.test.ts
 **/*.test.tsx
 **/*.map
@@ -18,3 +19,5 @@ package-lock.json
 ANALYTICS_GUIDE.md
 ANALYTICS_GUIDE-pt-br.md
 CHANGELOG-pt-br.md
+
+.vscode-test.mjs
