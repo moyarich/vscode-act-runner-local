@@ -84,19 +84,11 @@ Configure the extension through **Preferences -> Settings -> Act Visual Runner**
 
 Optionally, act can be configured using these configuration files:
 
-- **`.actrc`** - default act flags, for example `--platform ubuntu-latest=catthehacker/ubuntu:act-latest`.
+- **`.actrc`** - default act flags.
 - **`.secrets`** - secrets in `KEY=value` format.
 - **`.env`** - environment variables.
 
-### Example `.actrc`
-
-A complete example is available in [`.actrc.example`](.actrc.example).
-
-Copy it to `.actrc` in the directory where you run `act`, then customize values such as the Docker network, runner image, concurrency, and artifact path for your environment.
-
-```bash
-cp .actrc.example .actrc
-```
+See [the act configuration guide](docs/actrc.md) and [`.actrc.example`](.actrc.example) for a copyable local configuration.
 
 ## User Guide
 
