@@ -88,7 +88,7 @@ Optionally, act can be configured using these configuration files:
 - **`.secrets`** - secrets in `KEY=value` format.
 - **`.env`** - environment variables.
 
-See [the act configuration guide](docs/actrc.md) and [`.actrc.example`](.actrc.example) for a copyable local configuration.
+See [the documentation](docs/page.mdx) and [`.actrc.example`](.actrc.example) for a copyable local configuration.
 
 ## User Guide
 
