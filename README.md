@@ -84,42 +84,11 @@ Configure the extension through **Preferences -> Settings -> Act Visual Runner**
 
 Optionally, act can be configured using these configuration files:
 
-- **`.actrc`** - default act flags, for example `--platform ubuntu-latest=catthehacker/ubuntu:act-latest`.
+- **`.actrc`** - default act flags.
 - **`.secrets`** - secrets in `KEY=value` format.
 - **`.env`** - environment variables.
 
-### Example `.actrc`
-
-```bash
-# ─────────────────────────────────────────────────────────────────────────────
-# nektos/act default flags — must live at fean-projects/ root (where act is run).
-#
-# Invocation:
-#   cd /path/to/local-repository
-#   act push -W [name of repository]/.github/workflows/pipeline-local.yaml \
-#            --secret-file [name of repository]/.secrets
-#
-# IMPORTANT: act parses this file by splitting on whitespace. Shell quoting is
-#   NOT supported. Use --flag=value (no space) when the value contains special
-#   characters. Never write: --flag="value with space"
-# ─────────────────────────────────────────────────────────────────────────────
-
-# Runner image — catthehacker has Docker CLI, curl, jq, Python, etc.  pre-installed.
-# This overrides ~/.config/act/actrc which maps ubuntu-latest=node:16-buster-slim.
-
---pull=false
--P ubuntu-latest=catthehacker/ubuntu:act-latest
-
-# Attach all job containers to the platform_net network (created by docker compose).
-# Allows containers to reach: sonarqube:9000  localhost:5000  portainer:9443
---network platform_net
-
-# Reuse containers between runs to avoid re-downloading SDKs (217MB .NET SDK etc.)
-# Disabled: --reuse causes "No such container" errors when containers are cleaned between runs.
-# Clean up manually when needed: docker rm -f $(docker ps -aq --filter "name=act-")
-# --reuse
-
-```
+See [the documentation](docs/page.mdx) and [`.actrc.example`](.actrc.example) for a copyable local configuration.
 
 ## User Guide
 
