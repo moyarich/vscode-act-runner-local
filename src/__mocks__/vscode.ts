@@ -1,59 +1,57 @@
-import { vi } from 'vitest';
-
-// Mock do módulo vscode para uso em testes Vitest
+// Mock do módulo vscode para uso em testes Jest
 const vscode = {
   window: {
-    showInformationMessage: vi.fn(),
-    showWarningMessage: vi.fn(),
-    showErrorMessage: vi.fn(),
-    showQuickPick: vi.fn(),
-    showOpenDialog: vi.fn(),
-    showInputBox: vi.fn(),
-    createStatusBarItem: vi.fn(() => ({
-      show: vi.fn(),
-      hide: vi.fn(),
-      dispose: vi.fn(),
+    showInformationMessage: jest.fn(),
+    showWarningMessage: jest.fn(),
+    showErrorMessage: jest.fn(),
+    showQuickPick: jest.fn(),
+    showOpenDialog: jest.fn(),
+    showInputBox: jest.fn(),
+    createStatusBarItem: jest.fn(() => ({
+      show: jest.fn(),
+      hide: jest.fn(),
+      dispose: jest.fn(),
       text: '',
       tooltip: '',
       command: '',
       backgroundColor: undefined,
       color: undefined,
     })),
-    createWebviewPanel: vi.fn(),
-    createOutputChannel: vi.fn(() => ({
-      appendLine: vi.fn(),
-      show: vi.fn(),
-      dispose: vi.fn(),
+    createWebviewPanel: jest.fn(),
+    createOutputChannel: jest.fn(() => ({
+      appendLine: jest.fn(),
+      show: jest.fn(),
+      dispose: jest.fn(),
     })),
-    createTreeView: vi.fn(),
+    createTreeView: jest.fn(),
   },
   workspace: {
     workspaceFolders: undefined,
-    getConfiguration: vi.fn(() => ({
-      get: vi.fn((key: string, defaultValue: unknown) => defaultValue),
+    getConfiguration: jest.fn(() => ({
+      get: jest.fn((key: string, defaultValue: unknown) => defaultValue),
     })),
-    createFileSystemWatcher: vi.fn(() => ({
-      onDidCreate: vi.fn(),
-      onDidDelete: vi.fn(),
-      onDidChange: vi.fn(),
-      dispose: vi.fn(),
+    createFileSystemWatcher: jest.fn(() => ({
+      onDidCreate: jest.fn(),
+      onDidDelete: jest.fn(),
+      onDidChange: jest.fn(),
+      dispose: jest.fn(),
     })),
-    openTextDocument: vi.fn(),
+    openTextDocument: jest.fn(),
   },
   commands: {
-    registerCommand: vi.fn(),
-    executeCommand: vi.fn(),
+    registerCommand: jest.fn(),
+    executeCommand: jest.fn(),
   },
   languages: {
-    registerCodeLensProvider: vi.fn(),
+    registerCodeLensProvider: jest.fn(),
   },
   env: {
-    openExternal: vi.fn(),
+    openExternal: jest.fn(),
   },
   Uri: {
-    file: vi.fn((p: string) => ({ fsPath: p })),
-    parse: vi.fn((s: string) => ({ toString: () => s })),
-    joinPath: vi.fn((...parts: unknown[]) => parts[parts.length - 1]),
+    file: jest.fn((p: string) => ({ fsPath: p })),
+    parse: jest.fn((s: string) => ({ toString: () => s })),
+    joinPath: jest.fn((...parts: unknown[]) => parts[parts.length - 1]),
   },
   TreeItem: class {
     constructor(public label: string, public collapsibleState?: number) {}
@@ -65,9 +63,9 @@ const vscode = {
   ThemeIcon: class { constructor(public id: string) {} },
   ThemeColor: class { constructor(public id: string) {} },
   EventEmitter: class {
-    event = vi.fn();
-    fire = vi.fn();
-    dispose = vi.fn();
+    event = jest.fn();
+    fire = jest.fn();
+    dispose = jest.fn();
   },
   CodeLens: class {
     constructor(public range: unknown, public command?: unknown) {}
