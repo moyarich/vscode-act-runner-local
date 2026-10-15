@@ -88,3 +88,61 @@ Only run cleanup when you intend to remove all containers matching the `act-` na
 Keep secrets outside the example config. Pass them separately with `--secret-file` or another supported `act` mechanism.
 
 Do not commit real `.secrets` files.
+
+
+## Troubleshooting: workflow file not found
+
+An error such as:
+
+```text
+Error: stat /path/to/console/.github/workflows/reusable_select-recovery-packages.yml: no such file or directory
+```
+
+means `act` cannot open the workflow file selected for execution. It is **not** a Docker socket or container architecture failure.
+
+1. Check the workflow files actually present in the selected repository:
+
+   ```sh
+   cd /path/to/console
+   ls .github/workflows/
+   ```
+
+2. Run the **calling** workflow that exists in this repository, not the filename of a remote reusable workflow. For example, if `release.yml` calls a shared workflow:
+
+   ```yaml
+   jobs:
+     select-packages:
+       uses: moyarich/reusable-workflows/.github/workflows/reusable_select-recovery-packages.yml@main
+   ```
+
+   run the caller using:
+
+   ```sh
+   act workflow_dispatch -W .github/workflows/release.yml
+   ```
+
+   Replace `release.yml` and the event with the actual caller filename and trigger. In the VS Code extension, select that same existing caller workflow before running an individual job.
+
+3. If the caller uses a **local** reusable workflow reference such as `./.github/workflows/build.yml`, verify that the file exists in the caller repository. A remote `owner/repo/.github/workflows/file.yml@ref` reference should not be copied into the caller repository just to satisfy a local existence check.
+
+4. If the caller file exists but `act` cannot load its remote reusable dependency, inspect the actual `act` error, verify the upstream repository/ref/file and access permissions, and check `act --version`. Runner support for some GitHub Actions workflow features may vary. Fixing a bad `-W` path does not by itself guarantee that a remote workflow will execute.
+
+### Apple Silicon warning
+
+On Apple M-series Macs, `act` may print a warning suggesting `--container-architecture linux/amd64`. This warning is separate from a missing workflow file.
+
+To run containers as AMD64, add this line to the `.actrc` loaded by `act`:
+
+```text
+--container-architecture linux/amd64
+```
+
+Or use `act --container-architecture linux/amd64 workflow_dispatch -W .github/workflows/release.yml`.
+
+AMD64 emulation may be slower than native ARM64. Choose the architecture expected by the workflow's container images and dependencies; it is not necessary to force AMD64 solely to resolve a workflow path.
+
+When using the VS Code extension, ensure the setting is in a configuration location `act` actually reads for the selected working directory. The extension invokes `act` from the selected repository by default. If the architecture warning remains, test the equivalent command directly from that directory to determine which `.actrc` is loaded.
+
+### About `act exited with code 1`
+
+The extension may display `act exited with code 1` after the underlying `stat` error. This is the process exit status, not a second root cause. Address the first concrete error in the `act` output.
