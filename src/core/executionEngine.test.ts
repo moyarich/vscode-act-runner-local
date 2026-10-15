@@ -383,13 +383,12 @@ describe('ExecutionEngine', () => {
     expect(engine.isRunning()).toBe(false);
   });
 
-  it('detects a parent directory that contains reusable workflows', async () => {
+  it('resolves local reusable workflows within the selected repository', async () => {
     const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'act-parent-'));
     const child = path.join(parent, 'app');
-    const reusable = path.join(parent, '.github', 'workflows', 'shared.yml');
+    const reusable = path.join(child, '.github', 'workflows', 'shared.yml');
     fs.mkdirSync(path.dirname(reusable), { recursive: true });
-    fs.mkdirSync(child, { recursive: true });
-    fs.writeFileSync(reusable, 'name: shared\n', 'utf-8');
+    fs.writeFileSync(reusable, 'name: shared\\n', 'utf-8');
 
     (workflowParser.parse as jest.Mock).mockReturnValue({
       name: 'CI',
@@ -410,11 +409,9 @@ describe('ExecutionEngine', () => {
 
       expect(actRunner.run).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ actCwd: parent })
+        expect.objectContaining({ actCwd: child, workspaceRoot: child })
       );
-      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
-        expect.stringContaining(parent)
-      );
+      expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
     } finally {
       fs.rmSync(parent, { recursive: true, force: true });
     }

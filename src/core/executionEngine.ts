@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { actRunner } from './actRunner';
+import { findMissingLocalReusableJobs } from './reusableWorkflowRefs';
 import { eventBus } from './eventBus';
 import { workflowParser } from './workflowParser';
 import { workflowValidator } from './workflowValidator';
@@ -86,56 +87,24 @@ export class ExecutionEngine {
       throw new Error(t('Invalid workflow:\n{0}', validation.errors.join('\n')));
     }
 
-    // Verificar TODOS os jobs com reusable workflows (incluindo ./path locais)
-    const workspaceRoot = options.workspaceRoot ?? '';
-    const allUsesPaths = Object.values(workflow.jobs)
-      .filter((job) => job.uses)
-      .map((job) => {
-        const raw = job.uses!.split('@')[0]; // remove @ref
-        // ./path → path  (strip ./ para comparação de existência)
-        return raw.startsWith('./') ? raw.slice(2) : raw;
-      });
+    // GitHub resolves remote reusable workflows (owner/repo/.github/workflows/file.yml@ref).
+    // Only ./... references are local to the selected repository.
+    const workspaceRoot = options.workspaceRoot ?? path.resolve(path.dirname(options.workflowPath), '../..');
+    const actCwd = options.actCwd ?? workspaceRoot;
+    const missingLocalJobs = findMissingLocalReusableJobs(workflow.jobs, workspaceRoot);
 
-    // Auto-detectar o CWD correto subindo diretórios até encontrar os reusable workflows
-    let actCwd = options.actCwd ?? workspaceRoot;
-    if (allUsesPaths.length > 0 && !options.actCwd) {
-      const detected = this.detectReusableCwd(workspaceRoot, allUsesPaths);
-      if (detected && detected !== workspaceRoot) {
-        actCwd = detected;
-        vscode.window.showInformationMessage(
-          t('ℹ️ Running act from: {0} (reusable workflows detected in the parent directory)', detected)
-        );
-      }
-    }
-
-    // Avisar sobre reusable workflows que ainda não foram encontrados com o CWD detectado
-    const stillMissing = allUsesPaths.filter(
-      (relPath) => !fs.existsSync(path.join(actCwd, relPath))
-    );
-    if (stillMissing.length > 0) {
-      const jobLabels = Object.entries(workflow.jobs)
-        .filter(([, job]) => {
-          if (!job.uses) return false;
-          const raw = job.uses.split('@')[0];
-          const stripped = raw.startsWith('./') ? raw.slice(2) : raw;
-          return stillMissing.includes(stripped);
-        })
-        .map(([id, job]) => `• ${job.name ?? id} → ${job.uses}`);
-
+    if (missingLocalJobs.length > 0) {
       const msg = [
-        t('⚠️ {0} reusable workflow(s) not found locally:', stillMissing.length),
+        t('⚠️ {0} local reusable workflow(s) not found:', missingLocalJobs.length),
         '',
-        jobLabels.join('\n'),
+        missingLocalJobs.map(([id, job]) => `• ${job.name ?? id} → ${job.uses}`).join('\n'),
         '',
-        t('Base directory checked: {0}', actCwd),
-        t('act will fail. Run the project from the correct directory.'),
+        t('Repository directory checked: {0}', workspaceRoot),
+        t('Local reusable workflows must exist in the current repository.'),
       ].join('\n');
 
       const choice = await vscode.window.showWarningMessage(
-        msg,
-        { modal: true },
-        t('Run anyway'),
-        t('Cancel')
+        msg, { modal: true }, t('Run anyway'), t('Cancel')
       );
       if (choice !== t('Run anyway')) return 'cancelled';
     }
@@ -225,34 +194,6 @@ export class ExecutionEngine {
     actRunner.stop();
     this.activeExecutionId = null;
     this.startTime = 0;
-  }
-
-  /**
-   * Detecta o diretório correto para o act resolver reusable workflows externos.
-   * Sobe a árvore de diretórios até encontrar um nível onde TODOS os caminhos existam.
-   */
-  private detectReusableCwd(startDir: string, uses: string[]): string {
-    let dir = startDir;
-    // Verificar até 5 níveis acima
-    for (let i = 0; i < 5; i++) {
-      const allFound = uses.every((relPath) => fs.existsSync(path.join(dir, relPath)));
-      if (allFound) return dir;
-      const parent = path.dirname(dir);
-      if (parent === dir) break; // chegou na raiz do sistema
-      dir = parent;
-    }
-    // Retornar o melhor match parcial (mais caminhos encontrados)
-    let bestDir = startDir;
-    let bestCount = 0;
-    dir = startDir;
-    for (let i = 0; i < 5; i++) {
-      const found = uses.filter((relPath) => fs.existsSync(path.join(dir, relPath))).length;
-      if (found > bestCount) { bestCount = found; bestDir = dir; }
-      const parent = path.dirname(dir);
-      if (parent === dir) break;
-      dir = parent;
-    }
-    return bestDir;
   }
 
   isRunning(): boolean {
