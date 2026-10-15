@@ -4,33 +4,31 @@ This repository includes [`.actrc.example`](../../../.actrc.example) as a reusab
 
 ## Setup
 
-Copy the example into the workspace root where you run `act`:
+Copy the example to the root of the repository you are running:
 
 ```sh
 cp .actrc.example .actrc
 ```
 
-A typical workspace can look like this:
+A typical repository layout is:
 
 ```text
-my-project/
+my-repository/
 ├── .actrc
-└── my-repository/
-    ├── .github/
-    │   └── workflows/
-    │       └── pipeline-local.yaml
-    └── .secrets
+├── .github/
+│   └── workflows/
+│       └── release.yml
+└── .secrets  # optional, untracked
 ```
 
-Run `act` from the workspace root and point it at the repository workflow and secrets file:
+Run the existing **caller** workflow from that repository:
 
 ```sh
-cd ~/my-project
-
-act push \
-  -W my-repository/.github/workflows/pipeline-local.yaml \
-  --secret-file my-repository/.secrets
+cd my-repository
+act workflow_dispatch -W .github/workflows/release.yml
 ```
+
+The `-W` path must point to a real local workflow. A remote reusable workflow referenced inside `release.yml` is **not** a suitable local `-W` target.
 
 ## Parsing rules
 
@@ -48,19 +46,20 @@ Avoid:
 --flag="value with spaces"
 ```
 
-## Example defaults
+## Safe defaults and optional settings
 
-The provided example config:
+The checked-in `.actrc.example` intentionally enables **no options**. This avoids assuming that a custom Docker network exists, that you have a specific runner image cached, or that every host should use AMD64 emulation.
 
-- reuses a locally available runner image instead of pulling it before every run;
-- maps `ubuntu-latest` to `catthehacker/ubuntu:act-latest`;
-- attaches workflow containers to `platform_net`;
-- runs containers as `linux/amd64`;
-- allows up to four jobs to run concurrently;
-- stores local workflow artifacts in `/tmp/artifacts`;
-- leaves `--reuse` disabled because stale or externally removed containers can make reuse unreliable.
+Uncomment only what you need:
 
-Customize these values for your local environment before treating the file as a project default.
+- **Apple Silicon:** `--container-architecture linux/amd64` when x86-64 execution is required; this does not fix missing workflow files.
+- **Runner image:** `-P ubuntu-latest=...` if you want to override the extension's runner mapping.
+- **Docker network:** `--network my-existing-network` only after verifying the network exists with `docker network ls`.
+- **Image pulls:** `--pull=false` only if you intentionally maintain runner images locally.
+- **Concurrency and artifacts:** Configure `--concurrent-jobs` and `--artifact-server-path` for your machine.
+- **Reuse:** `--reuse` remains disabled unless you explicitly want persistent containers.
+
+See comments in `.actrc.example` for copyable examples. Avoid committing secrets into `.actrc`.
 
 ## Docker networking
 
@@ -75,7 +74,7 @@ Inside a workflow container, `localhost` refers to that container itself rather 
 
 ## Container cleanup
 
-If local `act` containers become stale, remove them with:
+If local `act` containers become stale, first inspect them with `docker ps -a --filter name=act-`. To remove containers matching that filter intentionally, use:
 
 ```sh
 docker rm -f $(docker ps -aq --filter "name=act-")
