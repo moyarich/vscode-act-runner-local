@@ -1,71 +1,66 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# nektos/act example configuration
+# nektos/act configuration example
 #
-# Copy this file to `.actrc` in your projects workspace root:
+# Copy this file into the root of the repository you run with Act/Run:
 #
 #   cp .actrc.example .actrc
+#   cd /path/to/your-repository
+#   act --version
+#   act workflow_dispatch -W .github/workflows/your-caller.yml
 #
-# Run `act` from the directory that contains your local repositories:
+# Only the *calling* workflow belongs after -W. For example, if your caller
+# references owner/repo/.github/workflows/build.yml@main, do not pass
+# build.yml to -W unless that file actually exists in this repository.
 #
-#   cd ~/my-project
+# This example deliberately has no enabled flags: it is safe to copy on
+# Docker Desktop, OrbStack, Linux, and Apple Silicon without presuming a
+# particular network, architecture, image, or artifacts directory.
 #
-# Example repository layout:
-#
-#   my-project/
-#   ├── .actrc
-#   └── my-repository/
-#       ├── .github/
-#       │   └── workflows/
-#       │       └── pipeline-local.yaml
-#       └── .secrets
-#
-# Example:
-#
-#   act push \
-#     -W my-repository/.github/workflows/pipeline-local.yaml \
-#     --secret-file my-repository/.secrets
-#
-# IMPORTANT:
-# `act` parses this file by splitting values on whitespace.
-# Shell-style quoting is not supported.
-#
-# Prefer:
-#   --flag=value
-#
-# Avoid:
-#   --flag="value with spaces"
-# ─────────────────────────────────────────────────────────────────────────────
+# Uncomment only options you need. act config options are not shell commands;
+# keep each enabled option on its own line. Check 'act --help' for your version.
 
-# Do not pull the runner image before every execution.
---pull=false
-
-# Map GitHub's `ubuntu-latest` runner to a full-featured local runner image.
-# Adjust this image if your environment requires a different runner.
--P ubuntu-latest=catthehacker/ubuntu:act-latest
-
-# Attach workflow containers to an existing Docker network.
-# Change `platform_net` to match your local Docker Compose network.
+# ─── Runner image ───────────────────────────────────────────────────────────
+# Act/Run can supply a default runner image. To override it yourself:
+# -P ubuntu-latest=catthehacker/ubuntu:act-latest
 #
-# Containers on this network should access other services by Docker service name,
-# for example: sonarqube:9000 or portainer:9443.
---network platform_net
+# Pull newer images when appropriate (the default behavior depends on act).
+# Avoid disabling pulls unless you manage the image locally and know it exists.
+# --pull=false
 
-# Reuse workflow containers between runs.
+# ─── Apple Silicon / ARM ────────────────────────────────────────────────────
+# If act warns about an Apple M-series processor, and your workflow expects
+# x86-64 images/tools, enable AMD64 emulation (may run more slowly).
+# This option does NOT fix errors about missing .github/workflows/*.yml files.
+# --container-architecture linux/amd64
 #
-# Disabled by default because reused containers can fail if they were removed
-# or cleaned up outside of `act`.
+# Use the native architecture when your runner image and dependencies support it.
+
+# ─── Docker network (optional) ──────────────────────────────────────────────
+# Only enable if this Docker network already exists:
+#   docker network ls
+# --network my-existing-network
 #
+# Without a custom network, act manages ordinary container networking.
+# Inside a container, localhost refers to that container.
+
+# ─── Execution options (optional) ──────────────────────────────────────────
+# Limit concurrent jobs on smaller development machines:
+# --concurrent-jobs 2
+#
+# Store artifacts locally. Create this directory first, choose a location
+# appropriate for your machine, and keep it out of source control:
+# --artifact-server-path /tmp/act-artifacts
+#
+# Container reuse may retain state between runs; enable only when wanted.
 # --reuse
 
-# Clean up stale `act` containers when needed:
-#   docker rm -f $(docker ps -aq --filter "name=act-")
-
-# Force the container architecture used by local workflow jobs.
-# Useful on Apple Silicon or other ARM hosts when workflows expect amd64.
---container-architecture linux/amd64
-
-# Maximum number of workflow jobs that may run concurrently.
---concurrent-jobs 4
-
-# Directory used by `act`'s local artifact server.
---artifact-server-path /tmp/artifacts
+# ─── Credentials ────────────────────────────────────────────────────────────
+# Do NOT put secrets or tokens in this file.
+# Keep .secrets untracked and pass it when needed:
+#   act workflow_dispatch -W .github/workflows/your-caller.yml --secret-file .secrets
+#
+# Troubleshooting:
+#   ls .github/workflows/
+#   act --version
+#   docker info
+#
+# Documentation: docs/02-guides/act-configuration/page.mdx
