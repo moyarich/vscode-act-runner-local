@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { actRunner } from './actRunner';
+import { findMissingLocalReusableJobs } from './reusableWorkflowRefs';
 import { eventBus } from './eventBus';
 import { workflowParser } from './workflowParser';
 import { workflowValidator } from './workflowValidator';
@@ -90,11 +91,7 @@ export class ExecutionEngine {
     // Only ./... references are local to the selected repository.
     const workspaceRoot = options.workspaceRoot ?? path.resolve(path.dirname(options.workflowPath), '../..');
     const actCwd = options.actCwd ?? workspaceRoot;
-    const missingLocalJobs = Object.entries(workflow.jobs).filter(([, job]) => {
-      if (!job.uses?.startsWith('./')) return false;
-      const relativePath = job.uses.slice(2);
-      return !fs.existsSync(path.join(workspaceRoot, relativePath));
-    });
+    const missingLocalJobs = findMissingLocalReusableJobs(workflow.jobs, workspaceRoot);
 
     if (missingLocalJobs.length > 0) {
       const msg = [
