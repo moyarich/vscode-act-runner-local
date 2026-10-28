@@ -75,10 +75,9 @@ describe('ActRunner', () => {
       '/repo'
     );
 
-    expect(args).toEqual(expect.arrayContaining([
-      '--env-file', '/repo/.env',
-      '--var-file', '/repo/.vars',
-    ]));
+    expect(args).toEqual(
+      expect.arrayContaining(['--env-file', '/repo/.env', '--var-file', '/repo/.vars'])
+    );
   });
 
   // --- Process execution lifecycle ------------------------------------------
@@ -92,10 +91,12 @@ describe('ActRunner', () => {
     (runner as any).cleanupDanglingImages = jest.fn().mockResolvedValue(undefined);
     (spawn as jest.Mock).mockReturnValueOnce(mockProc);
 
-    await expect(runner.run('exec-001', {
-      workflowPath: '.github/workflows/ci.yml',
-      workspaceRoot: '/repo',
-    })).resolves.toBeUndefined();
+    await expect(
+      runner.run('exec-001', {
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: '/repo',
+      })
+    ).resolves.toBeUndefined();
 
     expect(spawn).toHaveBeenNthCalledWith(
       1,
@@ -120,7 +121,10 @@ describe('ActRunner', () => {
   });
 
   it('processLine() deve mapear ::notice:: mesmo com prefixo visual do act', () => {
-    (runner as any).processLine('exec-001', '[build/Test] | ❓ ::notice title=AWS Setup::Running in SIMULATION MODE');
+    (runner as any).processLine(
+      'exec-001',
+      '[build/Test] | ❓ ::notice title=AWS Setup::Running in SIMULATION MODE'
+    );
 
     const logEvent = dispatchSpy.mock.calls
       .map((args) => args[0])
@@ -132,7 +136,10 @@ describe('ActRunner', () => {
   });
 
   it('processLine() deve mapear anotacao notice com separador de um colon', () => {
-    (runner as any).processLine('exec-001', '[build/Test] | ?::notice title=AWS Setup:Running in SIMULATION MODE');
+    (runner as any).processLine(
+      'exec-001',
+      '[build/Test] | ?::notice title=AWS Setup:Running in SIMULATION MODE'
+    );
 
     const logEvent = dispatchSpy.mock.calls
       .map((args) => args[0])
@@ -238,16 +245,20 @@ describe('ActRunner', () => {
     (runner as any).cleanupActContainers = jest.fn().mockResolvedValue(undefined);
     (spawn as jest.Mock).mockReturnValueOnce(mockProc);
 
-    await expect(runner.run('exec-failed', {
-      workflowPath: '.github/workflows/ci.yml',
-      workspaceRoot: '/repo',
-    })).rejects.toThrow(/code 2/i);
+    await expect(
+      runner.run('exec-failed', {
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: '/repo',
+      })
+    ).rejects.toThrow(/code 2/i);
 
     expect(runner.getLogs()).toContain('compiler failed');
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'execution:end',
-      payload: expect.objectContaining({ status: 'failed' }),
-    }));
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'execution:end',
+        payload: expect.objectContaining({ status: 'failed' }),
+      })
+    );
   });
 
   it('run() propagates child-process spawn errors as execution errors', async () => {
@@ -259,10 +270,12 @@ describe('ActRunner', () => {
     (spawn as jest.Mock).mockReturnValueOnce(proc);
     setImmediate(() => proc.emit('error', new Error('spawn ENOENT')));
 
-    await expect(runner.run('exec-error', {
-      workflowPath: '.github/workflows/ci.yml',
-      workspaceRoot: '/repo',
-    })).rejects.toThrow('spawn ENOENT');
+    await expect(
+      runner.run('exec-error', {
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: '/repo',
+      })
+    ).rejects.toThrow('spawn ENOENT');
 
     expect(dispatchSpy).toHaveBeenCalledWith({
       type: 'execution:error',
@@ -304,29 +317,41 @@ describe('ActRunner', () => {
 
     try {
       const workflowPath = `${root}/.github/workflows/ci.yml`;
-      const args = (runner as any).buildArgs({
-        workflowPath,
-        workspaceRoot: root,
-        jobId: 'build;rm',
-        dryRun: true,
-        eventType: 'workflow_dispatch',
-        eventPayloadPath: `${root}/event.json`,
-        envFile: `${root}/.env`,
-        varFile: `${root}/.vars`,
-        secretsFile: `${root}/.secrets`,
-      }, 'test/image:latest', root);
+      const args = (runner as any).buildArgs(
+        {
+          workflowPath,
+          workspaceRoot: root,
+          jobId: 'build;rm',
+          dryRun: true,
+          eventType: 'workflow_dispatch',
+          eventPayloadPath: `${root}/event.json`,
+          envFile: `${root}/.env`,
+          varFile: `${root}/.vars`,
+          secretsFile: `${root}/.secrets`,
+        },
+        'test/image:latest',
+        root
+      );
 
-      expect(args).toEqual(expect.arrayContaining([
-        '-j', 'buildrm',
-        '-n',
-        'workflow_dispatch',
-        '-e', `${root}/event.json`,
-        '--env-file', `${root}/.env`,
-        '--var-file', `${root}/.vars`,
-        '--secret-file', `${root}/.secrets`,
-        '--rm',
-        '-P', 'ubuntu-latest=test/image:latest',
-      ]));
+      expect(args).toEqual(
+        expect.arrayContaining([
+          '-j',
+          'buildrm',
+          '-n',
+          'workflow_dispatch',
+          '-e',
+          `${root}/event.json`,
+          '--env-file',
+          `${root}/.env`,
+          '--var-file',
+          `${root}/.vars`,
+          '--secret-file',
+          `${root}/.secrets`,
+          '--rm',
+          '-P',
+          'ubuntu-latest=test/image:latest',
+        ])
+      );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
@@ -337,10 +362,14 @@ describe('ActRunner', () => {
     fs.writeFileSync(`${root}/.actrc`, '-P ubuntu-latest=custom/image\n', 'utf-8');
 
     try {
-      const args = (runner as any).buildArgs({
-        workflowPath: '.github/workflows/ci.yml',
-        workspaceRoot: root,
-      }, 'fallback/image', root);
+      const args = (runner as any).buildArgs(
+        {
+          workflowPath: '.github/workflows/ci.yml',
+          workspaceRoot: root,
+        },
+        'fallback/image',
+        root
+      );
 
       expect(args).not.toContain('-P');
       expect(args).toContain('--rm');
@@ -356,12 +385,26 @@ describe('ActRunner', () => {
     (runner as any).processLine('exec-steps', '[build/Test] ⏭️ Skipping deploy [5ms]');
 
     const events = dispatchSpy.mock.calls.map((args) => args[0]);
-    expect(events).toEqual(expect.arrayContaining([
-      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'npm test', status: 'running' }) }),
-      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'npm test', status: 'success' }) }),
-      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'lint', status: 'failed' }) }),
-      expect.objectContaining({ type: 'step:update', payload: expect.objectContaining({ stepId: 'deploy', status: 'skipped' }) }),
-    ]));
+    expect(events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'step:update',
+          payload: expect.objectContaining({ stepId: 'npm test', status: 'running' }),
+        }),
+        expect.objectContaining({
+          type: 'step:update',
+          payload: expect.objectContaining({ stepId: 'npm test', status: 'success' }),
+        }),
+        expect.objectContaining({
+          type: 'step:update',
+          payload: expect.objectContaining({ stepId: 'lint', status: 'failed' }),
+        }),
+        expect.objectContaining({
+          type: 'step:update',
+          payload: expect.objectContaining({ stepId: 'deploy', status: 'skipped' }),
+        }),
+      ])
+    );
   });
 
   it('processLine() tracks reusable inner jobs separately from their outer job', () => {
@@ -369,16 +412,26 @@ describe('ActRunner', () => {
     (runner as any).processLine('exec-reuse', '[caller/shared/inner] 🏁 Job succeeded');
 
     const events = dispatchSpy.mock.calls.map((args) => args[0]);
-    expect(events).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        type: 'job:update',
-        payload: expect.objectContaining({ jobId: 'inner', outerJobId: 'caller', status: 'running' }),
-      }),
-      expect.objectContaining({
-        type: 'job:update',
-        payload: expect.objectContaining({ jobId: 'inner', outerJobId: 'caller', status: 'success' }),
-      }),
-    ]));
+    expect(events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'job:update',
+          payload: expect.objectContaining({
+            jobId: 'inner',
+            outerJobId: 'caller',
+            status: 'running',
+          }),
+        }),
+        expect.objectContaining({
+          type: 'job:update',
+          payload: expect.objectContaining({
+            jobId: 'inner',
+            outerJobId: 'caller',
+            status: 'success',
+          }),
+        }),
+      ])
+    );
   });
 
   it('processLine() captures and flushes step summaries', () => {
@@ -403,13 +456,15 @@ describe('ActRunner', () => {
       '[CI/CD Pipeline/build/Test] | workflow-prefixed log'
     );
 
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'log',
-      payload: expect.objectContaining({
-        jobId: 'build',
-        line: 'workflow-prefixed log',
-      }),
-    }));
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'log',
+        payload: expect.objectContaining({
+          jobId: 'build',
+          line: 'workflow-prefixed log',
+        }),
+      })
+    );
   });
 
   it('truncates oversized persisted and UI log lines', () => {
@@ -417,13 +472,14 @@ describe('ActRunner', () => {
     (runner as any).processLine('exec-long', `[build/Test] | ${longLine}`);
 
     const stored = runner.getLogs()[0];
-    const logEvent = dispatchSpy.mock.calls.map((args) => args[0]).find((event) => event.type === 'log');
+    const logEvent = dispatchSpy.mock.calls
+      .map((args) => args[0])
+      .find((event) => event.type === 'log');
 
     expect(stored.length).toBeLessThan(longLine.length);
     expect(stored).toContain('[truncated]');
     expect(logEvent.payload.line.length).toBeLessThan(stored.length);
   });
-
 
   // --- Shell and Docker fallbacks -------------------------------------------
 
@@ -452,7 +508,10 @@ describe('ActRunner', () => {
     (spawn as jest.Mock).mockReturnValueOnce(ambiguous);
 
     const ambiguousResult = (runner as any).resolveViaShell();
-    ambiguous.stdout.emit('data', Buffer.from('alias act=act --container-architecture linux/amd64\n'));
+    ambiguous.stdout.emit(
+      'data',
+      Buffer.from('alias act=act --container-architecture linux/amd64\n')
+    );
     ambiguous.emit('close', 0);
 
     await expect(ambiguousResult).resolves.toBeUndefined();
@@ -472,9 +531,7 @@ describe('ActRunner', () => {
   });
 
   it('run() flushes pending job status when the process closes', async () => {
-    const mockProc = createMockProcess([
-      '[build] 🏁 Job succeeded',
-    ]);
+    const mockProc = createMockProcess(['[build] 🏁 Job succeeded']);
     (runner as any).cleanupActContainers = jest.fn().mockResolvedValue(undefined);
     (spawn as jest.Mock).mockReturnValueOnce(mockProc);
 
@@ -483,14 +540,16 @@ describe('ActRunner', () => {
       workspaceRoot: '/repo',
     });
 
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'job:update',
-      payload: expect.objectContaining({
-        executionId: 'exec-pending-close',
-        jobId: 'build',
-        status: 'success',
-      }),
-    }));
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'job:update',
+        payload: expect.objectContaining({
+          executionId: 'exec-pending-close',
+          jobId: 'build',
+          status: 'success',
+        }),
+      })
+    );
   });
 
   it('cleanupActContainers() resolves cleanly when docker is unavailable', async () => {
@@ -508,9 +567,7 @@ describe('ActRunner', () => {
     const find = new EventEmitter() as any;
     find.stdout = new EventEmitter();
     const rm = new EventEmitter() as any;
-    (spawn as jest.Mock)
-      .mockReturnValueOnce(find)
-      .mockReturnValueOnce(rm);
+    (spawn as jest.Mock).mockReturnValueOnce(find).mockReturnValueOnce(rm);
 
     const cleanup = (runner as any).cleanupActContainers();
     find.stdout.emit('data', Buffer.from('abc123\ndef456\n'));
@@ -518,12 +575,9 @@ describe('ActRunner', () => {
     rm.emit('close', 0);
 
     await expect(cleanup).resolves.toBeUndefined();
-    expect(spawn).toHaveBeenNthCalledWith(
-      2,
-      'docker',
-      ['rm', '-f', 'abc123', 'def456'],
-      { stdio: 'ignore' }
-    );
+    expect(spawn).toHaveBeenNthCalledWith(2, 'docker', ['rm', '-f', 'abc123', 'def456'], {
+      stdio: 'ignore',
+    });
   });
 
   it('cleanupActContainers() skips removal when no act containers are found', async () => {
@@ -550,13 +604,15 @@ describe('ActRunner', () => {
 
     (runner as any).processLine('exec-transition', '[next] | world');
 
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'job:update',
-      payload: expect.objectContaining({
-        jobId: 'caller',
-        status: 'success',
-      }),
-    }));
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'job:update',
+        payload: expect.objectContaining({
+          jobId: 'caller',
+          status: 'success',
+        }),
+      })
+    );
   });
 
   it('processLine() infers failed outer reusable job completion after an inner failure', () => {
@@ -565,13 +621,15 @@ describe('ActRunner', () => {
 
     (runner as any).processLine('exec-transition-fail', '[next] | world');
 
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'job:update',
-      payload: expect.objectContaining({
-        jobId: 'caller',
-        status: 'failed',
-      }),
-    }));
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'job:update',
+        payload: expect.objectContaining({
+          jobId: 'caller',
+          status: 'failed',
+        }),
+      })
+    );
   });
 
   it('processLine() confirms pending status when output moves to another outer job', () => {
@@ -580,13 +638,15 @@ describe('ActRunner', () => {
 
     (runner as any).processLine('exec-pending', '[test] | starting');
 
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'job:update',
-      payload: expect.objectContaining({
-        jobId: 'build',
-        status: 'success',
-      }),
-    }));
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'job:update',
+        payload: expect.objectContaining({
+          jobId: 'build',
+          status: 'success',
+        }),
+      })
+    );
   });
 
   it('processLine() cancels pending status when the same outer job emits more work', () => {
@@ -610,14 +670,16 @@ describe('ActRunner', () => {
     (runner as any).processLine('exec-inner-fail', '[caller/shared/inner] 🏁 Job failed');
 
     expect((runner as any).failedInnerByOuter.has('caller')).toBe(true);
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'job:update',
-      payload: expect.objectContaining({
-        jobId: 'inner',
-        outerJobId: 'caller',
-        status: 'failed',
-      }),
-    }));
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'job:update',
+        payload: expect.objectContaining({
+          jobId: 'inner',
+          outerJobId: 'caller',
+          status: 'failed',
+        }),
+      })
+    );
   });
 
   // --- Log and summary resource limits --------------------------------------
@@ -678,7 +740,6 @@ describe('ActRunner', () => {
     });
   });
 
-
   it('autoDetect() returns undefined when configured, known paths, and shell lookup all fail', async () => {
     const update = jest.fn();
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
@@ -700,15 +761,16 @@ describe('ActRunner', () => {
     fs.writeFileSync(workflowPath, 'name: CI\n', 'utf-8');
 
     try {
-      const args = (runner as any).buildArgs({
-        workflowPath,
-        workspaceRoot: project,
-      }, 'fallback/image', root);
+      const args = (runner as any).buildArgs(
+        {
+          workflowPath,
+          workspaceRoot: project,
+        },
+        'fallback/image',
+        root
+      );
 
-      expect(args).toEqual(expect.arrayContaining([
-        '-W',
-        'project/.github/workflows/ci.yml',
-      ]));
+      expect(args).toEqual(expect.arrayContaining(['-W', 'project/.github/workflows/ci.yml']));
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
@@ -718,9 +780,7 @@ describe('ActRunner', () => {
     const find = new EventEmitter() as any;
     find.stdout = new EventEmitter();
     const rm = new EventEmitter() as any;
-    (spawn as jest.Mock)
-      .mockReturnValueOnce(find)
-      .mockReturnValueOnce(rm);
+    (spawn as jest.Mock).mockReturnValueOnce(find).mockReturnValueOnce(rm);
 
     const cleanup = (runner as any).cleanupActContainers();
     find.stdout.emit('data', Buffer.from('abc123\n'));
@@ -750,5 +810,4 @@ describe('ActRunner', () => {
 
     expect(runner.getLogs()).toEqual(['original']);
   });
-
 });

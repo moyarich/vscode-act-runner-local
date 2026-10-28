@@ -75,13 +75,20 @@ export class EnvManager {
       : resolved;
   }
 
-  async rememberFilePath(workspaceRoot: string, key: FileConfigKey, filePath: string): Promise<void> {
+  async rememberFilePath(
+    workspaceRoot: string,
+    key: FileConfigKey,
+    filePath: string
+  ): Promise<void> {
     const relativeOrAbsolute = this.toWorkspaceRelative(workspaceRoot, filePath);
     const current = this.fileOverrides.get(workspaceRoot) ?? {};
     current[key] = relativeOrAbsolute;
     this.fileOverrides.set(workspaceRoot, current);
 
-    await this.context?.workspaceState.update(this.workspaceStateKey(workspaceRoot, key), relativeOrAbsolute);
+    await this.context?.workspaceState.update(
+      this.workspaceStateKey(workspaceRoot, key),
+      relativeOrAbsolute
+    );
 
     try {
       await vscode.workspace
@@ -108,13 +115,23 @@ export class EnvManager {
 
   private getSelectedFilePath(workspaceRoot: string, key: FileConfigKey): string | undefined {
     const override = this.fileOverrides.get(workspaceRoot)?.[key];
-    const stored = this.context?.workspaceState.get<string>(this.workspaceStateKey(workspaceRoot, key));
-    return override ?? stored ? this.resolveWorkspacePath(workspaceRoot, override ?? stored!) : undefined;
+    const stored = this.context?.workspaceState.get<string>(
+      this.workspaceStateKey(workspaceRoot, key)
+    );
+    return (override ?? stored)
+      ? this.resolveWorkspacePath(workspaceRoot, override ?? stored!)
+      : undefined;
   }
 
-  private getConfiguredFilePath(workspaceRoot: string, key: FileConfigKey, defaultFile: string): string {
+  private getConfiguredFilePath(
+    workspaceRoot: string,
+    key: FileConfigKey,
+    defaultFile: string
+  ): string {
     const override = this.fileOverrides.get(workspaceRoot)?.[key];
-    const stored = this.context?.workspaceState.get<string>(this.workspaceStateKey(workspaceRoot, key));
+    const stored = this.context?.workspaceState.get<string>(
+      this.workspaceStateKey(workspaceRoot, key)
+    );
     const config = vscode.workspace.getConfiguration('actRunner');
     const configured = config.get<string>(key) ?? defaultFile;
     return this.resolveWorkspacePath(workspaceRoot, override ?? stored ?? configured);
@@ -132,9 +149,7 @@ export class EnvManager {
     const gitignorePath = path.join(workspaceRoot, '.gitignore');
     const entries = ['.secrets', '.env.local', '.env.production'];
 
-    let content = fs.existsSync(gitignorePath)
-      ? fs.readFileSync(gitignorePath, 'utf-8')
-      : '';
+    let content = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf-8') : '';
 
     const missing = entries.filter((entry) => !content.includes(entry));
     if (missing.length === 0) return;
@@ -213,7 +228,10 @@ function normalizeQuotedValue(valueLines: string[], quote: string): string {
   const normalized = [...valueLines];
   if (normalized[0] === '') normalized.shift();
   if (normalized[normalized.length - 1] === '') normalized.pop();
-  return normalized.join('\n').replace(new RegExp(`\\\\${escapeRegExp(quote)}`, 'g'), quote).replace(/\\\\/g, '\\');
+  return normalized
+    .join('\n')
+    .replace(new RegExp(`\\\\${escapeRegExp(quote)}`, 'g'), quote)
+    .replace(/\\\\/g, '\\');
 }
 
 function escapeRegExp(value: string): string {

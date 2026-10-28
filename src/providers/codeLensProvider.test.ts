@@ -54,7 +54,8 @@ describe('WorkflowCodeLensProvider', () => {
     const provider = new WorkflowCodeLensProvider();
     const document = {
       uri: { fsPath: '/repo/.github/workflows/ci.yaml' },
-      getText: () => 'name: CI\njobs:\n  build:\n    runs-on: ubuntu-latest\n  test:\n    runs-on: ubuntu-latest\n',
+      getText: () =>
+        'name: CI\njobs:\n  build:\n    runs-on: ubuntu-latest\n  test:\n    runs-on: ubuntu-latest\n',
     } as unknown as vscode.TextDocument;
 
     const lenses = provider.provideCodeLenses(document);
@@ -95,7 +96,8 @@ describe('WorkflowCodeLensProvider', () => {
     const lenses = provider.provideCodeLenses(document);
 
     expect(lenses).toHaveLength(4);
-    expect(lenses.some((lens: vscode.CodeLens) => lens.command?.command === 'actRunner.runJob')).toBe(false);
+    expect(
+      lenses.some((lens: vscode.CodeLens) => lens.command?.command === 'actRunner.runJob')
+    ).toBe(false);
   });
-
 });

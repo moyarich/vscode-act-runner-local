@@ -92,7 +92,9 @@ describe('ExecutionEngine', () => {
   });
 
   it('trunca logSummary grande antes de salvar no histórico', async () => {
-    (actRunner.getLogs as jest.Mock).mockReturnValue(Array.from({ length: 1200 }, (_, index) => `linha ${index}`));
+    (actRunner.getLogs as jest.Mock).mockReturnValue(
+      Array.from({ length: 1200 }, (_, index) => `linha ${index}`)
+    );
 
     await engine.run({ workflowPath: '.github/workflows/ci.yml', workspaceRoot: tempRoot });
 
@@ -136,7 +138,9 @@ describe('ExecutionEngine', () => {
 
   it('usa arquivo customizado configurado como varFile', async () => {
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
-      get: jest.fn((key: string, defaultValue: unknown) => key === 'varFile' ? 'my.variables' : defaultValue),
+      get: jest.fn((key: string, defaultValue: unknown) =>
+        key === 'varFile' ? 'my.variables' : defaultValue
+      ),
       update: jest.fn().mockResolvedValue(undefined),
     });
     const customVarsPath = path.join(tempRoot, 'my.variables');
@@ -160,7 +164,11 @@ describe('ExecutionEngine', () => {
     fs.writeFileSync(varsPath, 'RUNNER=ubuntu-latest\n');
 
     try {
-      await engine.run({ workflowPath: '.github/workflows/ci.yml', workspaceRoot: apiRoot, actCwd: repoRoot });
+      await engine.run({
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: apiRoot,
+        actCwd: repoRoot,
+      });
 
       expect(actRunner.run).toHaveBeenCalledWith(
         expect.any(String),
@@ -180,7 +188,9 @@ describe('ExecutionEngine', () => {
     const apiRoot = path.join(repoRoot, 'Sandbox', 'api');
     fs.mkdirSync(apiRoot, { recursive: true });
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
-      get: jest.fn((key: string, defaultValue: unknown) => key === 'varFile' ? 'config/local.variables' : defaultValue),
+      get: jest.fn((key: string, defaultValue: unknown) =>
+        key === 'varFile' ? 'config/local.variables' : defaultValue
+      ),
       update: jest.fn().mockResolvedValue(undefined),
     });
     const customVarsPath = path.join(apiRoot, 'config', 'local.variables');
@@ -188,7 +198,11 @@ describe('ExecutionEngine', () => {
     fs.writeFileSync(customVarsPath, 'RUNNER=ubuntu-latest\n');
 
     try {
-      await engine.run({ workflowPath: '.github/workflows/ci.yml', workspaceRoot: apiRoot, actCwd: repoRoot });
+      await engine.run({
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: apiRoot,
+        actCwd: repoRoot,
+      });
 
       expect(actRunner.run).toHaveBeenCalledWith(
         expect.any(String),
@@ -211,7 +225,11 @@ describe('ExecutionEngine', () => {
     fs.writeFileSync(secretsPath, 'TOKEN=local-secret\n');
 
     try {
-      await engine.run({ workflowPath: '.github/workflows/ci.yml', workspaceRoot: apiRoot, actCwd: repoRoot });
+      await engine.run({
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: apiRoot,
+        actCwd: repoRoot,
+      });
 
       expect(actRunner.run).toHaveBeenCalledWith(
         expect.any(String),
@@ -228,7 +246,9 @@ describe('ExecutionEngine', () => {
 
   it('usa arquivo customizado configurado como secretsFile', async () => {
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
-      get: jest.fn((key: string, defaultValue: unknown) => key === 'secretsFile' ? 'config/local.secrets' : defaultValue),
+      get: jest.fn((key: string, defaultValue: unknown) =>
+        key === 'secretsFile' ? 'config/local.secrets' : defaultValue
+      ),
       update: jest.fn().mockResolvedValue(undefined),
     });
     const customSecretsPath = path.join(tempRoot, 'config', 'local.secrets');
@@ -245,12 +265,14 @@ describe('ExecutionEngine', () => {
     );
   });
 
-
   it('prevents a second execution while one is already running', async () => {
     let resolveRun!: () => void;
-    (actRunner.run as jest.Mock).mockImplementation(() => new Promise<void>((resolve) => {
-      resolveRun = resolve;
-    }));
+    (actRunner.run as jest.Mock).mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRun = resolve;
+        })
+    );
 
     const first = engine.run({ workflowPath: '.github/workflows/ci.yml', workspaceRoot: tempRoot });
 
@@ -319,9 +341,7 @@ describe('ExecutionEngine', () => {
         payload: expect.objectContaining({ error: 'spawn ENOENT' }),
       })
     );
-    expect(historyService.save).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'failed' })
-    );
+    expect(historyService.save).toHaveBeenCalledWith(expect.objectContaining({ status: 'failed' }));
     expect(engine.isRunning()).toBe(false);
   });
 
@@ -336,16 +356,17 @@ describe('ExecutionEngine', () => {
     expect(eventBus.dispatch).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'execution:error' })
     );
-    expect(historyService.save).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'failed' })
-    );
+    expect(historyService.save).toHaveBeenCalledWith(expect.objectContaining({ status: 'failed' }));
   });
 
   it('stops an active execution and emits a cancelled execution:end event', async () => {
     let resolveRun!: () => void;
-    (actRunner.run as jest.Mock).mockImplementation(() => new Promise<void>((resolve) => {
-      resolveRun = resolve;
-    }));
+    (actRunner.run as jest.Mock).mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRun = resolve;
+        })
+    );
 
     const running = engine.run({
       workflowPath: '.github/workflows/ci.yml',
@@ -440,7 +461,6 @@ describe('ExecutionEngine', () => {
     expect(actRunner.run).not.toHaveBeenCalled();
   });
 
-
   it('accepts a browsed act executable and persists it before running', async () => {
     const update = jest.fn().mockResolvedValue(undefined);
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
@@ -460,7 +480,9 @@ describe('ExecutionEngine', () => {
 
     expect(result).toEqual(expect.any(String));
     expect(update).toHaveBeenCalledWith('actPath', '/tools/act', vscode.ConfigurationTarget.Global);
-    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('/tools/act'));
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      expect.stringContaining('/tools/act')
+    );
     expect(actRunner.run).toHaveBeenCalled();
   });
 
@@ -471,10 +493,12 @@ describe('ExecutionEngine', () => {
     (vscode.window.showErrorMessage as jest.Mock).mockResolvedValue('Browse for file...');
     (vscode.window.showOpenDialog as jest.Mock).mockResolvedValue([{ fsPath: '/bad/act' }]);
 
-    await expect(engine.run({
-      workflowPath: '.github/workflows/ci.yml',
-      workspaceRoot: tempRoot,
-    })).resolves.toBe('cancelled');
+    await expect(
+      engine.run({
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: tempRoot,
+      })
+    ).resolves.toBe('cancelled');
 
     expect(actRunner.run).not.toHaveBeenCalled();
   });
@@ -484,10 +508,12 @@ describe('ExecutionEngine', () => {
     (vscode.window.showErrorMessage as jest.Mock).mockResolvedValue('Browse for file...');
     (vscode.window.showOpenDialog as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(engine.run({
-      workflowPath: '.github/workflows/ci.yml',
-      workspaceRoot: tempRoot,
-    })).resolves.toBe('cancelled');
+    await expect(
+      engine.run({
+        workflowPath: '.github/workflows/ci.yml',
+        workspaceRoot: tempRoot,
+      })
+    ).resolves.toBe('cancelled');
   });
 
   it('accepts a manually entered act executable and trims the configured value', async () => {
@@ -524,5 +550,4 @@ describe('ExecutionEngine', () => {
     expect(saved.logSummary).toContain('...[log summary truncated to keep history lightweight]');
     expect(saved.logSummary.length).toBeLessThan(81_000);
   });
-
 });

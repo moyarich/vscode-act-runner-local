@@ -8,10 +8,6 @@ export default defineConfig({
     ui: 'tdd',
     timeout: 30_000,
   },
-  launchArgs: [
-    '--disable-extensions',
-    '--disable-gpu',
-    '--disable-workspace-trust',
-  ],
+  launchArgs: ['--disable-extensions', '--disable-gpu', '--disable-workspace-trust'],
   extensionDevelopmentPath: '.',
 });

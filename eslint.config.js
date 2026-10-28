@@ -27,5 +27,5 @@ module.exports = tseslint.config(
       '@typescript-eslint/explicit-function-return-type': 'off',
       'no-console': 'warn',
     },
-  },
+  }
 );

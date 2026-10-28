@@ -4,17 +4,23 @@ import * as path from 'path';
 import { findMissingLocalReusableJobs } from './reusableWorkflowRefs';
 import type { JobDefinition } from '../types/workflow.types';
 
-const job = (id: string, uses: string): JobDefinition =>
-  ({ id, uses, steps: [], needs: [] });
+const job = (id: string, uses: string): JobDefinition => ({ id, uses, steps: [], needs: [] });
 
 describe('findMissingLocalReusableJobs', () => {
   let root: string;
-  beforeEach(() => { root = fs.mkdtempSync(path.join(os.tmpdir(), 'act-reusable-')); });
-  afterEach(() => { fs.rmSync(root, { recursive: true, force: true }); });
+  beforeEach(() => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'act-reusable-'));
+  });
+  afterEach(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+  });
 
   it('does not require remote reusable workflows to exist locally', () => {
     const jobs = {
-      format: job('format', 'moyarich/reusable-workflows/.github/workflows/reusable_prettier.yml@main'),
+      format: job(
+        'format',
+        'moyarich/reusable-workflows/.github/workflows/reusable_prettier.yml@main'
+      ),
       build: job('build', 'other/repository/.github/workflows/build.yaml@v1'),
     };
     expect(findMissingLocalReusableJobs(jobs, root)).toEqual([]);
@@ -27,7 +33,10 @@ describe('findMissingLocalReusableJobs', () => {
     const jobs = {
       build: job('build', './.github/workflows/build.yml'),
       missing: job('missing', './.github/workflows/missing.yml'),
-      remote: job('remote', 'moyarich/reusable-workflows/.github/workflows/reusable_prettier.yml@main'),
+      remote: job(
+        'remote',
+        'moyarich/reusable-workflows/.github/workflows/reusable_prettier.yml@main'
+      ),
     };
     expect(findMissingLocalReusableJobs(jobs, root).map(([id]) => id)).toEqual(['missing']);
   });

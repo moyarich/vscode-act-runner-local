@@ -3,7 +3,7 @@ import webpack from 'webpack';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const createConfig = require('../webpack.webview.config.js') as (
   env: unknown,
-  argv: { mode?: string },
+  argv: { mode?: string }
 ) => webpack.Configuration;
 
 function getNodeEnvDefinition(config: webpack.Configuration): string | undefined {
@@ -12,9 +12,11 @@ function getNodeEnvDefinition(config: webpack.Configuration): string | undefined
     return undefined;
   }
 
-  const definitions = (plugin as webpack.DefinePlugin & {
-    definitions?: { 'process.env.NODE_ENV'?: string };
-  }).definitions;
+  const definitions = (
+    plugin as webpack.DefinePlugin & {
+      definitions?: { 'process.env.NODE_ENV'?: string };
+    }
+  ).definitions;
   return definitions?.['process.env.NODE_ENV'];
 }
 

@@ -65,12 +65,12 @@ export interface SummaryUpdatePayload {
 // Discriminated union — todos os eventos do backend
 export type ActEvent =
   | { type: 'execution:start'; payload: ExecutionStartPayload }
-  | { type: 'job:update';      payload: JobUpdatePayload }
-  | { type: 'step:update';     payload: StepUpdatePayload }
-  | { type: 'log';             payload: LogPayload }
-  | { type: 'execution:end';   payload: ExecutionEndPayload }
+  | { type: 'job:update'; payload: JobUpdatePayload }
+  | { type: 'step:update'; payload: StepUpdatePayload }
+  | { type: 'log'; payload: LogPayload }
+  | { type: 'execution:end'; payload: ExecutionEndPayload }
   | { type: 'execution:error'; payload: ExecutionErrorPayload }
-  | { type: 'summary:update';  payload: SummaryUpdatePayload };
+  | { type: 'summary:update'; payload: SummaryUpdatePayload };
 
 export type ActEventType = ActEvent['type'];
 
@@ -80,22 +80,34 @@ export type PayloadOf<T extends ActEventType> = Extract<ActEvent, { type: T }>['
 // Mensagens trafegadas entre Extension Host e Webview
 export type WebviewMessage =
   | ActEvent
-  | { type: 'navigate';       payload: { view: string } }
+  | { type: 'navigate'; payload: { view: string } }
   | { type: 'state:snapshot'; payload: Record<string, unknown> };
 
 // Comandos enviados da Webview para o Extension Host
 export type WebviewCommand =
-  | { type: 'command:run';       payload: { workflowPath?: string; jobId?: string; dryRun?: boolean; workflowInputs?: Record<string, string | number | boolean>; workflowRef?: string } }
-  | { type: 'command:quickRun';  payload: { workflowPath: string } }
-  | { type: 'command:stop';      payload: { executionId: string } }
-  | { type: 'command:rerun';     payload: { executionId: string } }
+  | {
+      type: 'command:run';
+      payload: {
+        workflowPath?: string;
+        jobId?: string;
+        dryRun?: boolean;
+        workflowInputs?: Record<string, string | number | boolean>;
+        workflowRef?: string;
+      };
+    }
+  | { type: 'command:quickRun'; payload: { workflowPath: string } }
+  | { type: 'command:stop'; payload: { executionId: string } }
+  | { type: 'command:rerun'; payload: { executionId: string } }
   | { type: 'command:restoreHistoryRepository'; payload: { executionId: string } }
   | { type: 'command:selectProject'; payload: Record<string, never> }
   | { type: 'command:locateAct'; payload: Record<string, never> }
-  | { type: 'command:loadEnv';      payload: { tab: string; filePath?: string } }
+  | { type: 'command:loadEnv'; payload: { tab: string; filePath?: string } }
   | { type: 'command:selectEnvFile'; payload: { tab: string } }
-  | { type: 'command:saveEnv';      payload: { tab: string; rows: { key: string; value: string }[]; filePath?: string } }
+  | {
+      type: 'command:saveEnv';
+      payload: { tab: string; rows: { key: string; value: string }[]; filePath?: string };
+    }
   | { type: 'command:deleteHistory'; payload: { executionId: string } }
   | { type: 'command:deleteHistories'; payload: { executionIds: string[] } }
   | { type: 'command:refreshHistory'; payload: Record<string, never> }
-  | { type: 'state:request';        payload: Record<string, never> };
+  | { type: 'state:request'; payload: Record<string, never> };

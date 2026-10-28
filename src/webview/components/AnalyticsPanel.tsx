@@ -27,8 +27,15 @@ export function AnalyticsPanel() {
   const [job, setJob] = useState('all');
   const [status, setStatus] = useState('all');
 
-  const workflows = useMemo(() => unique(history.map((record) => record.workflowName).filter(Boolean)), [history]);
-  const jobNames = useMemo(() => unique(history.flatMap((record) => record.jobs.map((item) => item.jobName || item.jobId))), [history]);
+  const workflows = useMemo(
+    () => unique(history.map((record) => record.workflowName).filter(Boolean)),
+    [history]
+  );
+  const jobNames = useMemo(
+    () =>
+      unique(history.flatMap((record) => record.jobs.map((item) => item.jobName || item.jobId))),
+    [history]
+  );
 
   const records = useMemo(() => {
     const cutoff = getCutoff(timeframe);
@@ -36,7 +43,8 @@ export function AnalyticsPanel() {
       if (cutoff && new Date(record.startedAt).getTime() < cutoff) return false;
       if (workflow !== 'all' && record.workflowName !== workflow) return false;
       if (status !== 'all' && record.status !== status) return false;
-      if (job !== 'all' && !record.jobs.some((item) => (item.jobName || item.jobId) === job)) return false;
+      if (job !== 'all' && !record.jobs.some((item) => (item.jobName || item.jobId) === job))
+        return false;
       return true;
     });
   }, [history, timeframe, workflow, job, status]);
@@ -62,7 +70,11 @@ export function AnalyticsPanel() {
         </div>
         <label style={styles.timeframe}>
           <span>Timeframe:</span>
-          <select value={timeframe} onChange={(event) => setTimeframe(event.target.value as Timeframe)} style={styles.select}>
+          <select
+            value={timeframe}
+            onChange={(event) => setTimeframe(event.target.value as Timeframe)}
+            style={styles.select}
+          >
             <option value="7">Past 7 days</option>
             <option value="30">Past 30 days</option>
             <option value="90">Past 90 days</option>
@@ -72,42 +84,97 @@ export function AnalyticsPanel() {
       </div>
 
       <div style={styles.filterbar}>
-        <select value={workflow} onChange={(event) => setWorkflow(event.target.value)} style={styles.filterSelect}>
+        <select
+          value={workflow}
+          onChange={(event) => setWorkflow(event.target.value)}
+          style={styles.filterSelect}
+        >
           <option value="all">Workflow</option>
-          {workflows.map((item) => <option key={item} value={item}>{item}</option>)}
+          {workflows.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
         </select>
-        <select value={job} onChange={(event) => setJob(event.target.value)} style={styles.filterSelect}>
+        <select
+          value={job}
+          onChange={(event) => setJob(event.target.value)}
+          style={styles.filterSelect}
+        >
           <option value="all">Job</option>
-          {jobNames.map((item) => <option key={item} value={item}>{item}</option>)}
+          {jobNames.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
         </select>
-        <select value={status} onChange={(event) => setStatus(event.target.value)} style={styles.filterSelect}>
+        <select
+          value={status}
+          onChange={(event) => setStatus(event.target.value)}
+          style={styles.filterSelect}
+        >
           <option value="all">{t('Status')}</option>
           <option value="success">Success</option>
           <option value="failed">Failed</option>
           <option value="cancelled">Cancelled</option>
         </select>
-        <button type="button" onClick={clearFilters} style={styles.clearBtn}>clear all filters</button>
+        <button type="button" onClick={clearFilters} style={styles.clearBtn}>
+          clear all filters
+        </button>
       </div>
 
       {history.length === 0 ? (
-        <div style={styles.empty}>{t('No history available yet. Run workflows to populate Analytics.')}</div>
+        <div style={styles.empty}>
+          {t('No history available yet. Run workflows to populate Analytics.')}
+        </div>
       ) : (
         <div style={styles.content}>
           <section>
             <h2 style={styles.sectionTitle}>Overview</h2>
             <div style={styles.metricGrid}>
-              <MetricCard label="Average duration" value={formatDuration(metrics.averageDuration)} />
-              <MetricCard label="Average failure rate" value={`${metrics.failureRate.toFixed(1)}%`} sub={`${metrics.failedRuns} of ${metrics.totalRuns} jobs`} />
-              <MetricCard label="Total minutes" value={`${formatNumber(metrics.totalMinutes)} min`} />
-              <MetricCard label="Billable minutes" value={`${formatNumber(metrics.billableMinutes)} min`} />
-              <MetricCard label="Est. time saved" value={`${formatNumber(metrics.estimatedSavedMinutes)} min`} sub="vs GitHub-hosted" />
-              <MetricCard label="Est. cost savings" value={`$${metrics.estimatedCostSavings.toFixed(2)}`} sub="vs GitHub-hosted" />
+              <MetricCard
+                label="Average duration"
+                value={formatDuration(metrics.averageDuration)}
+              />
+              <MetricCard
+                label="Average failure rate"
+                value={`${metrics.failureRate.toFixed(1)}%`}
+                sub={`${metrics.failedRuns} of ${metrics.totalRuns} jobs`}
+              />
+              <MetricCard
+                label="Total minutes"
+                value={`${formatNumber(metrics.totalMinutes)} min`}
+              />
+              <MetricCard
+                label="Billable minutes"
+                value={`${formatNumber(metrics.billableMinutes)} min`}
+              />
+              <MetricCard
+                label="Est. time saved"
+                value={`${formatNumber(metrics.estimatedSavedMinutes)} min`}
+                sub="vs GitHub-hosted"
+              />
+              <MetricCard
+                label="Est. cost savings"
+                value={`$${metrics.estimatedCostSavings.toFixed(2)}`}
+                sub="vs GitHub-hosted"
+              />
             </div>
           </section>
 
           <section style={styles.chartGrid}>
-            <ChartPanel title="Builds Over Time" buckets={buckets} mode="count" averageLabel={`Average: ${Math.round(metrics.averageBuildsPerBucket)} jobs`} />
-            <ChartPanel title="Minutes Over Time" buckets={buckets} mode="minutes" averageLabel={`Average: ${Math.round(metrics.averageMinutesPerBucket)} min`} />
+            <ChartPanel
+              title="Builds Over Time"
+              buckets={buckets}
+              mode="count"
+              averageLabel={`Average: ${Math.round(metrics.averageBuildsPerBucket)} jobs`}
+            />
+            <ChartPanel
+              title="Minutes Over Time"
+              buckets={buckets}
+              mode="minutes"
+              averageLabel={`Average: ${Math.round(metrics.averageMinutesPerBucket)} min`}
+            />
           </section>
 
           <section style={styles.bottomGrid}>
@@ -129,14 +196,22 @@ export function AnalyticsPanel() {
             <div style={styles.panel}>
               <h2 style={styles.sectionTitle}>Top 5 Slowest Jobs</h2>
               <div style={styles.slowestList}>
-                {slowestJobs.length > 0 ? slowestJobs.map((item) => (
-                  <div key={`${item.workflowName}-${item.jobName}`} style={styles.slowestItem}>
-                    <div style={styles.slowestName}>{item.workflowName}/{item.jobName}</div>
-                    <div style={styles.slowestSub}>{item.runs} runs</div>
-                    <div style={styles.slowestDuration}>{formatDuration(item.averageDuration)}</div>
-                    <div style={styles.slowestSubRight}>avg duration</div>
-                  </div>
-                )) : <div style={styles.muted}>{t('No jobs with recorded duration.')}</div>}
+                {slowestJobs.length > 0 ? (
+                  slowestJobs.map((item) => (
+                    <div key={`${item.workflowName}-${item.jobName}`} style={styles.slowestItem}>
+                      <div style={styles.slowestName}>
+                        {item.workflowName}/{item.jobName}
+                      </div>
+                      <div style={styles.slowestSub}>{item.runs} runs</div>
+                      <div style={styles.slowestDuration}>
+                        {formatDuration(item.averageDuration)}
+                      </div>
+                      <div style={styles.slowestSubRight}>avg duration</div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={styles.muted}>{t('No jobs with recorded duration.')}</div>
+                )}
               </div>
             </div>
           </section>
@@ -156,11 +231,27 @@ function MetricCard({ label, value, sub }: { label: string; value: string; sub?:
   );
 }
 
-function ChartPanel({ title, buckets, mode, averageLabel }: { title: string; buckets: DayBucket[]; mode: 'count' | 'minutes'; averageLabel: string }) {
-  const max = Math.max(1, ...buckets.map((bucket) => mode === 'count' ? bucket.success + bucket.failed : bucket.minutes));
+function ChartPanel({
+  title,
+  buckets,
+  mode,
+  averageLabel,
+}: {
+  title: string;
+  buckets: DayBucket[];
+  mode: 'count' | 'minutes';
+  averageLabel: string;
+}) {
+  const max = Math.max(
+    1,
+    ...buckets.map((bucket) => (mode === 'count' ? bucket.success + bucket.failed : bucket.minutes))
+  );
   const successTotal = buckets.reduce((sum, bucket) => sum + bucket.success, 0);
   const failedTotal = buckets.reduce((sum, bucket) => sum + bucket.failed, 0);
-  const valueTotal = mode === 'count' ? successTotal : Math.round(buckets.reduce((sum, bucket) => sum + bucket.minutes, 0));
+  const valueTotal =
+    mode === 'count'
+      ? successTotal
+      : Math.round(buckets.reduce((sum, bucket) => sum + bucket.minutes, 0));
 
   return (
     <div style={styles.chartPanel}>
@@ -172,12 +263,29 @@ function ChartPanel({ title, buckets, mode, averageLabel }: { title: string; buc
         <div style={styles.barChart}>
           {buckets.map((bucket) => {
             const total = mode === 'count' ? bucket.success + bucket.failed : bucket.minutes;
-            const successHeight = total > 0 ? Math.max(2, ((mode === 'count' ? bucket.success : Math.max(0, bucket.minutes - bucket.failed)) / max) * 100) : 1;
-            const failedHeight = total > 0 ? Math.max(bucket.failed > 0 ? 2 : 0, (bucket.failed / max) * 100) : 0;
+            const successHeight =
+              total > 0
+                ? Math.max(
+                    2,
+                    ((mode === 'count'
+                      ? bucket.success
+                      : Math.max(0, bucket.minutes - bucket.failed)) /
+                      max) *
+                      100
+                  )
+                : 1;
+            const failedHeight =
+              total > 0 ? Math.max(bucket.failed > 0 ? 2 : 0, (bucket.failed / max) * 100) : 0;
             return (
-              <div key={bucket.label} title={`${bucket.label}: ${mode === 'count' ? total : `${Math.round(total)} min`}`} style={styles.barSlot}>
+              <div
+                key={bucket.label}
+                title={`${bucket.label}: ${mode === 'count' ? total : `${Math.round(total)} min`}`}
+                style={styles.barSlot}
+              >
                 <div style={{ ...styles.successBar, height: `${successHeight}%` }} />
-                {bucket.failed > 0 && <div style={{ ...styles.failedBar, height: `${failedHeight}%` }} />}
+                {bucket.failed > 0 && (
+                  <div style={{ ...styles.failedBar, height: `${failedHeight}%` }} />
+                )}
               </div>
             );
           })}
@@ -185,8 +293,13 @@ function ChartPanel({ title, buckets, mode, averageLabel }: { title: string; buc
         <div style={styles.successErrors}>
           <div style={styles.successErrorsTitle}>Success & Errors</div>
           <div style={styles.successErrorsSub}>by day</div>
-          <div style={styles.successNumber}>{formatNumber(valueTotal)} <span style={styles.successText}>{mode === 'count' ? 'successful' : 'minutes'}</span></div>
-          <div style={styles.failedNumber}>{failedTotal} <span style={styles.failedText}>errored</span></div>
+          <div style={styles.successNumber}>
+            {formatNumber(valueTotal)}{' '}
+            <span style={styles.successText}>{mode === 'count' ? 'successful' : 'minutes'}</span>
+          </div>
+          <div style={styles.failedNumber}>
+            {failedTotal} <span style={styles.failedText}>errored</span>
+          </div>
         </div>
       </div>
     </div>
@@ -196,7 +309,17 @@ function ChartPanel({ title, buckets, mode, averageLabel }: { title: string; buc
 function flattenJobs(records: ExecutionRecord[], selectedJob: string): JobSample[] {
   return records.flatMap((record): JobSample[] => {
     if (record.jobs.length === 0) {
-      return record.duration ? [{ workflowName: record.workflowName, jobName: record.jobId ?? 'all jobs', status: record.status, duration: record.duration, startedAt: record.startedAt }] : [];
+      return record.duration
+        ? [
+            {
+              workflowName: record.workflowName,
+              jobName: record.jobId ?? 'all jobs',
+              status: record.status,
+              duration: record.duration,
+              startedAt: record.startedAt,
+            },
+          ]
+        : [];
     }
     return record.jobs
       .filter((job) => selectedJob === 'all' || (job.jobName || job.jobId) === selectedJob)
@@ -213,7 +336,8 @@ function flattenJobs(records: ExecutionRecord[], selectedJob: string): JobSample
 
 function getJobDuration(job: JobResult, record: ExecutionRecord): number {
   if (job.duration && job.duration > 0) return job.duration;
-  if (job.startedAt && job.completedAt) return Math.max(0, new Date(job.completedAt).getTime() - new Date(job.startedAt).getTime());
+  if (job.startedAt && job.completedAt)
+    return Math.max(0, new Date(job.completedAt).getTime() - new Date(job.startedAt).getTime());
   if (record.jobs.length === 1 && record.duration) return record.duration;
   return 0;
 }
@@ -221,9 +345,12 @@ function getJobDuration(job: JobResult, record: ExecutionRecord): number {
 function buildMetrics(records: ExecutionRecord[], jobs: JobSample[]) {
   const totalRuns = records.length;
   const failedRuns = records.filter((record) => record.status === 'failed').length;
-  const totalMs = jobs.reduce((sum, job) => sum + job.duration, 0) || records.reduce((sum, record) => sum + (record.duration ?? 0), 0);
+  const totalMs =
+    jobs.reduce((sum, job) => sum + job.duration, 0) ||
+    records.reduce((sum, record) => sum + (record.duration ?? 0), 0);
   const totalMinutes = Math.round(totalMs / 60000);
-  const averageDuration = jobs.length > 0 ? totalMs / jobs.length : totalRuns > 0 ? totalMs / totalRuns : 0;
+  const averageDuration =
+    jobs.length > 0 ? totalMs / jobs.length : totalRuns > 0 ? totalMs / totalRuns : 0;
   const failureRate = totalRuns > 0 ? (failedRuns / totalRuns) * 100 : 0;
   const estimatedSavedMinutes = Math.round(totalMinutes * 0.3);
   return {
@@ -279,10 +406,18 @@ function buildDistribution(jobs: JobSample[]) {
 }
 
 function buildSlowestJobs(jobs: JobSample[]) {
-  const byName = new Map<string, { workflowName: string; jobName: string; total: number; runs: number }>();
+  const byName = new Map<
+    string,
+    { workflowName: string; jobName: string; total: number; runs: number }
+  >();
   jobs.forEach((job) => {
     const key = `${job.workflowName}/${job.jobName}`;
-    const current = byName.get(key) ?? { workflowName: job.workflowName, jobName: job.jobName, total: 0, runs: 0 };
+    const current = byName.get(key) ?? {
+      workflowName: job.workflowName,
+      jobName: job.jobName,
+      total: 0,
+      runs: 0,
+    };
     current.total += job.duration;
     current.runs += 1;
     byName.set(key, current);
@@ -322,30 +457,115 @@ function formatNumber(value: number): string {
 
 const styles: Record<string, React.CSSProperties> = {
   page: { flex: 1, overflow: 'auto', background: '#0d1117', color: '#c9d1d9' },
-  topbar: { display: 'flex', alignItems: 'center', minHeight: 48, borderBottom: '1px solid #21262d', background: '#0d1117', padding: '0 20px' },
+  topbar: {
+    display: 'flex',
+    alignItems: 'center',
+    minHeight: 48,
+    borderBottom: '1px solid #21262d',
+    background: '#0d1117',
+    padding: '0 20px',
+  },
   brand: { color: '#e6edf3', fontWeight: 600, whiteSpace: 'nowrap', fontSize: 16 },
   tabs: { display: 'flex', gap: 2, alignItems: 'stretch', height: 42 },
-  tabActive: { display: 'flex', alignItems: 'center', padding: '0 14px', color: '#e6edf3', fontWeight: 600, borderBottom: '2px solid #f78166' },
-  timeframe: { marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, paddingRight: 12, color: '#8b949e', fontSize: 12 },
-  select: { background: '#0d1117', color: '#c9d1d9', border: '1px solid #30363d', borderRadius: 6, padding: '5px 28px 5px 10px', fontSize: 12 },
-  filterbar: { display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', borderBottom: '1px solid #21262d', background: '#0d1117' },
-  filterSelect: { background: '#0d1117', color: '#c9d1d9', border: '1px solid #30363d', borderRadius: 6, padding: '6px 28px 6px 10px', fontSize: 12 },
-  clearBtn: { border: '1px solid #30363d', borderRadius: 6, background: '#161b22', color: '#c9d1d9', padding: '6px 10px', fontSize: 11, cursor: 'pointer' },
+  tabActive: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 14px',
+    color: '#e6edf3',
+    fontWeight: 600,
+    borderBottom: '2px solid #f78166',
+  },
+  timeframe: {
+    marginLeft: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    paddingRight: 12,
+    color: '#8b949e',
+    fontSize: 12,
+  },
+  select: {
+    background: '#0d1117',
+    color: '#c9d1d9',
+    border: '1px solid #30363d',
+    borderRadius: 6,
+    padding: '5px 28px 5px 10px',
+    fontSize: 12,
+  },
+  filterbar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '12px 20px',
+    borderBottom: '1px solid #21262d',
+    background: '#0d1117',
+  },
+  filterSelect: {
+    background: '#0d1117',
+    color: '#c9d1d9',
+    border: '1px solid #30363d',
+    borderRadius: 6,
+    padding: '6px 28px 6px 10px',
+    fontSize: 12,
+  },
+  clearBtn: {
+    border: '1px solid #30363d',
+    borderRadius: 6,
+    background: '#161b22',
+    color: '#c9d1d9',
+    padding: '6px 10px',
+    fontSize: 11,
+    cursor: 'pointer',
+  },
   content: { padding: '20px 24px 28px', display: 'flex', flexDirection: 'column', gap: 24 },
   empty: { padding: 48, color: '#8b949e', textAlign: 'center' },
   sectionTitle: { margin: 0, marginBottom: 12, color: '#e6edf3', fontSize: 13, fontWeight: 700 },
   metricGrid: { display: 'grid', gridTemplateColumns: 'repeat(6, minmax(150px, 1fr))', gap: 12 },
-  metricCard: { minHeight: 72, padding: '12px 14px', border: '1px solid #30363d', borderRadius: 6, background: '#161b22' },
+  metricCard: {
+    minHeight: 72,
+    padding: '12px 14px',
+    border: '1px solid #30363d',
+    borderRadius: 6,
+    background: '#161b22',
+  },
   metricLabel: { color: '#8b949e', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' },
   metricValue: { marginTop: 6, color: '#e6edf3', fontSize: 18, fontWeight: 800 },
   metricSub: { marginTop: 2, color: '#6e7681', fontSize: 11 },
-  chartGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 26, borderTop: '1px solid #21262d', paddingTop: 18 },
+  chartGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 26,
+    borderTop: '1px solid #21262d',
+    paddingTop: 18,
+  },
   chartPanel: { minWidth: 0 },
   chartHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   average: { color: '#c9d1d9', fontSize: 11 },
-  chartBody: { display: 'grid', gridTemplateColumns: 'minmax(260px, 1fr) 190px', gap: 26, alignItems: 'center' },
-  barChart: { display: 'flex', alignItems: 'end', gap: 5, height: 130, padding: '0 0 1px', borderBottom: '1px solid #30363d', background: 'linear-gradient(to top, transparent 0, transparent 48%, #21262d 49%, transparent 50%)' },
-  barSlot: { flex: 1, minWidth: 4, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'end', gap: 1 },
+  chartBody: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(260px, 1fr) 190px',
+    gap: 26,
+    alignItems: 'center',
+  },
+  barChart: {
+    display: 'flex',
+    alignItems: 'end',
+    gap: 5,
+    height: 130,
+    padding: '0 0 1px',
+    borderBottom: '1px solid #30363d',
+    background:
+      'linear-gradient(to top, transparent 0, transparent 48%, #21262d 49%, transparent 50%)',
+  },
+  barSlot: {
+    flex: 1,
+    minWidth: 4,
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'end',
+    gap: 1,
+  },
   successBar: { width: '100%', background: '#3fb950', borderRadius: '2px 2px 0 0', minHeight: 1 },
   failedBar: { width: '100%', background: '#f85149', minHeight: 0 },
   successErrors: { color: '#e6edf3' },
@@ -355,17 +575,49 @@ const styles: Record<string, React.CSSProperties> = {
   failedNumber: { color: '#e6edf3', fontSize: 30, fontWeight: 800, lineHeight: 1.2 },
   successText: { color: '#3fb950', fontSize: 12, fontWeight: 500 },
   failedText: { color: '#ff7b72', fontSize: 12, fontWeight: 500 },
-  bottomGrid: { display: 'grid', gridTemplateColumns: 'minmax(320px, 0.9fr) minmax(360px, 1fr)', gap: 48, borderTop: '1px solid #21262d', paddingTop: 18 },
+  bottomGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(320px, 0.9fr) minmax(360px, 1fr)',
+    gap: 48,
+    borderTop: '1px solid #21262d',
+    paddingTop: 18,
+  },
   panel: { minWidth: 0 },
   distributionList: { display: 'flex', flexDirection: 'column', gap: 10 },
-  distributionRow: { display: 'grid', gridTemplateColumns: '52px 1fr 42px', gap: 10, alignItems: 'center' },
+  distributionRow: {
+    display: 'grid',
+    gridTemplateColumns: '52px 1fr 42px',
+    gap: 10,
+    alignItems: 'center',
+  },
   distributionLabel: { color: '#8b949e', fontSize: 12 },
-  distributionTrack: { height: 20, background: '#161b22', border: '1px solid #21262d', borderRadius: 3, overflow: 'hidden' },
+  distributionTrack: {
+    height: 20,
+    background: '#161b22',
+    border: '1px solid #21262d',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
   distributionFill: { height: '100%', background: '#58a6ff', borderRadius: 3 },
   distributionCount: { color: '#c9d1d9', fontSize: 12, textAlign: 'right' },
   slowestList: { display: 'flex', flexDirection: 'column', gap: 8 },
-  slowestItem: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gridTemplateRows: 'auto auto', gap: '2px 12px', padding: '10px 12px', border: '1px solid #30363d', borderRadius: 6, background: '#161b22' },
-  slowestName: { color: '#e6edf3', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  slowestItem: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) auto',
+    gridTemplateRows: 'auto auto',
+    gap: '2px 12px',
+    padding: '10px 12px',
+    border: '1px solid #30363d',
+    borderRadius: 6,
+    background: '#161b22',
+  },
+  slowestName: {
+    color: '#e6edf3',
+    fontWeight: 700,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
   slowestSub: { color: '#8b949e', fontSize: 11 },
   slowestDuration: { color: '#e6edf3', fontWeight: 800, textAlign: 'right' },
   slowestSubRight: { color: '#8b949e', fontSize: 11, textAlign: 'right' },

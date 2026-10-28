@@ -26,24 +26,15 @@ class EventBus extends EventEmitter {
     });
   }
 
-  on<T extends ActEventType>(
-    event: T,
-    listener: (payload: PayloadOf<T>) => void
-  ): this {
+  on<T extends ActEventType>(event: T, listener: (payload: PayloadOf<T>) => void): this {
     return super.on(event, listener);
   }
 
-  once<T extends ActEventType>(
-    event: T,
-    listener: (payload: PayloadOf<T>) => void
-  ): this {
+  once<T extends ActEventType>(event: T, listener: (payload: PayloadOf<T>) => void): this {
     return super.once(event, listener);
   }
 
-  off<T extends ActEventType>(
-    event: T,
-    listener: (payload: PayloadOf<T>) => void
-  ): this {
+  off<T extends ActEventType>(event: T, listener: (payload: PayloadOf<T>) => void): this {
     return super.off(event, listener);
   }
 }

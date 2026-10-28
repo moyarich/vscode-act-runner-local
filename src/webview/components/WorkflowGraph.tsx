@@ -73,7 +73,15 @@ function StatusDot({ status }: { status: NodeStatus }) {
   );
 }
 
-function StepRow({ node, onClick, isSelected }: { node: GraphNode; onClick: () => void; isSelected: boolean }) {
+function StepRow({
+  node,
+  onClick,
+  isSelected,
+}: {
+  node: GraphNode;
+  onClick: () => void;
+  isSelected: boolean;
+}) {
   const cfg = STATUS[node.status];
   const isRunning = node.status === 'running';
   return (
@@ -84,8 +92,8 @@ function StepRow({ node, onClick, isSelected }: { node: GraphNode; onClick: () =
         alignItems: 'center',
         gap: 8,
         padding: '5px 12px',
-        borderLeft: `3px solid ${isSelected ? '#58a6ff' : (isRunning ? cfg.border : 'transparent')}`,
-        background: isSelected ? '#0d1f3c' : (isRunning ? cfg.bg : 'transparent'),
+        borderLeft: `3px solid ${isSelected ? '#58a6ff' : isRunning ? cfg.border : 'transparent'}`,
+        background: isSelected ? '#0d1f3c' : isRunning ? cfg.bg : 'transparent',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
       }}
@@ -113,7 +121,13 @@ function StepRow({ node, onClick, isSelected }: { node: GraphNode; onClick: () =
 
 // ─── InnerJobSection: seção plana (sem caixa própria) dentro do outer job ────
 function InnerJobCard({
-  job, steps, isExpanded, onToggle, onSelectStep, filterJobId, filterStepLabel,
+  job,
+  steps,
+  isExpanded,
+  onToggle,
+  onSelectStep,
+  filterJobId,
+  filterStepLabel,
 }: {
   job: GraphNode;
   steps: GraphNode[];
@@ -132,7 +146,9 @@ function InnerJobCard({
       <div
         onClick={hasSteps ? onToggle : undefined}
         style={{
-          display: 'flex', alignItems: 'center', gap: 8,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
           padding: '7px 16px',
           cursor: hasSteps ? 'pointer' : 'default',
           background: undefined,
@@ -142,15 +158,30 @@ function InnerJobCard({
         <span style={{ color: cfg.iconColor, fontSize: 10, width: 10, flexShrink: 0 }}>
           {hasSteps ? (isExpanded ? '▼' : '▶') : '•'}
         </span>
-        <span style={{
-          fontWeight: 600, fontSize: 12,
-          color: job.status === 'idle' ? '#6e7681' : '#c9d1d9',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
-        }}>
+        <span
+          style={{
+            fontWeight: 600,
+            fontSize: 12,
+            color: job.status === 'idle' ? '#6e7681' : '#c9d1d9',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+          }}
+        >
           {job.label}
         </span>
         {isRunning && (
-          <span style={{ fontSize: 9, color: cfg.iconColor, animation: 'actDotBlink 1s ease-in-out infinite', flexShrink: 0 }}>●</span>
+          <span
+            style={{
+              fontSize: 9,
+              color: cfg.iconColor,
+              animation: 'actDotBlink 1s ease-in-out infinite',
+              flexShrink: 0,
+            }}
+          >
+            ●
+          </span>
         )}
         {job.duration !== undefined && job.duration > 0 && !isRunning && (
           <span style={{ fontSize: 10, color: '#6e7681', flexShrink: 0 }}>
@@ -178,9 +209,18 @@ function InnerJobCard({
 
 // ─── OuterJobCard: outer job (wrap de inner jobs ou steps diretos) ────────────
 function OuterJobCard({
-  outerJob, innerJobs, directSteps, stepsByJob,
-  isExpanded, onToggle, expandedInner, onToggleInner,
-  onSelectInnerStep, onSelectDirectStep, filterJobId, filterStepLabel,
+  outerJob,
+  innerJobs,
+  directSteps,
+  stepsByJob,
+  isExpanded,
+  onToggle,
+  expandedInner,
+  onToggleInner,
+  onSelectInnerStep,
+  onSelectDirectStep,
+  filterJobId,
+  filterStepLabel,
 }: {
   outerJob: GraphNode;
   innerJobs: GraphNode[];
@@ -199,19 +239,24 @@ function OuterJobCard({
   const isRunning = outerJob.status === 'running';
   const hasChildren = innerJobs.length > 0 || directSteps.length > 0;
   return (
-    <div style={{
-      border: `2px solid ${cfg.border}`,
-      borderRadius: 12, overflow: 'hidden',
-      background: JOB_CARD_BG,
-      width: 'fit-content', minWidth: 280,
-      animation: isRunning ? 'actPulse 2s ease-in-out infinite' : undefined,
-      transition: 'border-color 0.3s ease',
-    }}>
+    <div
+      style={{
+        border: `2px solid ${cfg.border}`,
+        borderRadius: 12,
+        overflow: 'hidden',
+        background: JOB_CARD_BG,
+        width: 'fit-content',
+        minWidth: 280,
+        animation: isRunning ? 'actPulse 2s ease-in-out infinite' : undefined,
+        transition: 'border-color 0.3s ease',
+      }}
+    >
       {/* Header centralizado com chevron à esquerda */}
       <div
         onClick={hasChildren ? onToggle : undefined}
         style={{
-          display: 'flex', alignItems: 'center',
+          display: 'flex',
+          alignItems: 'center',
           padding: '11px 14px',
           borderBottom: isExpanded && hasChildren ? `1px solid ${cfg.border}55` : undefined,
           background: JOB_CARD_BG,
@@ -224,17 +269,30 @@ function OuterJobCard({
           {hasChildren ? (isExpanded ? '▼' : '▶') : ''}
         </span>
         {/* Nome centralizado */}
-        <span style={{
-          flex: 1, textAlign: 'center',
-          fontWeight: 700, fontSize: 14,
-          color: outerJob.status === 'idle' ? '#8b949e' : '#e6edf3',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
+        <span
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            fontWeight: 700,
+            fontSize: 14,
+            color: outerJob.status === 'idle' ? '#8b949e' : '#e6edf3',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {outerJob.label}
         </span>
         {/* Duração à direita */}
         {isRunning && (
-          <span style={{ fontSize: 10, color: cfg.iconColor, animation: 'actDotBlink 1s ease-in-out infinite', flexShrink: 0 }}>
+          <span
+            style={{
+              fontSize: 10,
+              color: cfg.iconColor,
+              animation: 'actDotBlink 1s ease-in-out infinite',
+              flexShrink: 0,
+            }}
+          >
             {t('running')}
           </span>
         )}
@@ -249,7 +307,9 @@ function OuterJobCard({
         <div>
           {innerJobs.map((ij, idx) => (
             <div key={ij.id}>
-              {idx > 0 && <div style={{ height: 1, background: `${cfg.border}33`, marginLeft: 16 }} />}
+              {idx > 0 && (
+                <div style={{ height: 1, background: `${cfg.border}33`, marginLeft: 16 }} />
+              )}
               <InnerJobCard
                 job={ij}
                 steps={stepsByJob.get(ij.id) ?? []}
@@ -263,7 +323,9 @@ function OuterJobCard({
           ))}
           {directSteps.map((step, i) => (
             <React.Fragment key={step.id}>
-              {(innerJobs.length > 0 || i > 0) && <div style={{ height: 1, background: `${cfg.border}33`, marginLeft: 16 }} />}
+              {(innerJobs.length > 0 || i > 0) && (
+                <div style={{ height: 1, background: `${cfg.border}33`, marginLeft: 16 }} />
+              )}
               <StepRow
                 node={step}
                 onClick={() => onSelectDirectStep(step)}
@@ -279,13 +341,16 @@ function OuterJobCard({
 
 // ─── Layout engine ───────────────────────────────────────────────────────────
 
-const CARD_W = 300;  // largura fixa do card de job
-const HDR_H = 50;   // altura do header (âncora vertical das setas)
-const COL_GAP = 48;   // espaço horizontal entre colunas
-const ROW_GAP = 56;   // espaço vertical entre linhas (breathing room entre chains)
-const PAD = 32;   // padding do canvas
+const CARD_W = 300; // largura fixa do card de job
+const HDR_H = 50; // altura do header (âncora vertical das setas)
+const COL_GAP = 48; // espaço horizontal entre colunas
+const ROW_GAP = 56; // espaço vertical entre linhas (breathing room entre chains)
+const PAD = 32; // padding do canvas
 
-interface Pos { x: number; y: number }
+interface Pos {
+  x: number;
+  y: number;
+}
 
 /**
  * Calcula o layout em grade do DAG em duas etapas:
@@ -304,10 +369,10 @@ function computeDAGLayout(
   if (jobs.length === 0) return {};
 
   // ── 1. Coluna: profundidade máxima (BFS) ─────────────────────────────────
-  const col = new Map<string, number>(jobs.map(j => [j.id, 0]));
-  const inDeg = new Map<string, number>(jobs.map(j => [j.id, 0]));
-  const adj = new Map<string, string[]>();  // arestas diretas
-  const radj = new Map<string, string[]>();  // arestas inversas (predecessores)
+  const col = new Map<string, number>(jobs.map((j) => [j.id, 0]));
+  const inDeg = new Map<string, number>(jobs.map((j) => [j.id, 0]));
+  const adj = new Map<string, string[]>(); // arestas diretas
+  const radj = new Map<string, string[]>(); // arestas inversas (predecessores)
 
   for (const { from, to } of deps) {
     adj.set(from, [...(adj.get(from) ?? []), to]);
@@ -315,7 +380,7 @@ function computeDAGLayout(
     inDeg.set(to, (inDeg.get(to) ?? 0) + 1);
   }
 
-  const queue = jobs.filter(j => !(inDeg.get(j.id) ?? 0)).map(j => j.id);
+  const queue = jobs.filter((j) => !(inDeg.get(j.id) ?? 0)).map((j) => j.id);
   const visited = new Set<string>();
   while (queue.length) {
     const id = queue.shift()!;
@@ -332,7 +397,7 @@ function computeDAGLayout(
 
   // ── 2. Agrupar por coluna na ordem YAML ──────────────────────────────────
   const byCol = new Map<number, string[]>();
-  jobs.forEach(j => {
+  jobs.forEach((j) => {
     const c = col.get(j.id) ?? 0;
     byCol.set(c, [...(byCol.get(c) ?? []), j.id]);
   });
@@ -352,23 +417,27 @@ function computeDAGLayout(
     }
 
     // Calcular baricentro de cada nó: média das linhas dos predecessores
-    const withBary = ids.map(id => {
+    const withBary = ids.map((id) => {
       const preds = radj.get(id) ?? [];
-      const bary = preds.length === 0
-        ? ids.indexOf(id)   // sem predecessores: manter posição relativa
-        : preds.reduce((s, p) => s + (rowOf.get(p) ?? 0), 0) / preds.length;
+      const bary =
+        preds.length === 0
+          ? ids.indexOf(id) // sem predecessores: manter posição relativa
+          : preds.reduce((s, p) => s + (rowOf.get(p) ?? 0), 0) / preds.length;
       return { id, bary };
     });
 
     // Ordenar pelo baricentro e reatribuir índices de linha
     withBary.sort((a, b) => a.bary - b.bary);
     withBary.forEach(({ id }, i) => rowOf.set(id, i));
-    byCol.set(c, withBary.map(x => x.id));
+    byCol.set(
+      c,
+      withBary.map((x) => x.id)
+    );
   }
 
   // ── 4. Converter (coluna, linha) → (x, y) ────────────────────────────────
   const pos: Record<string, Pos> = {};
-  jobs.forEach(j => {
+  jobs.forEach((j) => {
     const c = col.get(j.id) ?? 0;
     const r = rowOf.get(j.id) ?? 0;
     pos[j.id] = {
@@ -383,16 +452,14 @@ function computeDAGLayout(
  * Redução transitiva de arestas: remove dependências já implícitas por
  * transitividade. Ex.: se setup→build→tests existem, setup→tests é redundante.
  */
-function transitiveReduction(
-  deps: { from: string; to: string }[]
-): { from: string; to: string }[] {
+function transitiveReduction(deps: { from: string; to: string }[]): { from: string; to: string }[] {
   const adj = new Map<string, string[]>();
   for (const { from, to } of deps) {
     adj.set(from, [...(adj.get(from) ?? []), to]);
   }
   const reachableViaOther = (u: string, v: string): boolean => {
     const visited = new Set<string>();
-    const queue = (adj.get(u) ?? []).filter(n => n !== v);
+    const queue = (adj.get(u) ?? []).filter((n) => n !== v);
     while (queue.length) {
       const curr = queue.shift()!;
       if (curr === v) return true;
@@ -430,10 +497,14 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const prevExecIdRef = useRef<string | null>(null);
   // Ref interna do drag — não causa re-render durante o arrasto
-  const dragRef = useRef<{ id: string; mx: number; my: number; ox: number; oy: number } | null>(null);
+  const dragRef = useRef<{ id: string; mx: number; my: number; ox: number; oy: number } | null>(
+    null
+  );
   const dragMovedRef = useRef(false);
 
-  useEffect(() => { injectKeyframes(); }, []);
+  useEffect(() => {
+    injectKeyframes();
+  }, []);
 
   // Resetar tudo ao iniciar nova execução
   useEffect(() => {
@@ -451,14 +522,20 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
       if (!dragRef.current) return;
       const { id, mx, my, ox, oy } = dragRef.current;
       dragMovedRef.current = true;
-      setDragPos(p => ({ ...p, [id]: { x: ox + e.clientX - mx, y: oy + e.clientY - my } }));
+      setDragPos((p) => ({ ...p, [id]: { x: ox + e.clientX - mx, y: oy + e.clientY - my } }));
     };
     const onUp = () => {
-      if (dragRef.current) { dragRef.current = null; setDraggingId(null); }
+      if (dragRef.current) {
+        dragRef.current = null;
+        setDraggingId(null);
+      }
     };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
-    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
   }, []);
 
   const outerJobs = nodes.filter((n) => n.type === 'job' && !n.parentId);
@@ -467,7 +544,7 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
 
   // Redução transitiva: apenas arestas essenciais (sem redundâncias transitivas)
   // DEVE vir antes do return condicional (Rules of Hooks)
-  const allDeps = edges.map(e => ({ from: e.source, to: e.target }));
+  const allDeps = edges.map((e) => ({ from: e.source, to: e.target }));
   const depsKey = allDeps.map((e: { from: string; to: string }) => `${e.from}→${e.to}`).join('|');
   const reducedDeps = useMemo(
     () => transitiveReduction(allDeps),
@@ -481,17 +558,19 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
   );
 
   // Layout computado — usa apenas arestas essenciais para baricentro mais limpo
-  const reducedKey = reducedDeps.map((e: { from: string; to: string }) => `${e.from}→${e.to}`).join('|');
+  const reducedKey = reducedDeps
+    .map((e: { from: string; to: string }) => `${e.from}→${e.to}`)
+    .join('|');
   const layout = useMemo(
     () => computeDAGLayout(outerJobs, reducedDeps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [outerJobs.map(j => j.id).join('|'), reducedKey]
+    [outerJobs.map((j) => j.id).join('|'), reducedKey]
   );
 
   // Agrupar inner jobs sob o outer correto (match por id OU label)
   const innerByOuter = new Map<string, GraphNode[]>();
-  innerJobs.forEach(ij => {
-    const outer = outerJobs.find(oj => oj.id === ij.parentId || oj.label === ij.parentId);
+  innerJobs.forEach((ij) => {
+    const outer = outerJobs.find((oj) => oj.id === ij.parentId || oj.label === ij.parentId);
     if (!outer) return;
     const list = innerByOuter.get(outer.id) ?? [];
     list.push(ij);
@@ -500,7 +579,7 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
 
   // Agrupar steps por job pai
   const stepsByJob = new Map<string, GraphNode[]>();
-  steps.forEach(step => {
+  steps.forEach((step) => {
     const list = stepsByJob.get(step.parentId ?? '') ?? [];
     list.push(step);
     stepsByJob.set(step.parentId ?? '', list);
@@ -522,12 +601,12 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
   const getPos = (id: string): Pos => dragPos[id] ?? layout[id] ?? { x: PAD, y: PAD };
 
   // Dimensões do canvas
-  const allPos = outerJobs.map(j => getPos(j.id));
-  const canvasW = Math.max(640, ...allPos.map(p => p.x + CARD_W + PAD + COL_GAP));
-  const canvasH = Math.max(320, ...allPos.map(p => p.y + HDR_H * 4 + PAD));
+  const allPos = outerJobs.map((j) => getPos(j.id));
+  const canvasW = Math.max(640, ...allPos.map((p) => p.x + CARD_W + PAD + COL_GAP));
+  const canvasH = Math.max(320, ...allPos.map((p) => p.y + HDR_H * 4 + PAD));
 
   const toggleOuter = (id: string) =>
-    setExpandedOuter(prev => {
+    setExpandedOuter((prev) => {
       const n = new Set(prev);
       if (n.has(id)) {
         n.delete(id);
@@ -537,7 +616,7 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
       return n;
     });
   const toggleInner = (id: string) =>
-    setExpandedInner(prev => {
+    setExpandedInner((prev) => {
       const n = new Set(prev);
       if (n.has(id)) {
         n.delete(id);
@@ -548,9 +627,9 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
     });
 
   const allJobs = [...outerJobs, ...innerJobs];
-  const runningCount = allJobs.filter(j => j.status === 'running').length;
-  const successCount = allJobs.filter(j => j.status === 'success').length;
-  const failedCount = allJobs.filter(j => j.status === 'failed').length;
+  const runningCount = allJobs.filter((j) => j.status === 'running').length;
+  const successCount = allJobs.filter((j) => j.status === 'success').length;
+  const failedCount = allJobs.filter((j) => j.status === 'failed').length;
 
   const handleCardMouseDown = (jobId: string, e: React.MouseEvent) => {
     dragMovedRef.current = false;
@@ -563,13 +642,28 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
     <div style={styles.container}>
       {showHeader && (
         <div style={styles.header}>
-          <span style={{ fontWeight: 600, color: '#e6edf3' }}>{execution.workflowName || 'Workflow'}</span>
+          <span style={{ fontWeight: 600, color: '#e6edf3' }}>
+            {execution.workflowName || 'Workflow'}
+          </span>
           <div style={styles.summary}>
-            {runningCount > 0 && <span style={{ color: '#fb923c' }}>◉ {runningCount} {t('running')}</span>}
-            {successCount > 0 && <span style={{ color: '#3fb950' }}>✓ {successCount} {t('completed')}</span>}
-            {failedCount > 0 && <span style={{ color: '#f85149' }}>✕ {failedCount} {t('failed plural')}</span>}
+            {runningCount > 0 && (
+              <span style={{ color: '#fb923c' }}>
+                ◉ {runningCount} {t('running')}
+              </span>
+            )}
+            {successCount > 0 && (
+              <span style={{ color: '#3fb950' }}>
+                ✓ {successCount} {t('completed')}
+              </span>
+            )}
+            {failedCount > 0 && (
+              <span style={{ color: '#f85149' }}>
+                ✕ {failedCount} {t('failed plural')}
+              </span>
+            )}
             <span style={{ color: '#6e7681', fontSize: 11 }}>
-              {allJobs.length} job{allJobs.length !== 1 ? 's' : ''} · {steps.length} step{steps.length !== 1 ? 's' : ''}
+              {allJobs.length} job{allJobs.length !== 1 ? 's' : ''} · {steps.length} step
+              {steps.length !== 1 ? 's' : ''}
             </span>
           </div>
         </div>
@@ -593,46 +687,53 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
           {/* SVG: arestas entre jobs */}
           <svg
             style={{
-              position: 'absolute', inset: 0,
-              width: canvasW, height: canvasH,
-              pointerEvents: 'none', overflow: 'visible',
+              position: 'absolute',
+              inset: 0,
+              width: canvasW,
+              height: canvasH,
+              pointerEvents: 'none',
+              overflow: 'visible',
             }}
           >
-            {edges.filter(e => reducedSet.has(`${e.source}→${e.target}`)).map(e => {
-              const src = getPos(e.source);
-              const dst = getPos(e.target);
-              // Dots ficam NA borda do card (port handle)
-              // Stub horizontal sai do dot antes do bezier começar
-              const DOT_R = 4;
-              const STUB = 8;
-              const dot1x = src.x + CARD_W;            // dot na borda direita do card fonte
-              const dot1y = src.y + HDR_H / 2;
-              const dot2x = dst.x;                     // dot na borda esquerda do card destino
-              const dot2y = dst.y + HDR_H / 2;
-              // Bezier parte do fim do stub source até o início do stub destino
-              const bx1 = dot1x + STUB;
-              const bx2 = dot2x - STUB;
-              const dx = bx2 - bx1;
-              const cpx1 = bx1 + dx * 0.45;
-              const cpx2 = bx2 - dx * 0.45;
-              const srcJob = outerJobs.find(j => j.id === e.source);
-              const clr = STATUS[srcJob?.status ?? 'idle'].border;
-              return (
-                <g key={e.id}>
-                  {/* path: stub saindo do card → bezier → stub entrando no destino */}
-                  <path
-                    d={`M ${dot1x} ${dot1y} H ${bx1} C ${cpx1} ${dot1y} ${cpx2} ${dot2y} ${bx2} ${dot2y} H ${dot2x}`}
-                    stroke={clr} strokeWidth={2} fill="none"
-                  />
-                  <circle cx={dot1x} cy={dot1y} r={DOT_R} fill={clr} />
-                  <circle cx={dot2x} cy={dot2y} r={DOT_R} fill={clr} />
-                </g>
-              );
-            })}
+            {edges
+              .filter((e) => reducedSet.has(`${e.source}→${e.target}`))
+              .map((e) => {
+                const src = getPos(e.source);
+                const dst = getPos(e.target);
+                // Dots ficam NA borda do card (port handle)
+                // Stub horizontal sai do dot antes do bezier começar
+                const DOT_R = 4;
+                const STUB = 8;
+                const dot1x = src.x + CARD_W; // dot na borda direita do card fonte
+                const dot1y = src.y + HDR_H / 2;
+                const dot2x = dst.x; // dot na borda esquerda do card destino
+                const dot2y = dst.y + HDR_H / 2;
+                // Bezier parte do fim do stub source até o início do stub destino
+                const bx1 = dot1x + STUB;
+                const bx2 = dot2x - STUB;
+                const dx = bx2 - bx1;
+                const cpx1 = bx1 + dx * 0.45;
+                const cpx2 = bx2 - dx * 0.45;
+                const srcJob = outerJobs.find((j) => j.id === e.source);
+                const clr = STATUS[srcJob?.status ?? 'idle'].border;
+                return (
+                  <g key={e.id}>
+                    {/* path: stub saindo do card → bezier → stub entrando no destino */}
+                    <path
+                      d={`M ${dot1x} ${dot1y} H ${bx1} C ${cpx1} ${dot1y} ${cpx2} ${dot2y} ${bx2} ${dot2y} H ${dot2x}`}
+                      stroke={clr}
+                      strokeWidth={2}
+                      fill="none"
+                    />
+                    <circle cx={dot1x} cy={dot1y} r={DOT_R} fill={clr} />
+                    <circle cx={dot2x} cy={dot2y} r={DOT_R} fill={clr} />
+                  </g>
+                );
+              })}
           </svg>
 
           {/* Cards de job — posicionados absolutamente */}
-          {outerJobs.map(oj => {
+          {outerJobs.map((oj) => {
             const pos = getPos(oj.id);
             const isDragging = draggingId === oj.id;
             return (
@@ -641,7 +742,10 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
                 onMouseDown={(e) => handleCardMouseDown(oj.id, e)}
                 onClickCapture={(e) => {
                   // Cancela o click se o usuário arrastou (evita toggle acidental)
-                  if (dragMovedRef.current) { dragMovedRef.current = false; e.stopPropagation(); }
+                  if (dragMovedRef.current) {
+                    dragMovedRef.current = false;
+                    e.stopPropagation();
+                  }
                 }}
                 style={{
                   position: 'absolute',
@@ -663,12 +767,24 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
                   expandedInner={expandedInner}
                   onToggleInner={toggleInner}
                   onSelectInnerStep={(job, step) => {
-                    if (logFilter?.jobId === job.id && logFilter.stepLabel === step.label) setLogFilter(null);
-                    else setLogFilter({ jobId: job.id, stepLabel: step.label, label: `${job.label} › ${step.label}` });
+                    if (logFilter?.jobId === job.id && logFilter.stepLabel === step.label)
+                      setLogFilter(null);
+                    else
+                      setLogFilter({
+                        jobId: job.id,
+                        stepLabel: step.label,
+                        label: `${job.label} › ${step.label}`,
+                      });
                   }}
                   onSelectDirectStep={(step) => {
-                    if (logFilter?.jobId === oj.id && logFilter.stepLabel === step.label) setLogFilter(null);
-                    else setLogFilter({ jobId: oj.id, stepLabel: step.label, label: `${oj.label} › ${step.label}` });
+                    if (logFilter?.jobId === oj.id && logFilter.stepLabel === step.label)
+                      setLogFilter(null);
+                    else
+                      setLogFilter({
+                        jobId: oj.id,
+                        stepLabel: step.label,
+                        label: `${oj.label} › ${step.label}`,
+                      });
                   }}
                   filterJobId={logFilter?.jobId ?? null}
                   filterStepLabel={logFilter?.stepLabel}
@@ -725,4 +841,3 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 8,
   },
 };
-

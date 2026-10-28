@@ -29,8 +29,8 @@ export class WorkflowParser {
       const needs = Array.isArray(rawNeeds)
         ? (rawNeeds as string[])
         : rawNeeds
-        ? [rawNeeds as string]
-        : [];
+          ? [rawNeeds as string]
+          : [];
 
       jobs[jobId] = {
         id: jobId,

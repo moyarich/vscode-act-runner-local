@@ -24,7 +24,9 @@ const STATUS_ICON: Record<NodeStatus, string> = {
 
 function fmtDuration(ms?: number): string {
   if (!ms || ms <= 0) return '';
-  return ms < 60_000 ? `${(ms / 1000).toFixed(0)}s` : `${Math.floor(ms / 60000)}m${Math.floor((ms % 60000) / 1000)}s`;
+  return ms < 60_000
+    ? `${(ms / 1000).toFixed(0)}s`
+    : `${Math.floor(ms / 60000)}m${Math.floor((ms % 60000) / 1000)}s`;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -41,7 +43,9 @@ function StepRow({ step, isSelected, indent, onSelect }: StepRowProps) {
       onClick={onSelect}
       title={step.label}
       style={{
-        display: 'flex', alignItems: 'center', gap: 5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
         padding: `3px 8px 3px ${indent}px`,
         borderLeft: `2px solid ${isSelected ? '#58a6ff' : 'transparent'}`,
         background: isSelected ? '#0d1f3c' : 'transparent',
@@ -49,17 +53,32 @@ function StepRow({ step, isSelected, indent, onSelect }: StepRowProps) {
         borderBottom: '1px solid transparent',
       }}
     >
-      <span style={{
-        color: STATUS_COLOR[step.status], fontSize: 11, flexShrink: 0,
-        animation: step.status === 'running' ? 'actSpin 1.2s linear infinite' : undefined
-      }}>
+      <span
+        style={{
+          color: STATUS_COLOR[step.status],
+          fontSize: 11,
+          flexShrink: 0,
+          animation: step.status === 'running' ? 'actSpin 1.2s linear infinite' : undefined,
+        }}
+      >
         {STATUS_ICON[step.status]}
       </span>
-      <span style={{ flex: 1, fontSize: 11, color: '#8b949e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span
+        style={{
+          flex: 1,
+          fontSize: 11,
+          color: '#8b949e',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
         {step.label}
       </span>
       {fmtDuration(step.duration) && (
-        <span style={{ fontSize: 10, color: '#484f58', flexShrink: 0 }}>{fmtDuration(step.duration)}</span>
+        <span style={{ fontSize: 10, color: '#484f58', flexShrink: 0 }}>
+          {fmtDuration(step.duration)}
+        </span>
       )}
     </div>
   );
@@ -76,48 +95,85 @@ interface InnerJobRowProps {
   onSelectJob: () => void;
   onSelectStep: (step: GraphNode) => void;
 }
-function InnerJobRow({ job, steps, isExpanded, isSelected, filterJobId, filterStepLabel, onToggle, onSelectJob, onSelectStep }: InnerJobRowProps) {
+function InnerJobRow({
+  job,
+  steps,
+  isExpanded,
+  isSelected,
+  filterJobId,
+  filterStepLabel,
+  onToggle,
+  onSelectJob,
+  onSelectStep,
+}: InnerJobRowProps) {
   return (
     <div>
       {/* Inner job header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 4,
-        padding: '4px 8px 4px 18px',
-        borderLeft: `2px solid ${isSelected ? '#58a6ff' : 'transparent'}`,
-        background: isSelected ? '#0d1f3c' : 'transparent',
-        borderBottom: '1px solid #161b22',
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          padding: '4px 8px 4px 18px',
+          borderLeft: `2px solid ${isSelected ? '#58a6ff' : 'transparent'}`,
+          background: isSelected ? '#0d1f3c' : 'transparent',
+          borderBottom: '1px solid #161b22',
+        }}
+      >
         {/* Chevron */}
-        <button onClick={onToggle} style={styles.chevron} title={isExpanded ? 'Colapsar' : 'Expandir'}>
-          {steps.length > 0 ? (isExpanded ? '▾' : '▸') : <span style={{ opacity: 0 }}>▸</span>}
+        <button
+          onClick={onToggle}
+          style={styles.chevron}
+          title={isExpanded ? 'Colapsar' : 'Expandir'}
+        >
+          {steps.length > 0 ? isExpanded ? '▾' : '▸' : <span style={{ opacity: 0 }}>▸</span>}
         </button>
         {/* Status */}
-        <span style={{
-          color: STATUS_COLOR[job.status], fontSize: 11, flexShrink: 0,
-          animation: job.status === 'running' ? 'actSpin 1.2s linear infinite' : undefined
-        }}>
+        <span
+          style={{
+            color: STATUS_COLOR[job.status],
+            fontSize: 11,
+            flexShrink: 0,
+            animation: job.status === 'running' ? 'actSpin 1.2s linear infinite' : undefined,
+          }}
+        >
           {STATUS_ICON[job.status]}
         </span>
         {/* Label */}
-        <span onClick={onSelectJob} title={job.label}
-          style={{ flex: 1, fontSize: 12, color: '#c9d1d9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', fontWeight: 500 }}>
+        <span
+          onClick={onSelectJob}
+          title={job.label}
+          style={{
+            flex: 1,
+            fontSize: 12,
+            color: '#c9d1d9',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            fontWeight: 500,
+          }}
+        >
           {job.label}
         </span>
         {fmtDuration(job.duration) && (
-          <span style={{ fontSize: 10, color: '#484f58', flexShrink: 0 }}>{fmtDuration(job.duration)}</span>
+          <span style={{ fontSize: 10, color: '#484f58', flexShrink: 0 }}>
+            {fmtDuration(job.duration)}
+          </span>
         )}
       </div>
 
       {/* Steps */}
-      {isExpanded && steps.map(step => (
-        <StepRow
-          key={step.id}
-          step={step}
-          indent={32}
-          isSelected={filterJobId === job.id && filterStepLabel === step.label}
-          onSelect={() => onSelectStep(step)}
-        />
-      ))}
+      {isExpanded &&
+        steps.map((step) => (
+          <StepRow
+            key={step.id}
+            step={step}
+            indent={32}
+            isSelected={filterJobId === job.id && filterStepLabel === step.label}
+            onSelect={() => onSelectStep(step)}
+          />
+        ))}
     </div>
   );
 }
@@ -125,10 +181,10 @@ function InnerJobRow({ job, steps, isExpanded, isSelected, filterJobId, filterSt
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function ExecutionSidebar() {
-  const nodes = useExecutionStore(s => s.nodes);
-  const logFilter = useExecutionStore(s => s.logFilter);
-  const setLogFilter = useExecutionStore(s => s.setLogFilter);
-  const execution = useExecutionStore(s => s.execution);
+  const nodes = useExecutionStore((s) => s.nodes);
+  const logFilter = useExecutionStore((s) => s.logFilter);
+  const setLogFilter = useExecutionStore((s) => s.setLogFilter);
+  const execution = useExecutionStore((s) => s.execution);
 
   // Sets separados por nível
   const [expandedOuter, setExpandedOuter] = useState<Set<string>>(new Set());
@@ -138,16 +194,16 @@ export function ExecutionSidebar() {
   const prevExecIdRef = useRef<string | null>(null);
 
   // Nodes por tipo/nível
-  const outerJobs = nodes.filter(n => n.type === 'job' && !n.parentId);
-  const innerJobs = nodes.filter(n => n.type === 'job' && !!n.parentId);
-  const steps = nodes.filter(n => n.type === 'step');
+  const outerJobs = nodes.filter((n) => n.type === 'job' && !n.parentId);
+  const innerJobs = nodes.filter((n) => n.type === 'job' && !!n.parentId);
+  const steps = nodes.filter((n) => n.type === 'step');
 
   // Agrupar inner jobs por outer job id
   // Usamos find(id OR label) porque o outerJobId do actRunner é o display name
   // enquanto o nó parsed do YAML tem id = chave YAML (ex: "ci") e label = display ("CI")
   const innerByOuter = new Map<string, GraphNode[]>();
-  innerJobs.forEach(ij => {
-    const outerNode = outerJobs.find(oj => oj.id === ij.parentId || oj.label === ij.parentId);
+  innerJobs.forEach((ij) => {
+    const outerNode = outerJobs.find((oj) => oj.id === ij.parentId || oj.label === ij.parentId);
     if (!outerNode) return;
     const list = innerByOuter.get(outerNode.id) ?? [];
     list.push(ij);
@@ -156,7 +212,7 @@ export function ExecutionSidebar() {
 
   // Agrupar steps por job id (inner ou outer)
   const stepsByJob = new Map<string, GraphNode[]>();
-  steps.forEach(s => {
+  steps.forEach((s) => {
     if (!s.parentId) return;
     const list = stepsByJob.get(s.parentId) ?? [];
     list.push(s);
@@ -175,7 +231,7 @@ export function ExecutionSidebar() {
   if (outerJobs.length === 0 || execution.status === 'idle') return null;
 
   const toggleOuter = (id: string) =>
-    setExpandedOuter(prev => {
+    setExpandedOuter((prev) => {
       const n = new Set(prev);
       if (n.has(id)) {
         n.delete(id);
@@ -185,7 +241,7 @@ export function ExecutionSidebar() {
       return n;
     });
   const toggleInner = (id: string) =>
-    setExpandedInner(prev => {
+    setExpandedInner((prev) => {
       const n = new Set(prev);
       if (n.has(id)) {
         n.delete(id);
@@ -202,12 +258,20 @@ export function ExecutionSidebar() {
 
   const selectStep = (ij: GraphNode, step: GraphNode) => {
     const isSelected = logFilter?.jobId === ij.id && logFilter.stepLabel === step.label;
-    setLogFilter(isSelected ? null : { jobId: ij.id, stepLabel: step.label, label: `${ij.label} › ${step.label}` });
+    setLogFilter(
+      isSelected
+        ? null
+        : { jobId: ij.id, stepLabel: step.label, label: `${ij.label} › ${step.label}` }
+    );
   };
 
   const selectOuterStep = (oj: GraphNode, step: GraphNode) => {
     const isSelected = logFilter?.jobId === oj.id && logFilter.stepLabel === step.label;
-    setLogFilter(isSelected ? null : { jobId: oj.id, stepLabel: step.label, label: `${oj.label} › ${step.label}` });
+    setLogFilter(
+      isSelected
+        ? null
+        : { jobId: oj.id, stepLabel: step.label, label: `${oj.label} › ${step.label}` }
+    );
   };
 
   return (
@@ -216,12 +280,14 @@ export function ExecutionSidebar() {
       <div style={styles.header}>
         <span>{t('Execution')}</span>
         {logFilter && (
-          <button style={styles.clearBtn} onClick={() => setLogFilter(null)}>✕ {t('all')}</button>
+          <button style={styles.clearBtn} onClick={() => setLogFilter(null)}>
+            ✕ {t('all')}
+          </button>
         )}
       </div>
 
       <div style={styles.list}>
-        {outerJobs.map(oj => {
+        {outerJobs.map((oj) => {
           const ijList = innerByOuter.get(oj.id) ?? [];
           const ojSteps = stepsByJob.get(oj.id) ?? [];
           const isExpanded = expandedOuter.has(oj.id);
@@ -232,28 +298,48 @@ export function ExecutionSidebar() {
             <div key={oj.id}>
               {/* ── Outer job row ── */}
               <div style={{ ...styles.outerJobRow, background: '#161b22' }}>
-                <button onClick={() => toggleOuter(oj.id)} style={styles.chevronOuter} title={isExpanded ? 'Colapsar' : 'Expandir'}>
-                  {hasChildren ? (isExpanded ? '▾' : '▸') : <span style={{ opacity: 0 }}>▸</span>}
+                <button
+                  onClick={() => toggleOuter(oj.id)}
+                  style={styles.chevronOuter}
+                  title={isExpanded ? 'Colapsar' : 'Expandir'}
+                >
+                  {hasChildren ? isExpanded ? '▾' : '▸' : <span style={{ opacity: 0 }}>▸</span>}
                 </button>
-                <span style={{
-                  color: STATUS_COLOR[oj.status], fontSize: 12, flexShrink: 0,
-                  animation: oj.status === 'running' ? 'actSpin 1.2s linear infinite' : undefined
-                }}>
+                <span
+                  style={{
+                    color: STATUS_COLOR[oj.status],
+                    fontSize: 12,
+                    flexShrink: 0,
+                    animation: oj.status === 'running' ? 'actSpin 1.2s linear infinite' : undefined,
+                  }}
+                >
                   {STATUS_ICON[oj.status]}
                 </span>
-                <span title={oj.label}
-                  style={{ flex: 1, fontSize: 12, color: '#e6edf3', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span
+                  title={oj.label}
+                  style={{
+                    flex: 1,
+                    fontSize: 12,
+                    color: '#e6edf3',
+                    fontWeight: 600,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {oj.label}
                 </span>
                 {fmtDuration(oj.duration) && (
-                  <span style={{ fontSize: 10, color: '#484f58', flexShrink: 0 }}>{fmtDuration(oj.duration)}</span>
+                  <span style={{ fontSize: 10, color: '#484f58', flexShrink: 0 }}>
+                    {fmtDuration(oj.duration)}
+                  </span>
                 )}
               </div>
 
               {isExpanded && (
                 <>
                   {/* Caso 1: outer job com inner jobs (reusable workflow) */}
-                  {ijList.map(ij => (
+                  {ijList.map((ij) => (
                     <InnerJobRow
                       key={ij.id}
                       job={ij}
@@ -269,7 +355,7 @@ export function ExecutionSidebar() {
                   ))}
 
                   {/* Caso 2: outer job com steps diretos (sem reusable) */}
-                  {ojSteps.map(step => (
+                  {ojSteps.map((step) => (
                     <StepRow
                       key={step.id}
                       step={step}

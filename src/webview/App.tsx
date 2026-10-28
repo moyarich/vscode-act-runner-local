@@ -25,25 +25,29 @@ declare global {
 }
 
 export function App() {
-  const { currentView, setView, handleEvent, setHistory, setWorkflows, setRepository } = useExecutionStore();
+  const { currentView, setView, handleEvent, setHistory, setWorkflows, setRepository } =
+    useExecutionStore();
   const [logHeight, setLogHeight] = useState(200);
 
-  const startResize = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    const startY = e.clientY;
-    const startH = logHeight;
-    const onMove = (ev: MouseEvent) => {
-      // dragging up increases log height
-      const delta = startY - ev.clientY;
-      setLogHeight(Math.max(60, Math.min(window.innerHeight - 120, startH + delta)));
-    };
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }, [logHeight]);
+  const startResize = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const startY = e.clientY;
+      const startH = logHeight;
+      const onMove = (ev: MouseEvent) => {
+        // dragging up increases log height
+        const delta = startY - ev.clientY;
+        setLogHeight(Math.max(60, Math.min(window.innerHeight - 120, startH + delta)));
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+    [logHeight]
+  );
 
   // Definir view inicial vinda do Extension Host
   useEffect(() => {

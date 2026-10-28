@@ -61,22 +61,22 @@ See [the release process](docs/RELEASE_PROCESS.md) for maintainer instructions.
 
 ## Available Commands
 
-| Command | Description |
-|---|---|
-| `Act: Run Workflow` | Run a complete workflow |
-| `Act: Quick Run` | Run the default workflow without prompts |
-| `Act: Run Job` | Run a specific job |
-| `Act: Stop Execution` | Cancel the current execution |
-| `Act: Validate Workflow` | Validate workflow YAML |
-| `Act: View History` | View previous executions |
+| Command                          | Description                              |
+| -------------------------------- | ---------------------------------------- |
+| `Act: Run Workflow`              | Run a complete workflow                  |
+| `Act: Quick Run`                 | Run the default workflow without prompts |
+| `Act: Run Job`                   | Run a specific job                       |
+| `Act: Stop Execution`            | Cancel the current execution             |
+| `Act: Validate Workflow`         | Validate workflow YAML                   |
+| `Act: View History`              | View previous executions                 |
 | `Act: Docker Alternatives Guide` | View free alternatives to Docker Desktop |
 
 ## Configuration
 
-| Setting | Description | Default |
-|---|---|---|
-| `actRunner.actPath` | Path to the `act` executable | `act` (`PATH`) |
-| `actRunner.defaultImage` | Default Docker image | `catthehacker/ubuntu:act-latest` |
+| Setting                  | Description                  | Default                          |
+| ------------------------ | ---------------------------- | -------------------------------- |
+| `actRunner.actPath`      | Path to the `act` executable | `act` (`PATH`)                   |
+| `actRunner.defaultImage` | Default Docker image         | `catthehacker/ubuntu:act-latest` |
 
 Configure the extension through **Preferences -> Settings -> Act Visual Runner**.
 

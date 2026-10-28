@@ -47,9 +47,11 @@ const WorkflowSchema = z.object({
   name: z.string(),
   filePath: z.string(),
   on: z.union([z.string(), z.array(z.string()), z.record(z.unknown())]),
-  jobs: z.record(JobSchema).refine((jobs: Record<string, unknown>) => Object.keys(jobs).length > 0, {
-    message: 'Workflow precisa ter ao menos um job',
-  }),
+  jobs: z
+    .record(JobSchema)
+    .refine((jobs: Record<string, unknown>) => Object.keys(jobs).length > 0, {
+      message: 'Workflow precisa ter ao menos um job',
+    }),
 });
 
 export interface ValidationResult {
@@ -63,7 +65,7 @@ export class WorkflowValidator {
 
     const result = WorkflowSchema.safeParse(workflow);
     if (!result.success) {
-      result.error.errors.forEach((e: { path: (string|number)[]; message: string }) => {
+      result.error.errors.forEach((e: { path: (string | number)[]; message: string }) => {
         errors.push(`${e.path.join('.')}: ${e.message}`);
       });
     }
