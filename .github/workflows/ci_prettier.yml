@@ -1,4 +1,5 @@
 name: CI / Prettier
+# Prettier is installed by the reusable workflow; consumer repositories need no local dependency.
 
 on:
   push:
