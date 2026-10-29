@@ -296,7 +296,7 @@ export function SummaryPanel() {
       <aside style={styles.sidebar}>
         <div style={styles.sidebarActive}>
           <span style={styles.sidebarIcon}>⌂</span>
-          <span>{t('Summary')}</span>
+          <span>{t('nav.summary')}</span>
         </div>
         <div style={styles.sidebarSection}>{t('Jobs')}</div>
         <div style={styles.sidebarJobs}>
@@ -308,7 +308,7 @@ export function SummaryPanel() {
               </div>
             ))
           ) : (
-            <div style={styles.sidebarEmpty}>{t('No job loaded')}</div>
+            <div style={styles.sidebarEmpty}>{t('job.empty')}</div>
           )}
         </div>
       </aside>
@@ -335,7 +335,7 @@ export function SummaryPanel() {
             <div style={styles.body} dangerouslySetInnerHTML={{ __html: htmlContent }} />
           ) : (
             <div style={{ ...styles.body, ...styles.empty }}>
-              {t('No GITHUB_STEP_SUMMARY detected in this execution.')}
+              {t('summary.empty')}
             </div>
           )}
         </section>
