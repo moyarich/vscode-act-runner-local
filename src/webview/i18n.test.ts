@@ -80,7 +80,7 @@ describe('webview translation references', () => {
   it('requires every statically referenced translation key in the source catalog', () => {
     for (const file of fs.readdirSync(components).filter((name) => name.endsWith('.tsx'))) {
       const content = fs.readFileSync(path.join(components, file), 'utf8');
-      for (const match of content.matchAll(/\\bt\\(\\s*['"]([^'"]+)['"]/g)) {
+      for (const match of content.matchAll(/\bt\(\s*['"]([^'"]+)['"]/g)) {
         expect(source).toHaveProperty(match[1]);
       }
     }
