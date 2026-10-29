@@ -351,7 +351,7 @@ export function LogPanel({ height }: { height: number }) {
       }}
     >
       <div style={styles.header}>
-        <span style={styles.headerTitle}>{t('Logs')}</span>
+        <span style={styles.headerTitle}>{t('log.title')}</span>
         {logFilter ? (
           <span style={styles.breadcrumb}>
             <span style={styles.breadcrumbLabel}>{logFilter.label}</span>
@@ -414,7 +414,7 @@ export function LogPanel({ height }: { height: number }) {
       <div ref={bodyRef} style={styles.body}>
         {displayItems.length === 0 ? (
           <span style={{ opacity: 0.4 }}>
-            {logFilter ? t('No logs for this step.') : t('Waiting for execution...')}
+            {logFilter ? t('log.empty') : t('execution.waiting')}
           </span>
         ) : (
           displayItems.map((item) => {
