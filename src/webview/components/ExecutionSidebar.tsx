@@ -124,7 +124,7 @@ function InnerJobRow({
         <button
           onClick={onToggle}
           style={styles.chevron}
-          title={isExpanded ? 'Colapsar' : 'Expandir'}
+          title={isExpanded ? t('collapse') : t('expand')}
         >
           {steps.length > 0 ? isExpanded ? '▾' : '▸' : <span style={{ opacity: 0 }}>▸</span>}
         </button>
@@ -301,7 +301,7 @@ export function ExecutionSidebar() {
                 <button
                   onClick={() => toggleOuter(oj.id)}
                   style={styles.chevronOuter}
-                  title={isExpanded ? 'Colapsar' : 'Expandir'}
+                  title={isExpanded ? t('collapse') : t('expand')}
                 >
                   {hasChildren ? isExpanded ? '▾' : '▸' : <span style={{ opacity: 0 }}>▸</span>}
                 </button>
