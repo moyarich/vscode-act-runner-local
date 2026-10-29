@@ -129,7 +129,10 @@ export function HistoryPanel() {
               />
               {selectedIds.size > 0
                 ? t('history.selected', selectedIds.size)
-                : t(filteredHistory.length === 1 ? 'history.runCountOne' : 'history.runCountOther', filteredHistory.length)}
+                : t(
+                    filteredHistory.length === 1 ? 'history.runCountOne' : 'history.runCountOther',
+                    filteredHistory.length
+                  )}
             </label>
             <button
               type="button"
