@@ -30,6 +30,11 @@ export function setLocale(language: string): void {
 export function getLocale(): SupportedLocale {
   return locale;
 }
+export function hasTranslation(message: string, language: string = locale): boolean {
+  const resolved = resolveLocale(language);
+  return Object.prototype.hasOwnProperty.call(catalogs[resolved], message);
+}
+
 export function t(
   message: string,
   ...args: Array<string | number | Record<string, string | number>>

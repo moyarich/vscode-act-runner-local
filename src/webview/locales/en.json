@@ -59,6 +59,7 @@
   "env.variables": "Environment variables",
   "env.variablesTab": "Variables",
   "env.varsDescription": "Variables loaded from a .vars file are visible as plain text and intended for non-sensitive settings.",
+  "error.webview": "Webview error",
   "execution": "Execution",
   "execution.idle": "No workflow running",
   "execution.local": "local",

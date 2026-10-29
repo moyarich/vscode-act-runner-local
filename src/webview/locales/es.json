@@ -59,6 +59,7 @@
   "env.variables": "Variables de entorno",
   "env.variablesTab": "Variables",
   "env.varsDescription": "Las variables de un archivo .vars aparecen como texto y sirven para configuración no confidencial.",
+  "error.webview": "Error de la vista web",
   "execution": "Execution",
   "execution.idle": "No hay flujos de trabajo en ejecución",
   "execution.local": "local",
