@@ -15,6 +15,14 @@ describe('webview localization', () => {
     expect(t('Run')).toBe('Ejecutar');
     expect(t('Nonexistent message')).toBe('Nonexistent message');
   });
+  it('switches locale without losing translated text', () => {
+    setLocale('fr-CA');
+    expect(t('Run')).toBe('Exécuter');
+    setLocale('es-MX');
+    expect(t('Run')).toBe('Ejecutar');
+    setLocale('en');
+    expect(t('Run')).toBe('Run');
+  });
   it('preserves placeholders', () => {
     setLocale('fr');
     expect(t('Value {0}', 42)).toBe('Value 42');
