@@ -93,19 +93,19 @@ export function TemplateSelector() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <span>{t('Templates')}</span>
+        <span>{t('template.list')}</span>
         <div style={styles.toggle}>
           <button
             style={{ ...styles.btn, ...(section === 'workflow' ? styles.btnActive : {}) }}
             onClick={() => setSection('workflow')}
           >
-            📋 {t('Workflows')}
+            📋 {t('workflow.list')}
           </button>
           <button
             style={{ ...styles.btn, ...(section === 'script' ? styles.btnActive : {}) }}
             onClick={() => setSection('script')}
           >
-            📜 {t('Scripts')}
+            📜 {t('script.list')}
           </button>
         </div>
       </div>
@@ -121,7 +121,7 @@ export function TemplateSelector() {
             {template.language && <div style={styles.tag}>{template.language}</div>}
             {selected === template.id && (
               <button style={styles.applyBtn} onClick={() => apply(template.id)}>
-                {t('Apply template')}
+                {t('template.apply')}
               </button>
             )}
           </div>
