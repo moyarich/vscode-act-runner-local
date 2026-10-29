@@ -512,18 +512,18 @@ async function pickWorkflow(): Promise<string | undefined> {
   const root = workspaceRoot();
   if (!root) {
     vscode.window.showErrorMessage(
-      'Selecione um projeto primeiro (botão 📂 na sidebar do Act Runner).'
+      t('Select a project first using the folder button in the Act Runner sidebar.')
     );
     return;
   }
   const paths = workflowParser.discoverWorkflows(root);
   if (paths.length === 0) {
-    vscode.window.showErrorMessage('Nenhum workflow encontrado em .github/workflows/');
+    vscode.window.showErrorMessage(t('No workflows found in .github/workflows/'));
     return;
   }
   if (paths.length === 1) return paths[0];
   const items = paths.map((p) => ({ label: path.basename(p), description: p, _path: p }));
-  const pick = await vscode.window.showQuickPick(items, { placeHolder: 'Selecione o workflow' });
+  const pick = await vscode.window.showQuickPick(items, { placeHolder: t('Select workflow') });
   return pick?._path;
 }
 
@@ -532,7 +532,7 @@ async function pickJob(wfPath: string): Promise<string | undefined> {
     const wf = workflowParser.parse(wfPath);
     const jobs = Object.keys(wf.jobs);
     if (jobs.length === 1) return jobs[0];
-    return vscode.window.showQuickPick(jobs, { placeHolder: 'Selecione o job' });
+    return vscode.window.showQuickPick(jobs, { placeHolder: t('Select job') });
   } catch {
     return undefined;
   }
@@ -543,7 +543,7 @@ async function safeRun(fn: () => Promise<unknown>): Promise<void> {
     await fn();
     sendWorkflowSnapshot();
   } catch (err) {
-    vscode.window.showErrorMessage(`Erro: ${err instanceof Error ? err.message : String(err)}`);
+    vscode.window.showErrorMessage(t('Error: {0}', err instanceof Error ? err.message : String(err)));
   }
 }
 
@@ -609,7 +609,7 @@ function openWebviewPanel(
           (msg.payload as Partial<ExecutionOptions>).workflowPath
         );
         if (!workflowPath) {
-          vscode.window.showErrorMessage('Nenhum workflow encontrado.');
+          vscode.window.showErrorMessage(t('No workflows found.'));
           break;
         }
         await safeRun(() =>
@@ -704,7 +704,7 @@ function openWebviewPanel(
           canSelectFolders: false,
           canSelectMany: false,
           defaultUri: vscode.Uri.file(root),
-          openLabel: 'Selecionar arquivo',
+          openLabel: t('Select file'),
           title: `Selecionar arquivo de ${tab}`,
           filters: { 'Arquivos de variáveis': ['env', 'vars', 'variables', 'secrets', '*'] },
         });
