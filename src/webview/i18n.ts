@@ -33,12 +33,17 @@ export function t(message: string, ...args: Array<string | number>): string {
 }
 /** Formatting belongs to the active locale, never a hardcoded language. */
 export function formatDate(value: string | number | Date): string {
-  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+    new Date(value)
+  );
 }
 export function formatNumber(value: number): string {
   return new Intl.NumberFormat(locale).format(value);
 }
-export function formatCount(value: number, forms: Partial<Record<Intl.LDMLPluralRule, string>>): string {
+export function formatCount(
+  value: number,
+  forms: Partial<Record<Intl.LDMLPluralRule, string>>
+): string {
   const rule = new Intl.PluralRules(locale).select(value);
   return (forms[rule] ?? forms.other ?? '').replace(/\{0\}/g, formatNumber(value));
 }
