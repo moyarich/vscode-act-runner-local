@@ -80,7 +80,7 @@ export function WorkflowRunDialog() {
       <div style={styles.dialog} onMouseDown={(event) => event.stopPropagation()}>
         <div style={styles.header}>
           <div>
-            <div style={styles.title}>{t("Run workflow")}</div>
+            <div style={styles.title}>{t('Run workflow')}</div>
             <div style={styles.subtitle}>
               {workflow.name} · {workflow.fileName}
             </div>
@@ -91,7 +91,7 @@ export function WorkflowRunDialog() {
         </div>
 
         <div style={styles.branchBox}>
-          <div style={styles.label}>{t("Use workflow from")}</div>
+          <div style={styles.label}>{t('Use workflow from')}</div>
           {branchOptions.length > 0 ? (
             <select
               style={styles.input}
