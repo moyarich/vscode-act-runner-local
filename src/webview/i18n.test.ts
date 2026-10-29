@@ -1,6 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { formatCount, formatDate, formatNumber, getLocale, resolveLocale, setLocale, t } from './i18n';
+import {
+  formatCount,
+  formatDate,
+  formatNumber,
+  getLocale,
+  resolveLocale,
+  setLocale,
+  t,
+} from './i18n';
 import english from './locales/en.json';
 import portuguese from './locales/pt-BR.json';
 import europeanPortuguese from './locales/pt-PT.json';
@@ -53,14 +61,17 @@ describe('webview localization', () => {
     (language) => {
       setLocale(language);
       const date = new Date('2026-04-20T12:30:00Z');
-      expect(formatDate(date)).toBe(new Intl.DateTimeFormat(language, {
-        dateStyle: 'medium', timeStyle: 'short',
-      }).format(date));
+      expect(formatDate(date)).toBe(
+        new Intl.DateTimeFormat(language, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(date)
+      );
       expect(formatNumber(1234567.89)).toBe(new Intl.NumberFormat(language).format(1234567.89));
       const plural = new Intl.PluralRules(language).select(2);
       const forms = { one: '{0} item', other: '{0} items' };
       expect(formatCount(2, forms)).toBe(
-        (forms[plural === 'one' ? 'one' : 'other']).replace('{0}', formatNumber(2))
+        forms[plural === 'one' ? 'one' : 'other'].replace('{0}', formatNumber(2))
       );
     }
   );
