@@ -30,11 +30,18 @@ export function setLocale(language: string): void {
 export function getLocale(): SupportedLocale {
   return locale;
 }
-export function t(message: string, ...args: Array<string | number>): string {
+export function t(
+  message: string,
+  ...args: Array<string | number | Record<string, string | number>>
+): string {
   const value = catalogs[locale]?.[message] ?? catalogs.en[message] ?? message;
-  return value.replace(/\{(\d+)\}/g, (_match, index: string) =>
-    String(args[Number(index)] ?? '{' + index + '}')
-  );
+  const named = args.length === 1 && typeof args[0] === 'object' ? args[0] : undefined;
+  return value.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*|\d+)\}/g, (placeholder, key: string) => {
+    const replacement = named
+      ? named[key]
+      : /^\d+$/.test(key) ? args[Number(key)] : undefined;
+    return replacement === undefined ? placeholder : String(replacement);
+  });
 }
 /** Formatting belongs to the active locale, never a hardcoded language. */
 export function formatDate(value: string | number | Date): string {
