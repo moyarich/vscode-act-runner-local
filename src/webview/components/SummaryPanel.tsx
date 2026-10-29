@@ -296,9 +296,9 @@ export function SummaryPanel() {
       <aside style={styles.sidebar}>
         <div style={styles.sidebarActive}>
           <span style={styles.sidebarIcon}>⌂</span>
-          <span>Summary</span>
+          <span>{t("Summary")}</span>
         </div>
-        <div style={styles.sidebarSection}>Jobs</div>
+        <div style={styles.sidebarSection}>{t("Jobs")}</div>
         <div style={styles.sidebarJobs}>
           {jobs.length > 0 ? (
             jobs.map((job) => (
