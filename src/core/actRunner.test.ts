@@ -123,11 +123,7 @@ describe('ActRunner', () => {
     ];
 
     for (const [workflowPath, workspaceRoot, actCwd, expected] of cases) {
-      const args = (runner as any).buildArgs(
-        { workflowPath, workspaceRoot },
-        'test/image',
-        actCwd
-      );
+      const args = (runner as any).buildArgs({ workflowPath, workspaceRoot }, 'test/image', actCwd);
       expect(args.slice(0, 2)).toEqual(['-W', expected]);
     }
   });
