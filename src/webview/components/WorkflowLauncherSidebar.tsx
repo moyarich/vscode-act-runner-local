@@ -118,7 +118,7 @@ export function WorkflowLauncherSidebar() {
                     <span style={styles.itemMeta}>
                       {workflow.fileName} · {workflow.jobs} job{workflow.jobs === 1 ? '' : 's'}
                       {workflow.inputs.length
-                        ? ` · ${workflow.inputs.length} input${workflow.inputs.length === 1 ? '' : 's'}`
+                        ? ` · ${t(workflow.inputs.length === 1 ? 'workflow.inputOne' : 'workflow.inputOther', workflow.inputs.length)}`
                         : ''}
                     </span>
                   </span>
