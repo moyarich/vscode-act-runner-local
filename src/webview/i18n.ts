@@ -55,5 +55,6 @@ export function formatCount(
   forms: Partial<Record<Intl.LDMLPluralRule, string>>
 ): string {
   const rule = new Intl.PluralRules(locale).select(value);
-  return (forms[rule] ?? forms.other ?? '').replace(/\{0\}/g, formatNumber(value));
+  const template = forms[rule] ?? forms.other ?? '';
+  return template.replace(/\{0\}/g, formatNumber(value));
 }
