@@ -5,6 +5,7 @@ import {
   formatDate,
   formatNumber,
   getLocale,
+  hasTranslation,
   resolveLocale,
   setLocale,
   t,
