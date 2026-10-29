@@ -1,6 +1,6 @@
 # Internationalization and localization
 
-Act/Run supports English (`en`), Spanish (`es`), French (`fr`), and Brazilian Portuguese (`pt-BR`). Unrecognized locales fall back to English.
+Act/Run supports English (`en`), Spanish (`es`), French (`fr`), and Brazilian Portuguese (`pt-BR`), and European Portuguese (`pt-PT`). Unrecognized locales fall back to English.
 
 ## Choosing a language
 
@@ -10,7 +10,7 @@ By default, `actRunner.language` is `auto`, which follows the VS Code display la
 { "actRunner.language": "fr" }
 ```
 
-Supported values: `auto`, `en`, `es`, `fr`, `pt-BR`. Changing the setting updates an open React webview without reinitializing its execution state.
+Supported values: `auto`, `en`, `es`, `fr`, `pt-BR`, `pt-PT`. Changing the setting updates an open React webview without reinitializing its execution state.
 
 VS Code command titles, view names, and configuration descriptions are controlled by VS Code's display language and **not** by `actRunner.language`; use **Configure Display Language** to switch those.
 
@@ -18,7 +18,7 @@ VS Code command titles, view names, and configuration descriptions are controlle
 
 - `package.nls.json` and `package.nls.<locale>.json` contain manifest contributions.
 - `l10n/bundle.l10n.json` and `l10n/bundle.l10n.<locale>.json` contain extension-host messages consumed through `vscode.l10n`.
-- `src/webview/locales/{en,es,fr,pt-BR}.json` stores the webview translations, while `src/webview/i18n.ts` implements locale resolution, fallback and `Intl` formatting. Use short semantic IDs such as `t('run')`, `t('history.empty')`, or `t('workflow.run')` for React labels. The canonical `src/webview/locales/en.json` maps IDs to English source messages. Keep identical keys in `es.json`, `fr.json`, and `pt-BR.json`.
+- `src/webview/locales/{en,es,fr,pt-BR,pt-PT}.json` stores the webview translations, while `src/webview/i18n.ts` implements locale resolution, fallback and `Intl` formatting. Use short semantic IDs such as `t('run')`, `t('history.empty')`, or `t('workflow.run')` for React labels. The canonical `src/webview/locales/en.json` maps IDs to English source messages. Keep identical keys in `es.json`, `fr.json`, and `pt-BR.json`, and `pt-PT.json`.
 
 Preserve interpolation placeholders such as `{0}`; do not translate workflow names, action output, user content or logs. Use locale-aware date and number formatting for presentation.
 
