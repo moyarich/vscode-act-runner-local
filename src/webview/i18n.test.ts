@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { formatCount, formatNumber, getLocale, resolveLocale, setLocale, t } from './i18n';
+import { formatCount, formatDate, formatNumber, getLocale, resolveLocale, setLocale, t } from './i18n';
 import english from './locales/en.json';
 import portuguese from './locales/pt-BR.json';
 import europeanPortuguese from './locales/pt-PT.json';
@@ -48,6 +48,22 @@ describe('webview localization', () => {
     expect(formatCount(1, { one: '{0} élément', other: '{0} éléments' })).toBe('1 élément');
     expect(formatCount(2, { one: '{0} élément', other: '{0} éléments' })).toBe('2 éléments');
   });
+  it.each(['en', 'es', 'fr', 'pt-BR', 'pt-PT'])(
+    'formats date, number and plural messages using %s',
+    (language) => {
+      setLocale(language);
+      const date = new Date('2026-04-20T12:30:00Z');
+      expect(formatDate(date)).toBe(new Intl.DateTimeFormat(language, {
+        dateStyle: 'medium', timeStyle: 'short',
+      }).format(date));
+      expect(formatNumber(1234567.89)).toBe(new Intl.NumberFormat(language).format(1234567.89));
+      const plural = new Intl.PluralRules(language).select(2);
+      const forms = { one: '{0} item', other: '{0} items' };
+      expect(formatCount(2, forms)).toBe(
+        (forms[plural === 'one' ? 'one' : 'other']).replace('{0}', formatNumber(2))
+      );
+    }
+  );
   it('preserves placeholders', () => {
     setLocale('fr');
     expect(t('Value {0}', 42)).toBe('Value 42');
