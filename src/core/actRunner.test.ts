@@ -80,6 +80,67 @@ describe('ActRunner', () => {
     );
   });
 
+  it('buildArgs() preserves a Windows workflow path under the default act root', () => {
+    const args = (runner as any).buildArgs(
+      {
+        workflowPath: 'C:\\Projects\\my app\\.github\\workflows\\ci.yml',
+        workspaceRoot: 'C:\\Projects\\my app',
+      },
+      'test/image',
+      'C:\\Projects\\my app'
+    );
+
+    expect(args.slice(0, 2)).toEqual(['-W', '.github/workflows/ci.yml']);
+  });
+
+  it('buildArgs() uses a Windows path relative to a custom act working directory', () => {
+    const args = (runner as any).buildArgs(
+      {
+        workflowPath: 'C:\\Projects\\my app\\.github\\workflows\\ci.yml',
+        workspaceRoot: 'C:\\Projects\\my app',
+      },
+      'test/image',
+      'C:\\Projects'
+    );
+
+    expect(args.slice(0, 2)).toEqual(['-W', 'my app/.github/workflows/ci.yml']);
+  });
+
+  it('buildArgs() resolves relative workflow paths from the workspace', () => {
+    const args = (runner as any).buildArgs(
+      { workflowPath: '.github/workflows/ci.yml', workspaceRoot: '/projects/app' },
+      'test/image',
+      '/projects'
+    );
+
+    expect(args.slice(0, 2)).toEqual(['-W', 'app/.github/workflows/ci.yml']);
+  });
+
+  it('buildArgs() preserves absolute paths outside the act root and on another drive', () => {
+    const cases = [
+      ['/projects/external/ci.yml', '/projects/app', '/projects/app', '/projects/external/ci.yml'],
+      ['D:\\workflows\\ci.yml', 'C:\\Projects\\app', 'C:\\Projects\\app', 'D:/workflows/ci.yml'],
+    ];
+
+    for (const [workflowPath, workspaceRoot, actCwd, expected] of cases) {
+      const args = (runner as any).buildArgs({ workflowPath, workspaceRoot }, 'test/image', actCwd);
+      expect(args.slice(0, 2)).toEqual(['-W', expected]);
+    }
+  });
+
+  it('buildArgs() does not strip shell-like characters from a workflow filename', () => {
+    const args = (runner as any).buildArgs(
+      {
+        workflowPath: '/projects/my repo/.github/workflows/build(test).yml',
+        workspaceRoot: '/projects/my repo',
+      },
+      'test/image',
+      '/projects/my repo'
+    );
+
+    expect(args.slice(0, 2)).toEqual(['-W', '.github/workflows/build(test).yml']);
+  });
+
   // --- Process execution lifecycle ------------------------------------------
 
   it('run() deve resolver ao finalizar com sucesso', async () => {
