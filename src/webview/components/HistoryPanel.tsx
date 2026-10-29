@@ -258,9 +258,7 @@ export function HistoryPanel() {
             </div>
           );
         })}
-        {pagedHistory.length === 0 && (
-          <div style={styles.noResults}>{t('history.noResults')}</div>
-        )}
+        {pagedHistory.length === 0 && <div style={styles.noResults}>{t('history.noResults')}</div>}
       </div>
 
       <div style={styles.pagination}>

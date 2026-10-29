@@ -227,8 +227,8 @@ export function EnvEditor() {
           <h2 style={s.pageTitle}>{t('env.title')}</h2>
           <p style={s.pageDesc}>
             Secrets and variables allow you to manage reusable configuration data.{' '}
-            <strong style={{ color: '#c9d1d9' }}>{t('secret.encrypted')}</strong> and are used
-            for sensitive data. Variables are shown as plain text and are used for{' '}
+            <strong style={{ color: '#c9d1d9' }}>{t('secret.encrypted')}</strong> and are used for
+            sensitive data. Variables are shown as plain text and are used for{' '}
             <strong style={{ color: '#c9d1d9' }}>{t('env.publicData')}</strong>. Anyone with
             collaborator access can use these secrets and variables for actions. They are not passed
             to workflows triggered by a pull request from a fork.
@@ -345,9 +345,8 @@ export function EnvEditor() {
                     />
                     {config.isSecret && (
                       <p style={s.formHint}>
-                        ⚠️ {t('secret.warning')}{' '}
-                        <code style={s.code}>.secrets</code> {t('common.isIn')}{' '}
-                        <code style={s.code}>.gitignore</code>.
+                        ⚠️ {t('secret.warning')} <code style={s.code}>.secrets</code>{' '}
+                        {t('common.isIn')} <code style={s.code}>.gitignore</code>.
                       </p>
                     )}
                   </div>
