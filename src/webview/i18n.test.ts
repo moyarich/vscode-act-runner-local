@@ -30,21 +30,25 @@ describe('webview localization', () => {
 });
 
 describe('translation catalog integrity', () => {
- const dictionaries = {
-   'pt-BR': require('./locales/pt-BR.json') as Record<string,string>,
-   es: require('./locales/es.json') as Record<string,string>,
-   fr: require('./locales/fr.json') as Record<string,string>,
- };
- const placeholders = (value: string) => Array.from(value.matchAll(/\{\d+\}/g), match => match[0]).sort();
- it.each(Object.entries(dictionaries))('%s has valid translations and placeholders', (_locale, entries) => {
-   for (const [source, translation] of Object.entries(entries)) {
-     expect(translation.trim()).not.toBe('');
-     expect(placeholders(translation)).toEqual(placeholders(source));
-   }
- });
- it('uses exact locale subtags', () => {
-   expect(resolveLocale('essay')).toBe('en');
-   expect(resolveLocale('FR_ca')).toBe('fr');
-   expect(resolveLocale('pt-PT')).toBe('pt-BR');
- });
+  const dictionaries = {
+    'pt-BR': require('./locales/pt-BR.json') as Record<string, string>,
+    es: require('./locales/es.json') as Record<string, string>,
+    fr: require('./locales/fr.json') as Record<string, string>,
+  };
+  const placeholders = (value: string) =>
+    Array.from(value.matchAll(/\{\d+\}/g), (match) => match[0]).sort();
+  it.each(Object.entries(dictionaries))(
+    '%s has valid translations and placeholders',
+    (_locale, entries) => {
+      for (const [source, translation] of Object.entries(entries)) {
+        expect(translation.trim()).not.toBe('');
+        expect(placeholders(translation)).toEqual(placeholders(source));
+      }
+    }
+  );
+  it('uses exact locale subtags', () => {
+    expect(resolveLocale('essay')).toBe('en');
+    expect(resolveLocale('FR_ca')).toBe('fr');
+    expect(resolveLocale('pt-PT')).toBe('pt-BR');
+  });
 });
