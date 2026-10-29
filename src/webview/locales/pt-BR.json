@@ -59,6 +59,7 @@
   "env.variables": "Variáveis de ambiente",
   "env.variablesTab": "Variáveis",
   "env.varsDescription": "Variáveis do arquivo .vars são exibidas como texto e destinadas a configurações não sensíveis.",
+  "error.webview": "Erro na visualização web",
   "execution": "Execução",
   "execution.idle": "Nenhum workflow em execução",
   "execution.local": "local",
