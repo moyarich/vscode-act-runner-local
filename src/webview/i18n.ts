@@ -1,10 +1,12 @@
+import english from './locales/en.json';
 import portuguese from './locales/pt-BR.json';
 import spanish from './locales/es.json';
 import french from './locales/fr.json';
 
 export type SupportedLocale = 'en' | 'es' | 'fr' | 'pt-BR';
 type Dictionary = Record<string, string>;
-const catalogs: Record<Exclude<SupportedLocale, 'en'>, Dictionary> = {
+const catalogs: Record<SupportedLocale, Dictionary> = {
+  en: english,
   es: spanish,
   fr: french,
   'pt-BR': portuguese,
@@ -26,7 +28,7 @@ export function getLocale(): SupportedLocale {
   return locale;
 }
 export function t(message: string, ...args: Array<string | number>): string {
-  const value = (locale === 'en' ? undefined : catalogs[locale]?.[message]) ?? message;
+  const value = catalogs[locale]?.[message] ?? catalogs.en[message] ?? message;
   return value.replace(/\{(\d+)\}/g, (_match, index: string) =>
     String(args[Number(index)] ?? '{' + index + '}')
   );
