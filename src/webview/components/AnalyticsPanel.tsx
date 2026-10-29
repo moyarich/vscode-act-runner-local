@@ -137,7 +137,11 @@ export function AnalyticsPanel() {
               <MetricCard
                 label={t('analytics.failureRate')}
                 value={`${metrics.failureRate.toFixed(1)}%`}
-                sub={t('analytics.failedOfTotal', formatNumber(metrics.failedRuns), formatNumber(metrics.totalRuns))}
+                sub={t(
+                  'analytics.failedOfTotal',
+                  formatNumber(metrics.failedRuns),
+                  formatNumber(metrics.totalRuns)
+                )}
               />
               <MetricCard
                 label={t('analytics.totalMinutes')}
@@ -165,13 +169,19 @@ export function AnalyticsPanel() {
               title={t('analytics.builds')}
               buckets={buckets}
               mode="count"
-              averageLabel={t('analytics.averageJobs', formatNumber(Math.round(metrics.averageBuildsPerBucket)))}
+              averageLabel={t(
+                'analytics.averageJobs',
+                formatNumber(Math.round(metrics.averageBuildsPerBucket))
+              )}
             />
             <ChartPanel
               title={t('analytics.minutes')}
               buckets={buckets}
               mode="minutes"
-              averageLabel={t('analytics.averageMinutes', formatNumber(Math.round(metrics.averageMinutesPerBucket)))}
+              averageLabel={t(
+                'analytics.averageMinutes',
+                formatNumber(Math.round(metrics.averageMinutesPerBucket))
+              )}
             />
           </section>
 
