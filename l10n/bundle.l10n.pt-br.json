@@ -66,5 +66,11 @@
   "Select job": "Selecionar job",
   "Error: {0}": "Erro: {0}",
   "No workflows found.": "Nenhum workflow encontrado.",
-  "Select file": "Selecionar arquivo"
+  "Select file": "Selecionar arquivo",
+  "{0} steps": "{0} etapas",
+  "Select file for {0}": "Selecionar arquivo para {0}",
+  "Variable files": "Arquivos de variáveis",
+  "Select a file to save {0}.": "Selecione um arquivo para salvar {0}.",
+  "✅ {0} saved successfully.": "✅ {0} salvo com sucesso.",
+  "Failed to save {0}: {1}": "Erro ao salvar {0}: {1}"
 }
