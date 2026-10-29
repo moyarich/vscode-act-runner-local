@@ -334,9 +334,7 @@ export function SummaryPanel() {
           {summaryContent ? (
             <div style={styles.body} dangerouslySetInnerHTML={{ __html: htmlContent }} />
           ) : (
-            <div style={{ ...styles.body, ...styles.empty }}>
-              {t('summary.empty')}
-            </div>
+            <div style={{ ...styles.body, ...styles.empty }}>{t('summary.empty')}</div>
           )}
         </section>
       </main>

@@ -590,9 +590,7 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
       <div style={styles.empty}>
         <div style={styles.emptyIcon}>▶</div>
         <p style={{ fontWeight: 600, marginBottom: 4 }}>{t('execution.idle')}</p>
-        <p style={{ fontSize: 12, color: '#6e7681' }}>
-          {t('workflow.selectHint')}
-        </p>
+        <p style={{ fontSize: 12, color: '#6e7681' }}>{t('workflow.selectHint')}</p>
       </div>
     );
   }
