@@ -59,5 +59,12 @@
   "Validate Workflow": "Valider le workflow",
   "Manage Environment Variables": "Manage Environment Variables",
   "View History": "Voir l’historique",
-  "Security best practices": "Security best practices"
+  "Security best practices": "Security best practices",
+  "Select a project first using the folder button in the Act Runner sidebar.": "Sélectionnez d’abord un projet depuis la barre latérale Act Runner.",
+  "No workflows found in .github/workflows/": "Aucun workflow trouvé dans .github/workflows/",
+  "Select workflow": "Choisir un workflow",
+  "Select job": "Choisir une tâche",
+  "Error: {0}": "Erreur : {0}",
+  "No workflows found.": "Aucun workflow trouvé.",
+  "Select file": "Choisir un fichier"
 }
