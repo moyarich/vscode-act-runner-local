@@ -37,17 +37,17 @@ export function ControlBar() {
       <div style={styles.left}>
         {!isRunning && (
           <button style={styles.btnPrimary} onClick={runSelectedWorkflow}>
-            ▶ {t('Run')}
+            ▶ {t('run')}
           </button>
         )}
         {isRunning && (
           <button style={styles.btnDanger} onClick={() => send('command:stop', {})}>
-            ⏹ {t('Stop')}
+            ⏹ {t('stop')}
           </button>
         )}
         <button
           style={styles.btnAct}
-          title={t('Configure the act executable path')}
+          title={t('act.configure')}
           onClick={() => send('command:locateAct', {})}
         >
           ⚙ act
@@ -67,10 +67,10 @@ export function ControlBar() {
           >
             {
               {
-                graph: `🗺 ${t('Graph')}`,
-                history: `📜 ${t('History')}`,
-                analytics: `📊 ${t('Analytics')}`,
-                env: `⚙️ ${t('Settings')}`,
+                graph: `🗺 ${t('nav.graph')}`,
+                history: `📜 ${t('nav.history')}`,
+                analytics: `📊 ${t('nav.analytics')}`,
+                env: `⚙️ ${t('nav.settings')}`,
               }[view]
             }
           </button>
@@ -83,7 +83,7 @@ export function ControlBar() {
           }}
           onClick={() => setView('summary')}
         >
-          📋 {t('Summary')}
+          📋 {t('nav.summary')}
         </button>
       </div>
     </div>
