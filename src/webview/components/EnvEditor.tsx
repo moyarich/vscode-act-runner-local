@@ -313,7 +313,9 @@ export function EnvEditor() {
             <div style={s.formBox}>
               <div style={s.formHeader}>
                 <h3 style={s.formTitle}>
-                  {mode === 'add' ? config.newBtnLabel : t('env.update', config.label.toLowerCase())}
+                  {mode === 'add'
+                    ? config.newBtnLabel
+                    : t('env.update', config.label.toLowerCase())}
                 </h3>
               </div>
               <div style={s.formBody}>
@@ -340,7 +342,9 @@ export function EnvEditor() {
                     <textarea
                       style={s.formTextarea}
                       value={formValue}
-                      placeholder={t(config.isSecret ? 'env.secretPlaceholder' : 'env.valuePlaceholder')}
+                      placeholder={t(
+                        config.isSecret ? 'env.secretPlaceholder' : 'env.valuePlaceholder'
+                      )}
                       onChange={(e) => setFormValue(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Escape') cancelForm();
@@ -390,9 +394,7 @@ export function EnvEditor() {
                 </div>
               ) : rows.length === 0 ? (
                 <div style={s.emptyBox}>
-                  <p style={s.emptyText}>
-                    {t('env.empty', config.label.toLowerCase())}
-                  </p>
+                  <p style={s.emptyText}>{t('env.empty', config.label.toLowerCase())}</p>
                   <button style={s.btnGreenSm} onClick={openAdd}>
                     {config.newBtnLabel}
                   </button>
