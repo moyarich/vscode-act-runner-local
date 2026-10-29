@@ -277,9 +277,7 @@ function getWorkflowSummaries(): Array<{
   });
 }
 
-function getWorkflowDispatchInputs(
-  workflow: WorkflowDefinition
-): Array<{
+function getWorkflowDispatchInputs(workflow: WorkflowDefinition): Array<{
   name: string;
   description?: string;
   required: boolean;
