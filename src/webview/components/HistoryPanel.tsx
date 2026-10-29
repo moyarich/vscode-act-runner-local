@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useExecutionStore } from '../store/executionStore';
-import { t } from '../i18n';
+import { t, getLocale } from '../i18n';
 
 const PAGE_SIZE = 20;
 
@@ -53,7 +53,7 @@ export function HistoryPanel() {
         record.jobId,
         record.status,
         record.trigger,
-        new Date(record.startedAt).toLocaleString('pt-BR'),
+        new Date(record.startedAt).toLocaleString(getLocale()),
       ].some((value) =>
         String(value ?? '')
           .toLowerCase()
@@ -94,8 +94,8 @@ export function HistoryPanel() {
     <div style={styles.container}>
       <div style={styles.topBar}>
         <div>
-          <div style={styles.title}>All workflow runs</div>
-          <div style={styles.subtitle}>Showing runs from all workflows</div>
+          <div style={styles.title}>{t('All workflow runs')}</div>
+          <div style={styles.subtitle}>{t('Showing runs from all workflows')}</div>
           <div style={styles.retentionNote}>
             For performance, only the latest 40 workflow runs are kept. Older runs are removed
             automatically.
@@ -188,7 +188,7 @@ export function HistoryPanel() {
                 <span style={styles.statusText}>{capitalize(r.status)}</span>
                 <span style={styles.branchPill}>{branch}</span>
                 <span style={styles.metaBlock}>
-                  {new Date(r.startedAt).toLocaleString('pt-BR')}
+                  {new Date(r.startedAt).toLocaleString(getLocale())}
                   <br />
                   {r.duration != null ? `${(r.duration / 1000).toFixed(1)}s` : '—'}
                 </span>
