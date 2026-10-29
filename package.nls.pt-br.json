@@ -23,5 +23,6 @@
   "configuration.maxHistoryRecords": "Número máximo de registros no histórico de execuções (limitado a 40 para manter a performance)",
   "configuration.secretsFile": "Caminho para o arquivo de secrets (relativo ao workspace)",
   "configuration.envFile": "Caminho para o arquivo de variáveis de ambiente (relativo ao workspace)",
-  "configuration.varFile": "Caminho para o arquivo de vars do GitHub Actions usado pelo act --var-file (relativo ao workspace)"
+  "configuration.varFile": "Caminho para o arquivo de vars do GitHub Actions usado pelo act --var-file (relativo ao workspace)",
+  "configuration.language": "Idioma das mensagens e visualizações (auto segue o idioma do VS Code)"
 }
