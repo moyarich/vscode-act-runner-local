@@ -9,16 +9,6 @@
     "rootDir": "./src",
     "moduleResolution": "bundler"
   },
-  "include": [
-    "src/webview/**/*.ts",
-    "src/webview/**/*.tsx",
-    "src/types/**/*.ts"
-  ],
-  "exclude": [
-    "src/core/**",
-    "src/providers/**",
-    "src/extension.ts",
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/webview/**/*.ts", "src/webview/**/*.tsx", "src/types/**/*.ts"],
+  "exclude": ["src/core/**", "src/providers/**", "src/extension.ts", "node_modules", "dist"]
 }

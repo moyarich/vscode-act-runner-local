@@ -57,29 +57,38 @@ describe('EnvManager', () => {
       key === `actRunner.secretsFile.${tempRoot}` ? 'config/local.secrets' : undefined
     );
 
-    expect(manager.getSelectedSecretsFilePath(tempRoot)).toBe(path.join(tempRoot, 'config', 'local.secrets'));
+    expect(manager.getSelectedSecretsFilePath(tempRoot)).toBe(
+      path.join(tempRoot, 'config', 'local.secrets')
+    );
   });
 
   it('lê secret multilinha entre aspas sem criar entradas para o conteúdo', () => {
     const secretsPath = path.join(tempRoot, '.secrets');
-    fs.writeFileSync(secretsPath, [
-      'GH_APP_PRIVATE_KEY="',
-      '-----BEGIN RSA PRIVATE KEY-----',
-      'MIIEowIBAAKCAQEArQxr20etHi3d6sYULzI3eLUNFRERglfkznrV2DalQrCSx2Sm',
-      '-----END RSA PRIVATE KEY-----',
-      '"',
-      'TOKEN=local-secret',
-    ].join('\n'));
+    fs.writeFileSync(
+      secretsPath,
+      [
+        'GH_APP_PRIVATE_KEY="',
+        '-----BEGIN RSA PRIVATE KEY-----',
+        'MIIEowIBAAKCAQEArQxr20etHi3d6sYULzI3eLUNFRERglfkznrV2DalQrCSx2Sm',
+        '-----END RSA PRIVATE KEY-----',
+        '"',
+        'TOKEN=local-secret',
+      ].join('\n')
+    );
 
     const result = manager.read(secretsPath);
 
-    expect(result.get('GH_APP_PRIVATE_KEY')).toBe([
-      '-----BEGIN RSA PRIVATE KEY-----',
-      'MIIEowIBAAKCAQEArQxr20etHi3d6sYULzI3eLUNFRERglfkznrV2DalQrCSx2Sm',
-      '-----END RSA PRIVATE KEY-----',
-    ].join('\n'));
+    expect(result.get('GH_APP_PRIVATE_KEY')).toBe(
+      [
+        '-----BEGIN RSA PRIVATE KEY-----',
+        'MIIEowIBAAKCAQEArQxr20etHi3d6sYULzI3eLUNFRERglfkznrV2DalQrCSx2Sm',
+        '-----END RSA PRIVATE KEY-----',
+      ].join('\n')
+    );
     expect(result.get('TOKEN')).toBe('local-secret');
-    expect(result.has('MIIEowIBAAKCAQEArQxr20etHi3d6sYULzI3eLUNFRERglfkznrV2DalQrCSx2Sm')).toBe(false);
+    expect(result.has('MIIEowIBAAKCAQEArQxr20etHi3d6sYULzI3eLUNFRERglfkznrV2DalQrCSx2Sm')).toBe(
+      false
+    );
   });
 
   it('salva valores multilinha em formato recarregável', () => {
@@ -98,27 +107,36 @@ describe('EnvManager', () => {
   it('returns defaults and resolves workspace-relative paths', () => {
     expect(manager.getDefaultFilePath(tempRoot, 'envFile')).toBe(path.join(tempRoot, '.env'));
     expect(manager.getDefaultFilePath(tempRoot, 'varFile')).toBe(path.join(tempRoot, '.vars'));
-    expect(manager.getDefaultFilePath(tempRoot, 'secretsFile')).toBe(path.join(tempRoot, '.secrets'));
+    expect(manager.getDefaultFilePath(tempRoot, 'secretsFile')).toBe(
+      path.join(tempRoot, '.secrets')
+    );
 
     const inside = path.join(tempRoot, 'config', 'vars.env');
     const outside = path.join(os.tmpdir(), 'outside.env');
 
     expect(manager.toWorkspaceRelative(tempRoot, inside)).toBe(path.join('config', 'vars.env'));
     expect(manager.toWorkspaceRelative(tempRoot, outside)).toBe(outside);
-    expect(manager.resolveFilePath(tempRoot, 'nested/file.env')).toBe(path.join(tempRoot, 'nested/file.env'));
+    expect(manager.resolveFilePath(tempRoot, 'nested/file.env')).toBe(
+      path.join(tempRoot, 'nested/file.env')
+    );
   });
 
   it('writes and reads simple environment values', () => {
     const envPath = path.join(tempRoot, '.env');
-    manager.write(envPath, new Map([
-      ['FOO', 'bar'],
-      ['EMPTY', ''],
-    ]));
+    manager.write(
+      envPath,
+      new Map([
+        ['FOO', 'bar'],
+        ['EMPTY', ''],
+      ])
+    );
 
-    expect(manager.read(envPath)).toEqual(new Map([
-      ['FOO', 'bar'],
-      ['EMPTY', ''],
-    ]));
+    expect(manager.read(envPath)).toEqual(
+      new Map([
+        ['FOO', 'bar'],
+        ['EMPTY', ''],
+      ])
+    );
   });
 
   it('returns an empty map for a missing env file', () => {
@@ -160,9 +178,7 @@ describe('EnvManager', () => {
     expect(fs.readFileSync(gitignorePath, 'utf-8')).toBe('node_modules\n');
   });
 
-
   it('returns the project .actrc path', () => {
     expect(manager.getActrcFilePath(tempRoot)).toBe(path.join(tempRoot, '.actrc'));
   });
-
 });

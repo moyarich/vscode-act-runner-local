@@ -1,9 +1,6 @@
 // Tipos do domínio de Workflow — GitHub Actions YAML
 
-export type WorkflowTrigger =
-  | string
-  | string[]
-  | Record<string, unknown>;
+export type WorkflowTrigger = string | string[] | Record<string, unknown>;
 
 export interface StepDefinition {
   id?: string;

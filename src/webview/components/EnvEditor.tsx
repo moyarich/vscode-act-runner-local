@@ -11,7 +11,10 @@ type FileTab = 'secrets' | 'vars' | 'env' | 'actrc';
 type SidebarSection = 'actions';
 type Mode = 'list' | 'add' | 'edit';
 
-interface EnvEntry { key: string; value: string }
+interface EnvEntry {
+  key: string;
+  value: string;
+}
 
 interface TabConfig {
   label: string;
@@ -35,7 +38,8 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'secrets',
     filePlaceholder: '.secrets ou config/local.secrets',
     isSecret: true,
-    description: 'Secrets are encrypted and are used for sensitive data. They are not passed to workflows triggered by a pull request from a fork.',
+    description:
+      'Secrets are encrypted and are used for sensitive data. They are not passed to workflows triggered by a pull request from a fork.',
   },
   vars: {
     label: '.vars',
@@ -46,7 +50,8 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'vars',
     filePlaceholder: '.vars ou my.variables',
     isSecret: false,
-    description: 'Variables loaded from a .vars file. Shown as plain text and used for non-sensitive configuration data.',
+    description:
+      'Variables loaded from a .vars file. Shown as plain text and used for non-sensitive configuration data.',
   },
   env: {
     label: '.env',
@@ -57,7 +62,8 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'env',
     filePlaceholder: '.env ou my.env',
     isSecret: false,
-    description: 'Environment variables loaded from a .env file and passed to the act runner at execution time.',
+    description:
+      'Environment variables loaded from a .env file and passed to the act runner at execution time.',
   },
   actrc: {
     label: 'Args do ACT',
@@ -68,7 +74,8 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'actrc',
     filePlaceholder: '.actrc',
     isSecret: false,
-    description: 'Configure act runner flags and platform mappings used when running GitHub Actions locally.',
+    description:
+      'Configure act runner flags and platform mappings used when running GitHub Actions locally.',
   },
 };
 
@@ -83,9 +90,7 @@ export function EnvEditor() {
 
   // Derived file tab based on navigation
   const fileTab: FileTab =
-    mainTab === 'secrets' ? 'secrets' :
-      mainTab === 'actrc' ? 'actrc' :
-        varsSubTab;
+    mainTab === 'secrets' ? 'secrets' : mainTab === 'actrc' ? 'actrc' : varsSubTab;
 
   const [rows, setRows] = useState<EnvEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -126,12 +131,18 @@ export function EnvEditor() {
   const config = FILE_TAB_CONFIGS[fileTab];
 
   const saveAll = (newRows: EnvEntry[]) => {
-    window.__vscode__?.postMessage({ type: 'command:saveEnv', payload: { tab: fileTab, rows: newRows, filePath } });
+    window.__vscode__?.postMessage({
+      type: 'command:saveEnv',
+      payload: { tab: fileTab, rows: newRows, filePath },
+    });
   };
 
   const loadCurrentFile = () => {
     setLoading(true);
-    window.__vscode__?.postMessage({ type: 'command:loadEnv', payload: { tab: fileTab, filePath } });
+    window.__vscode__?.postMessage({
+      type: 'command:loadEnv',
+      payload: { tab: fileTab, filePath },
+    });
   };
 
   const selectFile = () => {
@@ -139,7 +150,12 @@ export function EnvEditor() {
     window.__vscode__?.postMessage({ type: 'command:selectEnvFile', payload: { tab: fileTab } });
   };
 
-  const openAdd = () => { setFormKey(''); setFormValue(''); setEditIndex(null); setMode('add'); };
+  const openAdd = () => {
+    setFormKey('');
+    setFormValue('');
+    setEditIndex(null);
+    setMode('add');
+  };
 
   const openEdit = (i: number) => {
     setFormKey(rows[i].key);
@@ -148,7 +164,12 @@ export function EnvEditor() {
     setMode('edit');
   };
 
-  const cancelForm = () => { setMode('list'); setEditIndex(null); setFormKey(''); setFormValue(''); };
+  const cancelForm = () => {
+    setMode('list');
+    setEditIndex(null);
+    setFormKey('');
+    setFormValue('');
+  };
 
   const submitForm = () => {
     if (!formKey.trim()) return;
@@ -156,7 +177,9 @@ export function EnvEditor() {
     if (mode === 'add') {
       newRows = [...rows, { key: formKey.trim(), value: formValue }];
     } else if (mode === 'edit' && editIndex !== null) {
-      newRows = rows.map((r, i) => i === editIndex ? { key: formKey.trim(), value: formValue } : r);
+      newRows = rows.map((r, i) =>
+        i === editIndex ? { key: formKey.trim(), value: formValue } : r
+      );
     } else {
       return;
     }
@@ -204,21 +227,23 @@ export function EnvEditor() {
           <h2 style={s.pageTitle}>Actions secrets and variables</h2>
           <p style={s.pageDesc}>
             Secrets and variables allow you to manage reusable configuration data.{' '}
-            <strong style={{ color: '#c9d1d9' }}>Secrets are encrypted</strong> and are used for sensitive data.{' '}
-            Variables are shown as plain text and are used for{' '}
-            <strong style={{ color: '#c9d1d9' }}>non-sensitive data</strong>.{' '}
-            Anyone with collaborator access can use these secrets and variables for actions.
-            They are not passed to workflows triggered by a pull request from a fork.
+            <strong style={{ color: '#c9d1d9' }}>Secrets are encrypted</strong> and are used for
+            sensitive data. Variables are shown as plain text and are used for{' '}
+            <strong style={{ color: '#c9d1d9' }}>non-sensitive data</strong>. Anyone with
+            collaborator access can use these secrets and variables for actions. They are not passed
+            to workflows triggered by a pull request from a fork.
           </p>
         </div>
 
         {/* Top nav tabs: Secrets | Variables | Args do ACT */}
         <div style={s.navTabs}>
-          {([
-            { key: 'secrets', label: 'Secrets' },
-            { key: 'variables', label: 'Variables' },
-            { key: 'actrc', label: 'Args do ACT' },
-          ] as { key: MainTab; label: string }[]).map((t) => (
+          {(
+            [
+              { key: 'secrets', label: 'Secrets' },
+              { key: 'variables', label: 'Variables' },
+              { key: 'actrc', label: 'Args do ACT' },
+            ] as { key: MainTab; label: string }[]
+          ).map((t) => (
             <button
               key={t.key}
               style={{ ...s.navTab, ...(mainTab === t.key ? s.navTabActive : {}) }}
@@ -234,10 +259,12 @@ export function EnvEditor() {
           {/* Variables sub-tabs (.vars | .env) */}
           {mainTab === 'variables' && (
             <div style={s.subTabs}>
-              {([
-                { key: 'vars', label: '.vars' },
-                { key: 'env', label: '.env' },
-              ] as { key: VarsSubTab; label: string }[]).map((t) => (
+              {(
+                [
+                  { key: 'vars', label: '.vars' },
+                  { key: 'env', label: '.env' },
+                ] as { key: VarsSubTab; label: string }[]
+              ).map((t) => (
                 <button
                   key={t.key}
                   style={{ ...s.subTab, ...(varsSubTab === t.key ? s.subTabActive : {}) }}
@@ -254,7 +281,7 @@ export function EnvEditor() {
 
           {/* File path (collapsible) */}
           <div style={s.fileRow}>
-            <button style={s.fileToggle} onClick={() => setShowFilePath(v => !v)}>
+            <button style={s.fileToggle} onClick={() => setShowFilePath((v) => !v)}>
               📄 {filePath || config.filePlaceholder}
               <span style={s.fileToggleArrow}>{showFilePath ? '▲' : '▼'}</span>
             </button>
@@ -266,8 +293,12 @@ export function EnvEditor() {
                   placeholder={config.filePlaceholder}
                   onChange={(e) => setFilePath(e.target.value)}
                 />
-                <button style={s.btnOutline} onClick={selectFile}>Selecionar</button>
-                <button style={s.btnOutline} onClick={loadCurrentFile}>Carregar</button>
+                <button style={s.btnOutline} onClick={selectFile}>
+                  Selecionar
+                </button>
+                <button style={s.btnOutline} onClick={loadCurrentFile}>
+                  Carregar
+                </button>
               </div>
             )}
           </div>
@@ -287,7 +318,11 @@ export function EnvEditor() {
                     ref={nameInputRef}
                     style={s.formInput}
                     value={formKey}
-                    placeholder={mainTab === 'actrc' ? '--flag ou -P ubuntu-latest=catthehacker/ubuntu:act-latest' : 'e.g. MY_VARIABLE'}
+                    placeholder={
+                      mainTab === 'actrc'
+                        ? '--flag ou -P ubuntu-latest=catthehacker/ubuntu:act-latest'
+                        : 'e.g. MY_VARIABLE'
+                    }
                     onChange={(e) => setFormKey(e.target.value)}
                     onKeyDown={handleKeyDown}
                     spellCheck={false}
@@ -302,14 +337,16 @@ export function EnvEditor() {
                       value={formValue}
                       placeholder={config.isSecret ? 'Enter secret value' : 'Enter value'}
                       onChange={(e) => setFormValue(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Escape') cancelForm(); }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') cancelForm();
+                      }}
                       rows={3}
                       spellCheck={false}
                     />
                     {config.isSecret && (
                       <p style={s.formHint}>
-                        ⚠️ {t('Secrets should never be committed. Make sure')} {' '}
-                        <code style={s.code}>.secrets</code> {t('is in')} {' '}
+                        ⚠️ {t('Secrets should never be committed. Make sure')}{' '}
+                        <code style={s.code}>.secrets</code> {t('is in')}{' '}
                         <code style={s.code}>.gitignore</code>.
                       </p>
                     )}
@@ -321,9 +358,13 @@ export function EnvEditor() {
                     onClick={submitForm}
                     disabled={!formKey.trim()}
                   >
-                    {mode === 'add' ? `Add ${config.label.toLowerCase()}` : `Update ${config.label.toLowerCase()}`}
+                    {mode === 'add'
+                      ? `Add ${config.label.toLowerCase()}`
+                      : `Update ${config.label.toLowerCase()}`}
                   </button>
-                  <button style={s.btnOutline} onClick={cancelForm}>Cancel</button>
+                  <button style={s.btnOutline} onClick={cancelForm}>
+                    Cancel
+                  </button>
                 </div>
               </div>
             </div>
@@ -334,15 +375,23 @@ export function EnvEditor() {
             <div style={s.section}>
               <div style={s.sectionHeader}>
                 <span style={s.sectionTitle}>{config.sectionTitle}</span>
-                <button style={s.btnGreen} onClick={openAdd}>{config.newBtnLabel}</button>
+                <button style={s.btnGreen} onClick={openAdd}>
+                  {config.newBtnLabel}
+                </button>
               </div>
 
               {loading ? (
-                <div style={s.emptyBox}><span style={s.emptyText}>Loading…</span></div>
+                <div style={s.emptyBox}>
+                  <span style={s.emptyText}>Loading…</span>
+                </div>
               ) : rows.length === 0 ? (
                 <div style={s.emptyBox}>
-                  <p style={s.emptyText}>There are no {config.label.toLowerCase()} for this repository.</p>
-                  <button style={s.btnGreenSm} onClick={openAdd}>{config.newBtnLabel}</button>
+                  <p style={s.emptyText}>
+                    There are no {config.label.toLowerCase()} for this repository.
+                  </p>
+                  <button style={s.btnGreenSm} onClick={openAdd}>
+                    {config.newBtnLabel}
+                  </button>
                 </div>
               ) : (
                 <div style={s.table}>
@@ -362,15 +411,26 @@ export function EnvEditor() {
                       </div>
                       {config.valueLabel !== null && (
                         <div style={s.tdValue}>
-                          {config.isSecret
-                            ? <span style={s.maskedValue}>••••••••••••••••</span>
-                            : <span style={s.plainValue}>{row.value || <span style={s.noValue}>—</span>}</span>
-                          }
+                          {config.isSecret ? (
+                            <span style={s.maskedValue}>••••••••••••••••</span>
+                          ) : (
+                            <span style={s.plainValue}>
+                              {row.value || <span style={s.noValue}>—</span>}
+                            </span>
+                          )}
                         </div>
                       )}
                       <div style={s.tdActions}>
-                        <button style={s.iconBtn} title="Edit" onClick={() => openEdit(i)}>✏️</button>
-                        <button style={{ ...s.iconBtn, ...s.iconBtnDanger }} title="Delete" onClick={() => deleteRow(i)}>🗑️</button>
+                        <button style={s.iconBtn} title="Edit" onClick={() => openEdit(i)}>
+                          ✏️
+                        </button>
+                        <button
+                          style={{ ...s.iconBtn, ...s.iconBtnDanger }}
+                          title="Delete"
+                          onClick={() => deleteRow(i)}
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -552,7 +612,12 @@ const s: Record<string, React.CSSProperties> = {
   },
 
   /* ── Form ── */
-  formBox: { border: '1px solid #30363d', borderRadius: 8, overflow: 'hidden', background: '#161b22' },
+  formBox: {
+    border: '1px solid #30363d',
+    borderRadius: 8,
+    overflow: 'hidden',
+    background: '#161b22',
+  },
   formHeader: { padding: '12px 16px', borderBottom: '1px solid #21262d', background: '#21262d' },
   formTitle: { margin: 0, fontSize: 14, fontWeight: 600, color: '#e6edf3' },
   formBody: { padding: '16px', display: 'flex', flexDirection: 'column', gap: 14 },
@@ -589,7 +654,13 @@ const s: Record<string, React.CSSProperties> = {
     borderRadius: 4,
     padding: '6px 10px',
   },
-  code: { fontFamily: 'monospace', background: '#21262d', padding: '1px 4px', borderRadius: 3, fontSize: 11 },
+  code: {
+    fontFamily: 'monospace',
+    background: '#21262d',
+    padding: '1px 4px',
+    borderRadius: 3,
+    fontSize: 11,
+  },
   formActions: { display: 'flex', gap: 8, paddingTop: 4 },
 
   /* ── Section / Table ── */
@@ -612,8 +683,20 @@ const s: Record<string, React.CSSProperties> = {
     borderBottom: '1px solid #21262d',
     gap: 12,
   },
-  thName: { fontSize: 11, fontWeight: 600, color: '#6e7681', textTransform: 'uppercase' as const, letterSpacing: '0.04em' },
-  thValue: { fontSize: 11, fontWeight: 600, color: '#6e7681', textTransform: 'uppercase' as const, letterSpacing: '0.04em' },
+  thName: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#6e7681',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.04em',
+  },
+  thValue: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#6e7681',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.04em',
+  },
   thActions: { width: 88 },
   tableRow: {
     display: 'grid',
@@ -627,44 +710,79 @@ const s: Record<string, React.CSSProperties> = {
   tdName: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 },
   lockIcon: { fontSize: 13, flexShrink: 0 },
   itemName: {
-    fontSize: 13, fontWeight: 600, color: '#58a6ff', fontFamily: 'monospace',
-    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const,
+    fontSize: 13,
+    fontWeight: 600,
+    color: '#58a6ff',
+    fontFamily: 'monospace',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
   },
   tdValue: { minWidth: 0, overflow: 'hidden' },
   maskedValue: { fontSize: 12, color: '#6e7681', letterSpacing: 2 },
   plainValue: {
-    fontSize: 12, color: '#8b949e', fontFamily: 'monospace',
-    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, display: 'block',
+    fontSize: 12,
+    color: '#8b949e',
+    fontFamily: 'monospace',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
+    display: 'block',
   },
   noValue: { color: '#484f58' },
   tdActions: { display: 'flex', gap: 4, justifyContent: 'flex-end', alignItems: 'center' },
   emptyBox: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center',
-    justifyContent: 'center', gap: 12, padding: '40px 20px', background: '#0d1117',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    padding: '40px 20px',
+    background: '#0d1117',
   },
   emptyText: { fontSize: 13, color: '#6e7681', margin: 0, textAlign: 'center' as const },
 
   /* ── Buttons ── */
   btnGreen: {
-    padding: '6px 14px', background: '#238636',
-    border: '1px solid rgba(240,246,252,0.1)', borderRadius: 6,
-    color: '#ffffff', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+    padding: '6px 14px',
+    background: '#238636',
+    border: '1px solid rgba(240,246,252,0.1)',
+    borderRadius: 6,
+    color: '#ffffff',
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 500,
   },
   btnGreenSm: {
-    padding: '5px 12px', background: '#238636',
-    border: '1px solid rgba(240,246,252,0.1)', borderRadius: 6,
-    color: '#ffffff', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+    padding: '5px 12px',
+    background: '#238636',
+    border: '1px solid rgba(240,246,252,0.1)',
+    borderRadius: 6,
+    color: '#ffffff',
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 500,
   },
   btnDisabled: { opacity: 0.5, cursor: 'not-allowed' },
   btnOutline: {
-    padding: '6px 14px', background: 'transparent',
-    border: '1px solid #30363d', borderRadius: 6,
-    color: '#c9d1d9', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+    padding: '6px 14px',
+    background: 'transparent',
+    border: '1px solid #30363d',
+    borderRadius: 6,
+    color: '#c9d1d9',
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 500,
   },
   iconBtn: {
-    padding: '4px 8px', background: 'transparent',
-    border: '1px solid #30363d', borderRadius: 6,
-    color: '#8b949e', cursor: 'pointer', fontSize: 13, lineHeight: '1',
+    padding: '4px 8px',
+    background: 'transparent',
+    border: '1px solid #30363d',
+    borderRadius: 6,
+    color: '#8b949e',
+    cursor: 'pointer',
+    fontSize: 13,
+    lineHeight: '1',
   },
   iconBtnDanger: { color: '#f85149' },
 };

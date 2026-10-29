@@ -33,16 +33,19 @@ describe('WorkflowParser', () => {
     it('uses the file name when workflow name is omitted and supports scalar needs', () => {
       const root = fs.mkdtempSync(path.join(os.tmpdir(), 'workflow-parser-'));
       const file = path.join(root, 'release.yml');
-      fs.writeFileSync(file, [
-        'on: push',
-        'jobs:',
-        '  build:',
-        '    runs-on: ubuntu-latest',
-        '    steps: []',
-        '  deploy:',
-        '    needs: build',
-        '    runs-on: ubuntu-latest',
-      ].join('\n'));
+      fs.writeFileSync(
+        file,
+        [
+          'on: push',
+          'jobs:',
+          '  build:',
+          '    runs-on: ubuntu-latest',
+          '    steps: []',
+          '  deploy:',
+          '    needs: build',
+          '    runs-on: ubuntu-latest',
+        ].join('\n')
+      );
 
       try {
         const wf = workflowParser.parse(file);
@@ -68,26 +71,30 @@ describe('WorkflowParser', () => {
     it('parses optional step metadata and ignores non-array steps', () => {
       expect(workflowParser.parseSteps(undefined)).toEqual([]);
 
-      const [step] = workflowParser.parseSteps([{
-        name: 'Deploy',
-        uses: 'actions/example@v1',
-        with: { target: 'prod' },
-        env: { TOKEN: 'value' },
-        if: 'success()',
-        'continue-on-error': true,
-        'timeout-minutes': 10,
-      }]);
+      const [step] = workflowParser.parseSteps([
+        {
+          name: 'Deploy',
+          uses: 'actions/example@v1',
+          with: { target: 'prod' },
+          env: { TOKEN: 'value' },
+          if: 'success()',
+          'continue-on-error': true,
+          'timeout-minutes': 10,
+        },
+      ]);
 
-      expect(step).toEqual(expect.objectContaining({
-        id: 'step-0',
-        name: 'Deploy',
-        uses: 'actions/example@v1',
-        with: { target: 'prod' },
-        env: { TOKEN: 'value' },
-        if: 'success()',
-        'continue-on-error': true,
-        'timeout-minutes': 10,
-      }));
+      expect(step).toEqual(
+        expect.objectContaining({
+          id: 'step-0',
+          name: 'Deploy',
+          uses: 'actions/example@v1',
+          with: { target: 'prod' },
+          env: { TOKEN: 'value' },
+          if: 'success()',
+          'continue-on-error': true,
+          'timeout-minutes': 10,
+        })
+      );
     });
 
     it('discovers only yml and yaml workflow files', () => {
@@ -99,8 +106,12 @@ describe('WorkflowParser', () => {
       fs.writeFileSync(path.join(dir, 'notes.txt'), 'ignore');
 
       try {
-        expect(workflowParser.discoverWorkflows(root).map((p) => path.basename(p)).sort())
-          .toEqual(['ci.yml', 'release.yaml']);
+        expect(
+          workflowParser
+            .discoverWorkflows(root)
+            .map((p) => path.basename(p))
+            .sort()
+        ).toEqual(['ci.yml', 'release.yaml']);
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
@@ -114,7 +125,6 @@ describe('WorkflowParser', () => {
         fs.rmSync(root, { recursive: true, force: true });
       }
     });
-
   });
 
   describe('buildGraph()', () => {
@@ -157,6 +167,5 @@ describe('WorkflowParser', () => {
 
       expect(labels).toEqual(['Named step', 'actions/checkout@v4', 'npm test', 'fallback']);
     });
-
   });
 });

@@ -11,7 +11,14 @@ describe('WebhookSimulator', () => {
   it('returns supported event types and a defensive copy of templates', () => {
     const events = simulator.getSupportedEvents();
     expect(events).toEqual(
-      expect.arrayContaining(['push', 'pull_request', 'workflow_dispatch', 'release', 'schedule', 'issues'])
+      expect.arrayContaining([
+        'push',
+        'pull_request',
+        'workflow_dispatch',
+        'release',
+        'schedule',
+        'issues',
+      ])
     );
 
     const first = simulator.getTemplate('push');

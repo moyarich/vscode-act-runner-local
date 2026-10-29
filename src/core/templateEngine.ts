@@ -290,7 +290,9 @@ export class TemplateEngine {
     fs.mkdirSync(dir, { recursive: true });
     const dest = path.join(dir, template.fileName);
     if (fs.existsSync(dest)) {
-      throw new Error(`Arquivo já existe: ${template.fileName}. Remova-o antes de aplicar o template.`);
+      throw new Error(
+        `Arquivo já existe: ${template.fileName}. Remova-o antes de aplicar o template.`
+      );
     }
     fs.writeFileSync(dest, template.content, 'utf-8');
     return dest;

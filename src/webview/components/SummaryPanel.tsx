@@ -7,19 +7,77 @@ import { t } from '../i18n';
 // ─── Parser Markdown leve (browser-safe, zero dependências) ──────────────────
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function sanitizeHtml(html: string): string {
   const template = document.createElement('template');
   template.innerHTML = html;
   const allowedTags = new Set([
-    'A', 'B', 'BLOCKQUOTE', 'BR', 'CODE', 'DEL', 'DETAILS', 'DIV', 'EM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-    'HR', 'I', 'IMG', 'KBD', 'LI', 'OL', 'P', 'PRE', 'S', 'SPAN', 'STRONG', 'SUB', 'SUMMARY', 'SUP',
-    'TABLE', 'TBODY', 'TD', 'TFOOT', 'TH', 'THEAD', 'TR', 'U', 'UL'
+    'A',
+    'B',
+    'BLOCKQUOTE',
+    'BR',
+    'CODE',
+    'DEL',
+    'DETAILS',
+    'DIV',
+    'EM',
+    'H1',
+    'H2',
+    'H3',
+    'H4',
+    'H5',
+    'H6',
+    'HR',
+    'I',
+    'IMG',
+    'KBD',
+    'LI',
+    'OL',
+    'P',
+    'PRE',
+    'S',
+    'SPAN',
+    'STRONG',
+    'SUB',
+    'SUMMARY',
+    'SUP',
+    'TABLE',
+    'TBODY',
+    'TD',
+    'TFOOT',
+    'TH',
+    'THEAD',
+    'TR',
+    'U',
+    'UL',
   ]);
-  const allowedAttrs = new Set(['align', 'alt', 'colspan', 'height', 'href', 'rowspan', 'src', 'style', 'title', 'width']);
-  const allowedCss = new Set(['color', 'background', 'background-color', 'font-weight', 'font-style', 'text-align', 'text-decoration']);
+  const allowedAttrs = new Set([
+    'align',
+    'alt',
+    'colspan',
+    'height',
+    'href',
+    'rowspan',
+    'src',
+    'style',
+    'title',
+    'width',
+  ]);
+  const allowedCss = new Set([
+    'color',
+    'background',
+    'background-color',
+    'font-weight',
+    'font-style',
+    'text-align',
+    'text-decoration',
+  ]);
 
   const cleanNode = (node: Node) => {
     Array.from(node.childNodes).forEach((child) => {
@@ -47,10 +105,14 @@ function sanitizeHtml(html: string): string {
           return;
         }
         if (name === 'style') {
-          const safeStyle = value.split(';').map((rule: string) => rule.trim()).filter((rule: string) => {
-            const prop = rule.split(':')[0]?.trim().toLowerCase();
-            return prop && allowedCss.has(prop) && !/url\s*\(/i.test(rule);
-          }).join('; ');
+          const safeStyle = value
+            .split(';')
+            .map((rule: string) => rule.trim())
+            .filter((rule: string) => {
+              const prop = rule.split(':')[0]?.trim().toLowerCase();
+              return prop && allowedCss.has(prop) && !/url\s*\(/i.test(rule);
+            })
+            .join('; ');
           if (safeStyle) element.setAttribute('style', safeStyle);
           else element.removeAttribute('style');
         }
@@ -85,10 +147,16 @@ function markdownToHtml(md: string): string {
   let inList: 'ul' | 'ol' | null = null;
 
   const closeList = () => {
-    if (inList) { result.push(`</${inList}>`); inList = null; }
+    if (inList) {
+      result.push(`</${inList}>`);
+      inList = null;
+    }
   };
   const closeTable = () => {
-    if (inTable) { result.push('</tbody></table>'); inTable = false; }
+    if (inTable) {
+      result.push('</tbody></table>');
+      inTable = false;
+    }
   };
 
   for (let i = 0; i < lines.length; i++) {
@@ -101,27 +169,34 @@ function markdownToHtml(md: string): string {
         codeBlockContent = [];
         inCodeBlock = false;
       } else {
-        closeList(); closeTable();
+        closeList();
+        closeTable();
         inCodeBlock = true;
       }
       continue;
     }
-    if (inCodeBlock) { codeBlockContent.push(line); continue; }
+    if (inCodeBlock) {
+      codeBlockContent.push(line);
+      continue;
+    }
 
     // Table rows
     if (line.includes('|') && line.trim().startsWith('|')) {
-      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+      const cells = line
+        .split('|')
+        .slice(1, -1)
+        .map((c) => c.trim());
       // Separator row (---|---) — skip
-      if (cells.every(c => /^[-:]+$/.test(c))) continue;
+      if (cells.every((c) => /^[-:]+$/.test(c))) continue;
       if (!inTable) {
         closeList();
         result.push('<table><thead><tr>');
-        cells.forEach(c => result.push(`<th>${parseInline(escapeHtml(c))}</th>`));
+        cells.forEach((c) => result.push(`<th>${parseInline(escapeHtml(c))}</th>`));
         result.push('</tr></thead><tbody>');
         inTable = true;
       } else {
         result.push('<tr>');
-        cells.forEach(c => result.push(`<td>${parseInline(escapeHtml(c))}</td>`));
+        cells.forEach((c) => result.push(`<td>${parseInline(escapeHtml(c))}</td>`));
         result.push('</tr>');
       }
       continue;
@@ -131,7 +206,10 @@ function markdownToHtml(md: string): string {
     const trimmed = line.trimStart();
 
     // Empty line
-    if (!trimmed) { closeList(); continue; }
+    if (!trimmed) {
+      closeList();
+      continue;
+    }
 
     // Headings
     const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
@@ -143,7 +221,11 @@ function markdownToHtml(md: string): string {
     }
 
     // Horizontal rule
-    if (/^[-*_]{3,}\s*$/.test(trimmed)) { closeList(); result.push('<hr/>'); continue; }
+    if (/^[-*_]{3,}\s*$/.test(trimmed)) {
+      closeList();
+      result.push('<hr/>');
+      continue;
+    }
 
     // Blockquote
     if (trimmed.startsWith('> ')) {
@@ -154,7 +236,11 @@ function markdownToHtml(md: string): string {
 
     // Unordered list
     if (/^[-*+]\s+/.test(trimmed)) {
-      if (inList !== 'ul') { closeList(); result.push('<ul>'); inList = 'ul'; }
+      if (inList !== 'ul') {
+        closeList();
+        result.push('<ul>');
+        inList = 'ul';
+      }
       result.push(`<li>${parseInline(escapeHtml(trimmed.replace(/^[-*+]\s+/, '')))}</li>`);
       continue;
     }
@@ -162,7 +248,11 @@ function markdownToHtml(md: string): string {
     // Ordered list
     const olMatch = trimmed.match(/^(\d+)\.\s+(.+)$/);
     if (olMatch) {
-      if (inList !== 'ol') { closeList(); result.push('<ol>'); inList = 'ol'; }
+      if (inList !== 'ol') {
+        closeList();
+        result.push('<ol>');
+        inList = 'ol';
+      }
       result.push(`<li>${parseInline(escapeHtml(olMatch[2]))}</li>`);
       continue;
     }
@@ -177,7 +267,8 @@ function markdownToHtml(md: string): string {
   }
 
   // Close remaining open elements
-  if (inCodeBlock) result.push(`<pre><code>${escapeHtml(codeBlockContent.join('\n'))}</code></pre>`);
+  if (inCodeBlock)
+    result.push(`<pre><code>${escapeHtml(codeBlockContent.join('\n'))}</code></pre>`);
   closeList();
   closeTable();
 
@@ -209,12 +300,14 @@ export function SummaryPanel() {
         </div>
         <div style={styles.sidebarSection}>Jobs</div>
         <div style={styles.sidebarJobs}>
-          {jobs.length > 0 ? jobs.map((job) => (
-            <div key={job.id} style={styles.sidebarJob}>
-              <StatusIcon status={job.status} />
-              <span style={styles.sidebarJobLabel}>{job.label}</span>
-            </div>
-          )) : (
+          {jobs.length > 0 ? (
+            jobs.map((job) => (
+              <div key={job.id} style={styles.sidebarJob}>
+                <StatusIcon status={job.status} />
+                <span style={styles.sidebarJobLabel}>{job.label}</span>
+              </div>
+            ))
+          ) : (
             <div style={styles.sidebarEmpty}>{t('No job loaded')}</div>
           )}
         </div>
@@ -239,10 +332,7 @@ export function SummaryPanel() {
             <span style={styles.kebab}>•••</span>
           </header>
           {summaryContent ? (
-            <div
-              style={styles.body}
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-            />
+            <div style={styles.body} dangerouslySetInnerHTML={{ __html: htmlContent }} />
           ) : (
             <div style={{ ...styles.body, ...styles.empty }}>
               {t('No GITHUB_STEP_SUMMARY detected in this execution.')}
@@ -270,13 +360,23 @@ function StatusIcon({ status }: { status: NodeStatus }) {
     failed: '✕',
     skipped: '⊘',
   };
-  return <span style={{ ...styles.statusIcon, color: colors[status], borderColor: colors[status] }}>{icon[status]}</span>;
+  return (
+    <span style={{ ...styles.statusIcon, color: colors[status], borderColor: colors[status] }}>
+      {icon[status]}
+    </span>
+  );
 }
 
 function getSummaryTitle(markdown: string): string | null {
   const firstHeading = markdown.split('\n').find((line) => /^#{1,6}\s+/.test(line.trim()));
   if (!firstHeading) return null;
-  return firstHeading.replace(/^#{1,6}\s+/, '').trim().replace(/[🚀📋✅❌]/g, '').trim() || null;
+  return (
+    firstHeading
+      .replace(/^#{1,6}\s+/, '')
+      .trim()
+      .replace(/[🚀📋✅❌]/g, '')
+      .trim() || null
+  );
 }
 
 // ─── Inline styles (container) ───────────────────────────────────────────────

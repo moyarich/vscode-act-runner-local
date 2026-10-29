@@ -19,15 +19,16 @@ module.exports = (_, argv) => {
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
     },
-    plugins: mode === 'production'
-      ? []
-      : [
-          // React e outras libs verificam process.env.NODE_ENV que não existe em webviews.
-          // DefinePlugin substitui a referência por uma string literal no bundle.
-          new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('development'),
-          }),
-        ],
+    plugins:
+      mode === 'production'
+        ? []
+        : [
+            // React e outras libs verificam process.env.NODE_ENV que não existe em webviews.
+            // DefinePlugin substitui a referência por uma string literal no bundle.
+            new webpack.DefinePlugin({
+              'process.env.NODE_ENV': JSON.stringify('development'),
+            }),
+          ],
     module: {
       rules: [
         {

@@ -82,9 +82,9 @@ export class HistoryService {
   async updateGraphHistory(id: string, graphHistory: ExecutionGraphHistory): Promise<void> {
     if (!this.context) return;
     let found = false;
-    const history = this.getAll().map((record) => (
-      record.id === id ? (found = true, { ...record, graphHistory }) : record
-    ));
+    const history = this.getAll().map((record) =>
+      record.id === id ? ((found = true), { ...record, graphHistory }) : record
+    );
     if (!found) {
       this.pendingGraphHistory.set(id, graphHistory);
       return;
@@ -98,19 +98,21 @@ export class HistoryService {
   }
 
   private compactForWebview(record: ExecutionRecord): ExecutionRecord {
-    const compactSummary = record.logSummary.length > MAX_WEBVIEW_LOG_SUMMARY_CHARS
-      ? `${record.logSummary.slice(0, MAX_WEBVIEW_LOG_SUMMARY_CHARS)}\n...[truncated for webview]`
-      : record.logSummary;
+    const compactSummary =
+      record.logSummary.length > MAX_WEBVIEW_LOG_SUMMARY_CHARS
+        ? `${record.logSummary.slice(0, MAX_WEBVIEW_LOG_SUMMARY_CHARS)}\n...[truncated for webview]`
+        : record.logSummary;
     const compactGraphHistory: ExecutionGraphHistory | undefined = record.graphHistory
       ? {
-        final: {
-          ...record.graphHistory.final,
-          summaryContent: record.graphHistory.final.summaryContent.length > MAX_WEBVIEW_GRAPH_SUMMARY_CHARS
-            ? `${record.graphHistory.final.summaryContent.slice(0, MAX_WEBVIEW_GRAPH_SUMMARY_CHARS)}\n...[truncated for webview]`
-            : record.graphHistory.final.summaryContent,
-        },
-        timeline: [],
-      }
+          final: {
+            ...record.graphHistory.final,
+            summaryContent:
+              record.graphHistory.final.summaryContent.length > MAX_WEBVIEW_GRAPH_SUMMARY_CHARS
+                ? `${record.graphHistory.final.summaryContent.slice(0, MAX_WEBVIEW_GRAPH_SUMMARY_CHARS)}\n...[truncated for webview]`
+                : record.graphHistory.final.summaryContent,
+          },
+          timeline: [],
+        }
       : undefined;
 
     return {
@@ -126,25 +128,32 @@ export class HistoryService {
     let changed = false;
 
     const compacted = history.map((record) => {
-      const compactLogSummary = record.logSummary.length > MAX_STORED_LOG_SUMMARY_CHARS
-        ? `${record.logSummary.slice(0, MAX_STORED_LOG_SUMMARY_CHARS)}\n...[truncated in storage migration]`
-        : record.logSummary;
+      const compactLogSummary =
+        record.logSummary.length > MAX_STORED_LOG_SUMMARY_CHARS
+          ? `${record.logSummary.slice(0, MAX_STORED_LOG_SUMMARY_CHARS)}\n...[truncated in storage migration]`
+          : record.logSummary;
 
       const compactGraphHistory = record.graphHistory
         ? {
-          final: {
-            ...record.graphHistory.final,
-            summaryContent: record.graphHistory.final.summaryContent.length > MAX_STORED_GRAPH_SUMMARY_CHARS
-              ? `${record.graphHistory.final.summaryContent.slice(0, MAX_STORED_GRAPH_SUMMARY_CHARS)}\n...[truncated in storage migration]`
-              : record.graphHistory.final.summaryContent,
-          },
-          timeline: [],
-        }
+            final: {
+              ...record.graphHistory.final,
+              summaryContent:
+                record.graphHistory.final.summaryContent.length > MAX_STORED_GRAPH_SUMMARY_CHARS
+                  ? `${record.graphHistory.final.summaryContent.slice(0, MAX_STORED_GRAPH_SUMMARY_CHARS)}\n...[truncated in storage migration]`
+                  : record.graphHistory.final.summaryContent,
+            },
+            timeline: [],
+          }
         : undefined;
 
       if (compactLogSummary !== record.logSummary) changed = true;
       if (record.graphHistory && record.graphHistory.timeline.length > 0) changed = true;
-      if (record.graphHistory && compactGraphHistory && compactGraphHistory.final.summaryContent !== record.graphHistory.final.summaryContent) changed = true;
+      if (
+        record.graphHistory &&
+        compactGraphHistory &&
+        compactGraphHistory.final.summaryContent !== record.graphHistory.final.summaryContent
+      )
+        changed = true;
 
       return {
         ...record,

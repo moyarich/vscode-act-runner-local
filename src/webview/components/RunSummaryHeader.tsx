@@ -49,7 +49,11 @@ function StatusIcon({ status }: { status: NodeStatus }) {
     failed: '✕',
     skipped: '⊘',
   };
-  return <span style={{ ...styles.statusIcon, color: colors[status], borderColor: colors[status] }}>{icon[status]}</span>;
+  return (
+    <span style={{ ...styles.statusIcon, color: colors[status], borderColor: colors[status] }}>
+      {icon[status]}
+    </span>
+  );
 }
 
 function toNodeStatus(status: string): NodeStatus {
@@ -67,11 +71,16 @@ function formatStatus(status: string): string {
   return 'Idle';
 }
 
-function formatDuration(execution: { startedAt: string | null; duration: number | null; status: string }): string {
+function formatDuration(execution: {
+  startedAt: string | null;
+  duration: number | null;
+  status: string;
+}): string {
   if (!execution.startedAt) return '-';
-  const diff = execution.status === 'running' || execution.duration == null
-    ? Math.max(0, Date.now() - new Date(execution.startedAt).getTime())
-    : execution.duration;
+  const diff =
+    execution.status === 'running' || execution.duration == null
+      ? Math.max(0, Date.now() - new Date(execution.startedAt).getTime())
+      : execution.duration;
   const seconds = Math.round(diff / 1000);
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.floor(seconds / 60);
