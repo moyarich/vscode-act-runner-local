@@ -1,6 +1,7 @@
 import { getLocale, resolveLocale, setLocale, t } from './i18n';
 import english from './locales/en.json';
 import portuguese from './locales/pt-BR.json';
+import europeanPortuguese from './locales/pt-PT.json';
 import spanish from './locales/es.json';
 import french from './locales/fr.json';
 describe('webview localization', () => {
@@ -9,10 +10,16 @@ describe('webview localization', () => {
     ['en-US', 'en'],
     ['es-MX', 'es'],
     ['fr-CA', 'fr'],
-    ['pt-PT', 'pt-BR'],
+    ['pt-PT', 'pt-PT'],
     ['pt-BR', 'pt-BR'],
     ['de-DE', 'en'],
   ])('%s resolves to %s', (input, expected) => expect(resolveLocale(input)).toBe(expected));
+  it('distinguishes European and Brazilian Portuguese', () => {
+    setLocale('pt-PT');
+    expect(t('nav.settings')).toBe('Definições');
+    setLocale('pt-BR');
+    expect(t('nav.settings')).toBe('Configurações');
+  });
   it('translates and falls back to English', () => {
     setLocale('es');
     expect(getLocale()).toBe('es');
@@ -37,6 +44,7 @@ describe('translation catalog integrity', () => {
   const source: Record<string, string> = english;
   const dictionaries = {
     'pt-BR': portuguese as Record<string, string>,
+    'pt-PT': europeanPortuguese as Record<string, string>,
     es: spanish as Record<string, string>,
     fr: french as Record<string, string>,
   };
@@ -60,6 +68,6 @@ describe('translation catalog integrity', () => {
   it('uses exact locale subtags', () => {
     expect(resolveLocale('essay')).toBe('en');
     expect(resolveLocale('FR_ca')).toBe('fr');
-    expect(resolveLocale('pt-PT')).toBe('pt-BR');
+    expect(resolveLocale('pt-PT')).toBe('pt-PT');
   });
 });
