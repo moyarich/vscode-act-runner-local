@@ -130,7 +130,7 @@ export function activate(context: vscode.ExtensionContext): void {
         const wf = workflowParser.parse(wfPath);
         const items = Object.values(wf.jobs).map((j) => ({
           label: j.name ?? j.id,
-          description: `${j.steps.length} steps`,
+          description: t('{0} steps', j.steps.length),
           detail: j.needs?.length ? `needs: ${j.needs.join(', ')}` : undefined,
         }));
         await vscode.window.showQuickPick(items, { placeHolder: t('Available jobs (read-only)') });
@@ -707,8 +707,8 @@ function openWebviewPanel(
           canSelectMany: false,
           defaultUri: vscode.Uri.file(root),
           openLabel: t('Select file'),
-          title: `Selecionar arquivo de ${tab}`,
-          filters: { 'Arquivos de variáveis': ['env', 'vars', 'variables', 'secrets', '*'] },
+          title: t('Select file for {0}', tab),
+          filters: { [t('Variable files')]: ['env', 'vars', 'variables', 'secrets', '*'] },
         });
         const filePath = selected?.[0]?.fsPath;
         if (!filePath) break;
@@ -749,7 +749,7 @@ function openWebviewPanel(
               : resolveEnvEditorFilePath(root, tab);
             if (!filePath) {
               vscode.window.showErrorMessage(
-                `Selecione um arquivo para salvar ${tab === 'vars' ? 'vars' : `.${tab}`}.`
+                t('Select a file to save {0}.', tab === 'vars' ? 'vars' : `.${tab}`)
               );
               break;
             }
@@ -760,11 +760,11 @@ function openWebviewPanel(
             await rememberEnvFilePath(root, tab, filePath);
           }
           vscode.window.showInformationMessage(
-            `✅ ${tab === 'vars' ? 'vars' : `.${tab}`} salvo com sucesso.`
+            t('✅ {0} saved successfully.', tab === 'vars' ? 'vars' : `.${tab}`)
           );
         } catch (e) {
           vscode.window.showErrorMessage(
-            `Erro ao salvar ${tab === 'vars' ? 'vars' : `.${tab}`}: ${e instanceof Error ? e.message : e}`
+            t('Failed to save {0}: {1}', tab === 'vars' ? 'vars' : `.${tab}`, e instanceof Error ? e.message : String(e))
           );
         }
         break;
