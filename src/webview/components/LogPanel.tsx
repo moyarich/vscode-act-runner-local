@@ -358,7 +358,7 @@ export function LogPanel({ height }: { height: number }) {
             <button
               style={styles.clearBtn}
               onClick={() => setLogFilter(null)}
-              title="Mostrar todos os logs"
+              title={t('log.showAll')}
             >
               ✕ todos
             </button>
@@ -373,7 +373,7 @@ export function LogPanel({ height }: { height: number }) {
           <button
             style={styles.clearBtn}
             onClick={restoreLatestGraphState}
-            title="Voltar ao estado mais recente do grafo"
+            title={t('graph.latest')}
           >
             voltar ao atual
           </button>
@@ -383,7 +383,7 @@ export function LogPanel({ height }: { height: number }) {
             style={styles.searchInput}
             value={searchQuery}
             onChange={(event) => changeSearch(event.target.value)}
-            placeholder="Buscar no log"
+            placeholder={t('log.search')}
           />
           <span style={styles.searchCount}>
             {normalizedSearch
@@ -445,7 +445,7 @@ export function LogPanel({ height }: { height: number }) {
                         : 'transparent',
                   }}
                   onClick={() => restoreGraphAtLog(item.log.id)}
-                  title="Restaurar o grafo neste ponto do log"
+                  title={t('graph.restore')}
                 >
                   {renderLogText(item.log.line, color)}
                 </div>
@@ -501,7 +501,7 @@ export function LogPanel({ height }: { height: number }) {
                                   : 'transparent',
                             }}
                             onClick={() => restoreGraphAtLog(l.id)}
-                            title="Restaurar o grafo neste ponto do log"
+                            title={t('graph.restore')}
                           >
                             {renderLogText(l.line, color)}
                           </div>
