@@ -97,8 +97,7 @@ export function HistoryPanel() {
           <div style={styles.title}>{t('history.title')}</div>
           <div style={styles.subtitle}>{t('history.subtitle')}</div>
           <div style={styles.retentionNote}>
-            For performance, only the latest 40 workflow runs are kept. Older runs are removed
-            automatically.
+            {t('history.retentionNote')}
           </div>
         </div>
         <input
@@ -270,17 +269,17 @@ export function HistoryPanel() {
           disabled={currentPage <= 1}
           onClick={() => setPage(currentPage - 1)}
         >
-          Previous
+          {t('previous')}
         </button>
         <span style={styles.pageInfo}>
-          Page {currentPage} of {totalPages}
+          {t('history.pageOf', currentPage, totalPages)}
         </span>
         <button
           style={styles.pageButton}
           disabled={currentPage >= totalPages}
           onClick={() => setPage(currentPage + 1)}
         >
-          Next
+          {t('next')}
         </button>
       </div>
     </div>
