@@ -1,6 +1,6 @@
 # Internationalization and localization
 
-Act/Run supports English (`en`), Spanish (`es`), French (`fr`), and Brazilian Portuguese (`pt-BR`), and European Portuguese (`pt-PT`). Unrecognized locales fall back to English.
+Act/Run supports English (`en`), Spanish (`es`), French (`fr`), Brazilian Portuguese (`pt-BR`), and European Portuguese (`pt-PT`). Unrecognized locales fall back to English.
 
 ## Choosing a language
 
@@ -18,9 +18,9 @@ VS Code command titles, view names, and configuration descriptions are controlle
 
 - `package.nls.json` and `package.nls.<locale>.json` contain manifest contributions.
 - `l10n/bundle.l10n.json` and `l10n/bundle.l10n.<locale>.json` contain extension-host messages consumed through `vscode.l10n`.
-- `src/webview/locales/{en,es,fr,pt-BR,pt-PT}.json` stores the webview translations, while `src/webview/i18n.ts` implements locale resolution, fallback and `Intl` formatting. Use short semantic IDs such as `t('run')`, `t('history.empty')`, or `t('workflow.run')` for React labels. The canonical `src/webview/locales/en.json` maps IDs to English source messages. Keep identical keys in `es.json`, `fr.json`, and `pt-BR.json`, and `pt-PT.json`.
+- `src/webview/locales/{en,es,fr,pt-BR,pt-PT}.json` stores the webview translations, while `src/webview/i18n.ts` implements locale resolution, fallback and `Intl` formatting. Use short semantic IDs such as `t('run')`, `t('history.empty')`, or `t('workflow.run')` for React labels. The canonical `src/webview/locales/en.json` maps IDs to English source messages. Keep identical keys in `es.json`, `fr.json`, `pt-BR.json`, and `pt-PT.json`.
 
-Preserve interpolation placeholders such as `{0}`; do not translate workflow names, action output, user content or logs. Use locale-aware date and number formatting for presentation.
+Preserve interpolation placeholders such as `{0}` and `{name}`. Use `t('workflow.runCount', count)` for indexed arguments or `t('workflow.greeting', { name })` for named arguments. All locale catalogs must use the same placeholder names and indices for a given key; their order may differ. Missing values are left intact so they can be detected in tests. Do not concatenate translated sentences from fragments; do not translate workflow names, action output, user content or logs. Use locale-aware date and number formatting for presentation.
 
 ## Testing
 
