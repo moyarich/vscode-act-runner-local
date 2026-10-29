@@ -20,11 +20,24 @@ import type { WorkflowDefinition } from './types/workflow.types';
 import { t } from './i18n/messages';
 
 let webviewPanel: vscode.WebviewPanel | undefined;
+function getRuntimeLocale(): string {
+  const configured = vscode.workspace.getConfiguration('actRunner').get<string>('language', 'auto');
+  const language = configured === 'auto' ? vscode.env.language : configured;
+  const normalized = language.toLowerCase();
+  return normalized.startsWith('pt') ? 'pt-BR' : normalized.startsWith('es') ? 'es' : normalized.startsWith('fr') ? 'fr' : 'en';
+}
+
 /** Execução pendente: inicia quando o webview enviar state:request (React montado) */
 /* Start */
 let pendingExecution: (() => void) | undefined;
 
 export function activate(context: vscode.ExtensionContext): void {
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
+    if (event.affectsConfiguration('actRunner.language') && webviewPanel) {
+      // Recreate the webview to ensure all module-level labels use the new locale.
+      webviewPanel.webview.html = buildWebviewHtml(context, webviewPanel.webview, 'graph');
+    }
+  }));
   historyService.initialize(context);
   envManager.initialize(context);
 
@@ -788,19 +801,24 @@ function openWebviewPanel(
     webviewPanel = undefined;
   });
 
-  const scriptUri = webviewPanel.webview.asWebviewUri(
+  webviewPanel.webview.html = buildWebviewHtml(context, webviewPanel.webview, initialView);
+
+}
+
+function buildWebviewHtml(context: vscode.ExtensionContext, webview: vscode.Webview, initialView: string): string {
+  const scriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview', 'webview.js')
   );
 
-  const csp = webviewPanel.webview.cspSource;
+  const csp = webview.cspSource;
   const nonce = Array.from({ length: 32 }, () =>
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'.charAt(
       Math.floor(Math.random() * 62)
     )
   ).join('');
 
-  webviewPanel.webview.html = `<!DOCTYPE html>
-<html lang="pt-BR">
+  return `<!DOCTYPE html>
+<html lang="${getRuntimeLocale()}">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy"
