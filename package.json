@@ -233,7 +233,8 @@
             "en",
             "es",
             "fr",
-            "pt-BR"
+            "pt-BR",
+            "pt-PT"
           ],
           "default": "auto",
           "description": "%configuration.language%"
