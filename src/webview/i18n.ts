@@ -1,21 +1,24 @@
 import english from './locales/en.json';
 import portuguese from './locales/pt-BR.json';
+import europeanPortuguese from './locales/pt-PT.json';
 import spanish from './locales/es.json';
 import french from './locales/fr.json';
 
-export type SupportedLocale = 'en' | 'es' | 'fr' | 'pt-BR';
+export type SupportedLocale = 'en' | 'es' | 'fr' | 'pt-BR' | 'pt-PT';
 type Dictionary = Record<string, string>;
 const catalogs: Record<SupportedLocale, Dictionary> = {
   en: english,
   es: spanish,
   fr: french,
   'pt-BR': portuguese,
+  'pt-PT': europeanPortuguese,
 };
 
 /** Match language subtags rather than prefixes (e.g. "essay" is not Spanish). */
 export function resolveLocale(language: string | undefined): SupportedLocale {
-  const primary = (language ?? 'en').trim().replace(/_/g, '-').split('-')[0].toLowerCase();
-  if (primary === 'pt') return 'pt-BR';
+  const normalized = (language ?? 'en').trim().replace(/_/g, '-').toLowerCase();
+  const [primary, region] = normalized.split('-');
+  if (primary === 'pt') return region === 'pt' ? 'pt-PT' : 'pt-BR';
   if (primary === 'es' || primary === 'fr') return primary;
   return 'en';
 }
