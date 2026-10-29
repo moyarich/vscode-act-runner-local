@@ -351,7 +351,7 @@ export function LogPanel({ height }: { height: number }) {
       }}
     >
       <div style={styles.header}>
-        <span style={styles.headerTitle}>Logs</span>
+        <span style={styles.headerTitle}>{t("Logs")}</span>
         {logFilter ? (
           <span style={styles.breadcrumb}>
             <span style={styles.breadcrumbLabel}>{logFilter.label}</span>
