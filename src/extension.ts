@@ -764,7 +764,11 @@ function openWebviewPanel(
           );
         } catch (e) {
           vscode.window.showErrorMessage(
-            t('Failed to save {0}: {1}', tab === 'vars' ? 'vars' : `.${tab}`, e instanceof Error ? e.message : String(e))
+            t(
+              'Failed to save {0}: {1}',
+              tab === 'vars' ? 'vars' : `.${tab}`,
+              e instanceof Error ? e.message : String(e)
+            )
           );
         }
         break;
