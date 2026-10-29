@@ -1,84 +1,99 @@
-name: Release VSIX
+name: Release package
+
+run-name: >-
+  Release · ${{ inputs.package }} · ${{ inputs.version-mode }}${{ inputs.version-mode
+  == 'bump' && format(':{0}', inputs.version-bump) || inputs.version-mode == 'exact'
+  && format(':{0}', inputs.exact-version) || '' }} · ${{ inputs.draft && 'draft' ||
+  'published' }} · dry-run=${{ inputs.dry-run }}
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
+    inputs:
+      workspace-tools-source:
+        description: Workspace Tools CLI source for package discovery
+        type: choice
+        required: true
+        default: auto
+        options:
+          - auto
+          - checkout:current
+          - checkout:upstream;branch:main
+          - registry:npm:latest
+      package:
+        description: Select a publishable workspace package
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - "packages/example"
+      version-mode:
+        description: Resolve each package version
+        type: choice
+        required: true
+        default: auto
+        options: [auto, bump, package-json, exact]
+      initial-version:
+        description: Initial release version for auto mode
+        type: string
+        required: true
+        default: "0.1.0"
+      version-bump:
+        description: SemVer increment for bump mode
+        type: choice
+        required: true
+        default: patch
+        options: [patch, minor, major, prepatch, preminor, premajor, prerelease]
+      exact-version:
+        description: Version for exact mode (all selected packages)
+        type: string
+        required: false
+        default: ""
+      commit-version-changes:
+        description: Commit prepared versions and lockfile to the selected branch before release
+        type: boolean
+        required: true
+        default: false
+      update-major-tag:
+        description: Update package-scoped major compatibility alias
+        type: boolean
+        required: true
+        default: true
+      draft:
+        description: |
+          Prepare draft GitHub Releases
+          (disable only to explicitly finalize)
+        type: boolean
+        required: true
+        default: true
+      dry-run:
+        description: Validate without creating a GitHub Release, tag, or package
+        required: true
+        default: true
+        type: boolean
 
-permissions:
-  contents: write
+permissions: {}
+
+concurrency:
+  group: release-package-${{ inputs.package }}
+  cancel-in-progress: false
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out tag
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Validate
-        run: |
-          npm run typecheck
-          npm test -- --runInBand
-
-      - name: Verify tag version
-        if: ${{ github.actor != 'nektos/act' }}
-        env:
-          TAG_NAME: ${{ github.ref_name }}
-        run: |
-          package_version=$(node -p "require('./package.json').version")
-          expected_tag="v${package_version}"
-          if [ "$TAG_NAME" != "$expected_tag" ]; then
-            echo "Tag $TAG_NAME does not match package version $package_version"
-            exit 1
-          fi
-
-      - name: Package VSIX
-        run: npm run package
-
-      - name: Create GitHub Release
-        if: ${{ github.actor != 'nektos/act' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.ref_name }}
-        run: gh release create "$TAG_NAME" ./*.vsix --title "$TAG_NAME" --generate-notes
-
-  publish-openvsx:
-    needs: release
-    if: ${{ vars.ENABLE_OPENVSX_PUBLISH == 'true' }}
-    runs-on: ubuntu-latest
-    environment: release
+    name: Release selected packages
     permissions:
-      contents: read
-    steps:
-      - name: Check out tag
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download VSIX from GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.ref_name }}
-        run: gh release download "$TAG_NAME" --pattern '*.vsix'
-
-      - name: Publish to Open VSX
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
-        run: npx --no-install ovsx publish ./*.vsix --pat "$OVSX_PAT"
+      actions: read
+      contents: write
+      pull-requests: read
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_workspace-package-release.yml@main
+    with:
+      workspace-tools-source: ${{ inputs.workspace-tools-source }}
+      package: ${{ inputs.package }}
+      version-mode: ${{ inputs.version-mode }}
+      initial-version: ${{ inputs.initial-version }}
+      version-bump: ${{ inputs.version-bump }}
+      exact-version: ${{ inputs.exact-version }}
+      commit-version-changes: ${{ inputs.commit-version-changes }}
+      update-major-tag: ${{ inputs.update-major-tag }}
+      draft: ${{ inputs.draft }}
+      dry-run: ${{ inputs.dry-run }}
