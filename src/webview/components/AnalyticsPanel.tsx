@@ -459,10 +459,6 @@ function formatDuration(ms: number): string {
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
-function formatNumber(value: number): string {
-  return formatNumber(Math.round(value));
-}
-
 const styles: Record<string, React.CSSProperties> = {
   page: { flex: 1, overflow: 'auto', background: '#0d1117', color: '#c9d1d9' },
   topbar: {
