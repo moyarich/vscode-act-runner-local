@@ -12,16 +12,16 @@ describe('webview localization', () => {
   it('translates and falls back to English', () => {
     setLocale('es');
     expect(getLocale()).toBe('es');
-    expect(t('Run')).toBe('Ejecutar');
-    expect(t('Nonexistent message')).toBe('Nonexistent message');
+    expect(t('run')).toBe('Ejecutar');
+    expect(t('missing.key')).toBe('missing.key');
   });
   it('switches locale without losing translated text', () => {
     setLocale('fr-CA');
-    expect(t('Run')).toBe('Exécuter');
+    expect(t('run')).toBe('Exécuter');
     setLocale('es-MX');
-    expect(t('Run')).toBe('Ejecutar');
+    expect(t('run')).toBe('Ejecutar');
     setLocale('en');
-    expect(t('Run')).toBe('Run');
+    expect(t('run')).toBe('Run');
   });
   it('preserves placeholders', () => {
     setLocale('fr');
@@ -30,6 +30,7 @@ describe('webview localization', () => {
 });
 
 describe('translation catalog integrity', () => {
+  const english = require('./locales/en.json') as Record<string, string>;
   const dictionaries = {
     'pt-BR': require('./locales/pt-BR.json') as Record<string, string>,
     es: require('./locales/es.json') as Record<string, string>,
@@ -40,12 +41,18 @@ describe('translation catalog integrity', () => {
   it.each(Object.entries(dictionaries))(
     '%s has valid translations and placeholders',
     (_locale, entries) => {
-      for (const [source, translation] of Object.entries(entries)) {
+      expect(Object.keys(entries).sort()).toEqual(Object.keys(english).sort());
+      for (const [key, translation] of Object.entries(entries)) {
         expect(translation.trim()).not.toBe('');
-        expect(placeholders(translation)).toEqual(placeholders(source));
+        expect(placeholders(translation)).toEqual(placeholders(english[key]));
       }
     }
   );
+  it('resolves semantic identifiers to readable English', () => {
+    setLocale('en');
+    expect(t('history.empty')).toBe('No workflow runs recorded yet.');
+    expect(t('workflow.run')).toBe('Run workflow');
+  });
   it('uses exact locale subtags', () => {
     expect(resolveLocale('essay')).toBe('en');
     expect(resolveLocale('FR_ca')).toBe('fr');
