@@ -36,7 +36,7 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     nameLabel: 'env.name',
     valueLabel: 'env.secret',
     fileKindLabel: 'secrets',
-    filePlaceholder: '.secrets ou config/local.secrets',
+    filePlaceholder: '.secrets or config/local.secrets',
     isSecret: true,
     description: 'env.secretsDescription',
   },
@@ -47,7 +47,7 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     nameLabel: 'env.name',
     valueLabel: 'value',
     fileKindLabel: 'vars',
-    filePlaceholder: '.vars ou my.variables',
+    filePlaceholder: '.vars or my.variables',
     isSecret: false,
     description: 'env.varsDescription',
   },
@@ -58,7 +58,7 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     nameLabel: 'env.name',
     valueLabel: 'value',
     fileKindLabel: 'env',
-    filePlaceholder: '.env ou my.env',
+    filePlaceholder: '.env or my.env',
     isSecret: false,
     description: 'env.envDescription',
   },
@@ -313,7 +313,7 @@ export function EnvEditor() {
             <div style={s.formBox}>
               <div style={s.formHeader}>
                 <h3 style={s.formTitle}>
-                  {mode === 'add' ? config.newBtnLabel : `Update ${config.label.toLowerCase()}`}
+                  {mode === 'add' ? config.newBtnLabel : t('env.update', config.label.toLowerCase())}
                 </h3>
               </div>
               <div style={s.formBody}>
@@ -340,7 +340,7 @@ export function EnvEditor() {
                     <textarea
                       style={s.formTextarea}
                       value={formValue}
-                      placeholder={config.isSecret ? 'Enter secret value' : 'Enter value'}
+                      placeholder={t(config.isSecret ? 'env.secretPlaceholder' : 'env.valuePlaceholder')}
                       onChange={(e) => setFormValue(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Escape') cancelForm();
@@ -363,7 +363,7 @@ export function EnvEditor() {
                     disabled={!formKey.trim()}
                   >
                     {mode === 'add'
-                      ? `Add ${config.label.toLowerCase()}`
+                      ? t('env.add', config.label.toLowerCase())
                       : `Update ${config.label.toLowerCase()}`}
                   </button>
                   <button style={s.btnOutline} onClick={cancelForm}>
@@ -391,7 +391,7 @@ export function EnvEditor() {
               ) : rows.length === 0 ? (
                 <div style={s.emptyBox}>
                   <p style={s.emptyText}>
-                    There are no {config.label.toLowerCase()} for this repository.
+                    {t('env.empty', config.label.toLowerCase())}
                   </p>
                   <button style={s.btnGreenSm} onClick={openAdd}>
                     {config.newBtnLabel}
