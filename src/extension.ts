@@ -543,7 +543,9 @@ async function safeRun(fn: () => Promise<unknown>): Promise<void> {
     await fn();
     sendWorkflowSnapshot();
   } catch (err) {
-    vscode.window.showErrorMessage(t('Error: {0}', err instanceof Error ? err.message : String(err)));
+    vscode.window.showErrorMessage(
+      t('Error: {0}', err instanceof Error ? err.message : String(err))
+    );
   }
 }
 
