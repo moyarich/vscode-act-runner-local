@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './global.css';
-import { setLocale } from './i18n';
+import { setLocale, t } from './i18n';
 setLocale(document.documentElement.lang || navigator.language);
 import { App } from './App';
 
@@ -18,7 +18,7 @@ class ErrorBoundary extends React.Component<
     if (this.state.error) {
       return (
         <div style={{ padding: 24, color: '#f85149', fontFamily: 'monospace' }}>
-          <h2>⚠️ Webview Error</h2>
+          <h2>⚠️ {t('error.webview')}</h2>
           <pre style={{ whiteSpace: 'pre-wrap', color: '#e6edf3', marginTop: 12 }}>
             {this.state.error.message}
           </pre>
