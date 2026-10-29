@@ -38,8 +38,7 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'secrets',
     filePlaceholder: '.secrets ou config/local.secrets',
     isSecret: true,
-    description:
-      'env.secretsDescription',
+    description: 'env.secretsDescription',
   },
   vars: {
     label: '.vars',
@@ -50,8 +49,7 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'vars',
     filePlaceholder: '.vars ou my.variables',
     isSecret: false,
-    description:
-      'env.varsDescription',
+    description: 'env.varsDescription',
   },
   env: {
     label: '.env',
@@ -62,8 +60,7 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'env',
     filePlaceholder: '.env ou my.env',
     isSecret: false,
-    description:
-      'env.envDescription',
+    description: 'env.envDescription',
   },
   actrc: {
     label: 'env.actArgs',
@@ -74,8 +71,7 @@ const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
     fileKindLabel: 'actrc',
     filePlaceholder: '.actrc',
     isSecret: false,
-    description:
-      'env.argsDescription',
+    description: 'env.argsDescription',
   },
 };
 
@@ -129,7 +125,15 @@ export function EnvEditor() {
   }, [mode]);
 
   const configSource = FILE_TAB_CONFIGS[fileTab];
-  const config = { ...configSource, label: t(configSource.label), sectionTitle: t(configSource.sectionTitle), newBtnLabel: t(configSource.newBtnLabel), nameLabel: t(configSource.nameLabel), valueLabel: configSource.valueLabel ? t(configSource.valueLabel) : null, description: t(configSource.description) };
+  const config = {
+    ...configSource,
+    label: t(configSource.label),
+    sectionTitle: t(configSource.sectionTitle),
+    newBtnLabel: t(configSource.newBtnLabel),
+    nameLabel: t(configSource.nameLabel),
+    valueLabel: configSource.valueLabel ? t(configSource.valueLabel) : null,
+    description: t(configSource.description),
+  };
 
   const saveAll = (newRows: EnvEntry[]) => {
     window.__vscode__?.postMessage({
