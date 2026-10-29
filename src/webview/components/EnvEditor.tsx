@@ -420,12 +420,12 @@ export function EnvEditor() {
                         </div>
                       )}
                       <div style={s.tdActions}>
-                        <button style={s.iconBtn} title="Edit" onClick={() => openEdit(i)}>
+                        <button style={s.iconBtn} title={t('edit')} onClick={() => openEdit(i)}>
                           ✏️
                         </button>
                         <button
                           style={{ ...s.iconBtn, ...s.iconBtnDanger }}
-                          title="Delete"
+                          title={t('delete')}
                           onClick={() => deleteRow(i)}
                         >
                           🗑️
