@@ -28,11 +28,11 @@ function getRuntimeLocale(): string {
     ? 'pt-PT'
     : normalized === 'pt' || normalized === 'pt-br' || normalized.startsWith('pt-br-')
       ? 'pt-BR'
-    : normalized.startsWith('es')
-      ? 'es'
-      : normalized.startsWith('fr')
-        ? 'fr'
-        : 'en';
+      : normalized.startsWith('es')
+        ? 'es'
+        : normalized.startsWith('fr')
+          ? 'fr'
+          : 'en';
 }
 
 /** Execução pendente: inicia quando o webview enviar state:request (React montado) */
