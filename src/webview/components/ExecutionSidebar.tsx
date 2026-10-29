@@ -278,7 +278,7 @@ export function ExecutionSidebar() {
     <div style={styles.container}>
       {/* Cabeçalho */}
       <div style={styles.header}>
-        <span>{t('Execution')}</span>
+        <span>{t('execution')}</span>
         {logFilter && (
           <button style={styles.clearBtn} onClick={() => setLogFilter(null)}>
             ✕ {t('all')}
