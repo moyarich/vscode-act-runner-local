@@ -68,7 +68,7 @@ export function WorkflowLauncherSidebar() {
         </button>
       </div>
       <div style={styles.header}>
-        <span style={styles.title}>Workflows</span>
+        <span style={styles.title}>{t("Workflows")}</span>
         <span style={styles.count}>{workflows.length}</span>
       </div>
       <div style={styles.list}>
