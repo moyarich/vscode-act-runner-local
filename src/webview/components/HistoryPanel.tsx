@@ -128,8 +128,8 @@ export function HistoryPanel() {
                 aria-label={t('history.selectPage')}
               />
               {selectedIds.size > 0
-                ? `${selectedIds.size} selected`
-                : `${filteredHistory.length} workflow ${filteredHistory.length === 1 ? 'run' : 'runs'}`}
+                ? t('history.selected', selectedIds.size)
+                : t(filteredHistory.length === 1 ? 'history.runCountOne' : 'history.runCountOther', filteredHistory.length)}
             </label>
             <button
               type="button"
@@ -182,7 +182,7 @@ export function HistoryPanel() {
                 <div style={styles.runMain}>
                   <div style={styles.runTitle}>{r.workflowName}</div>
                   <div style={styles.runSubline}>
-                    {eventLabel(r)} · {r.jobId ?? 'todos os jobs'} · {r.trigger}
+                    {eventLabel(r)} · {r.jobId ?? t('job.all')} · {r.trigger}
                   </div>
                 </div>
                 <span style={styles.statusText}>{capitalize(r.status)}</span>
