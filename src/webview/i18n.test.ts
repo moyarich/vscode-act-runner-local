@@ -30,6 +30,13 @@ describe('webview localization', () => {
     setLocale('pt-BR');
     expect(t('nav.settings')).toBe('Configurações');
   });
+  it('detects missing keys for each locale without confusing fallback with coverage', () => {
+    for (const language of ['en', 'es', 'fr', 'pt-BR', 'pt-PT']) {
+      expect(hasTranslation('run', language)).toBe(true);
+      expect(hasTranslation('missing.key', language)).toBe(false);
+    }
+    expect(hasTranslation('run', 'de-DE')).toBe(true);
+  });
   it('translates and falls back to English', () => {
     setLocale('es');
     expect(getLocale()).toBe('es');
