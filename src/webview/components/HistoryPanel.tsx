@@ -87,15 +87,15 @@ export function HistoryPanel() {
   };
 
   if (history.length === 0) {
-    return <div style={styles.empty}>{t('No workflow runs recorded yet.')}</div>;
+    return <div style={styles.empty}>{t('history.empty')}</div>;
   }
 
   return (
     <div style={styles.container}>
       <div style={styles.topBar}>
         <div>
-          <div style={styles.title}>{t('All workflow runs')}</div>
-          <div style={styles.subtitle}>{t('Showing runs from all workflows')}</div>
+          <div style={styles.title}>{t('history.title')}</div>
+          <div style={styles.subtitle}>{t('history.subtitle')}</div>
           <div style={styles.retentionNote}>
             For performance, only the latest 40 workflow runs are kept. Older runs are removed
             automatically.
@@ -105,7 +105,7 @@ export function HistoryPanel() {
           style={styles.search}
           value={query}
           onChange={(event) => updateQuery(event.target.value)}
-          placeholder={t('Filter workflow runs')}
+          placeholder={t('history.filter')}
         />
       </div>
 
@@ -125,7 +125,7 @@ export function HistoryPanel() {
                     return next;
                   });
                 }}
-                aria-label={t('Select all runs on this page')}
+                aria-label={t('history.selectPage')}
               />
               {selectedIds.size > 0
                 ? `${selectedIds.size} selected`
@@ -137,7 +137,7 @@ export function HistoryPanel() {
               disabled={selectedIds.size === 0}
               onClick={deleteSelected}
             >
-              {t('Delete selected')}
+              {t('history.deleteSelected')}
             </button>
           </div>
           <span style={styles.headerColumns}>Workflow · Event · Status · Branch · Action</span>
@@ -174,7 +174,7 @@ export function HistoryPanel() {
                       return next;
                     });
                   }}
-                  aria-label={`${t('Select run')} ${r.workflowName}`}
+                  aria-label={`${t('history.select')} ${r.workflowName}`}
                 />
                 <span style={{ color: statusColor(r.status), fontSize: 14 }}>
                   {statusIcon(r.status)}
@@ -199,7 +199,7 @@ export function HistoryPanel() {
                       event.stopPropagation();
                       setOpenMenuId(menuOpen ? null : r.id);
                     }}
-                    title={t('Actions')}
+                    title={t('actions')}
                   >
                     ...
                   </button>
@@ -217,7 +217,7 @@ export function HistoryPanel() {
                           setOpenMenuId(null);
                         }}
                       >
-                        {isExpanded ? t('Hide log') : t('View log')}
+                        {isExpanded ? t('log.hide') : t('log.view')}
                       </button>
                       <button
                         type="button"
@@ -227,7 +227,7 @@ export function HistoryPanel() {
                           setOpenMenuId(null);
                         }}
                       >
-                        {t('Rerun')}
+                        {t('rerun')}
                       </button>
                       <button
                         type="button"
@@ -237,7 +237,7 @@ export function HistoryPanel() {
                           setOpenMenuId(null);
                         }}
                       >
-                        {t('Delete')}
+                        {t('delete')}
                       </button>
                     </div>
                   )}
@@ -259,7 +259,7 @@ export function HistoryPanel() {
           );
         })}
         {pagedHistory.length === 0 && (
-          <div style={styles.noResults}>{t('No runs found for this filter.')}</div>
+          <div style={styles.noResults}>{t('history.noResults')}</div>
         )}
       </div>
 
