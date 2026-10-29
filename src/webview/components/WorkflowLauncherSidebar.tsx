@@ -3,7 +3,14 @@ import { useExecutionStore, type WorkflowListItem } from '../store/executionStor
 import { t } from '../i18n';
 
 export function WorkflowLauncherSidebar() {
-  const { workflows, selectedWorkflowPath, repository, execution, setSelectedWorkflowPath, openWorkflowRunDialog } = useExecutionStore();
+  const {
+    workflows,
+    selectedWorkflowPath,
+    repository,
+    execution,
+    setSelectedWorkflowPath,
+    openWorkflowRunDialog,
+  } = useExecutionStore();
   const [isOpen, setIsOpen] = useState(true);
 
   const selectRepository = () => {
@@ -17,7 +24,10 @@ export function WorkflowLauncherSidebar() {
       openWorkflowRunDialog(workflow.filePath);
       return;
     }
-    window.__vscode__?.postMessage({ type: 'command:run', payload: { workflowPath: workflow.filePath } });
+    window.__vscode__?.postMessage({
+      type: 'command:run',
+      payload: { workflowPath: workflow.filePath },
+    });
   };
 
   if (!isOpen) {
@@ -47,7 +57,12 @@ export function WorkflowLauncherSidebar() {
       </button>
       <div style={styles.repoBox}>
         <div style={styles.repoLabel}>{t('Repository')}</div>
-        <button type="button" style={styles.repoButton} onClick={selectRepository} title={repository?.root ?? t('Select repository')}>
+        <button
+          type="button"
+          style={styles.repoButton}
+          onClick={selectRepository}
+          title={repository?.root ?? t('Select repository')}
+        >
           <span style={styles.repoIcon}>📁</span>
           <span style={styles.repoText}>{repository?.name ?? t('Select repository')}</span>
         </button>
@@ -60,52 +75,74 @@ export function WorkflowLauncherSidebar() {
         {workflows.length === 0 ? (
           <div style={styles.empty}>
             {t('No workflow found in .github/workflows.')}
-            <button type="button" style={styles.emptyButton} onClick={selectRepository}>{t('Select repository')}</button>
+            <button type="button" style={styles.emptyButton} onClick={selectRepository}>
+              {t('Select repository')}
+            </button>
           </div>
-        ) : workflows.map((workflow) => {
-          const active = selectedWorkflowPath === workflow.filePath;
-          const isRunning = execution.status === 'running' && execution.workflowPath === workflow.filePath;
-          return (
-            <div
-              key={workflow.filePath}
-              style={{
-                ...styles.item,
-                ...(active ? styles.itemActive : {}),
-                ...(!workflow.valid ? styles.itemInvalid : {}),
-              }}
-            >
-              <button
-                type="button"
-                title={workflow.valid ? `${t('Run')} ${workflow.fileName}${workflow.inputs.length ? ` ${t('with inputs')}` : ''}` : workflow.error}
-                style={styles.itemButton}
-                onClick={() => runWorkflow(workflow)}
-                disabled={!workflow.valid || isRunning}
+        ) : (
+          workflows.map((workflow) => {
+            const active = selectedWorkflowPath === workflow.filePath;
+            const isRunning =
+              execution.status === 'running' && execution.workflowPath === workflow.filePath;
+            return (
+              <div
+                key={workflow.filePath}
+                style={{
+                  ...styles.item,
+                  ...(active ? styles.itemActive : {}),
+                  ...(!workflow.valid ? styles.itemInvalid : {}),
+                }}
               >
-                <span style={{ ...styles.icon, ...(isRunning ? styles.runningIcon : {}) }}>
-                  {isRunning ? <span className="workflow-running-spinner" aria-hidden="true" /> : workflow.valid ? '▶' : '!'}
-                </span>
-                <span style={styles.itemText}>
-                  <span style={styles.itemName}>{workflow.name}</span>
-                  <span style={styles.itemMeta}>{workflow.fileName} · {workflow.jobs} job{workflow.jobs === 1 ? '' : 's'}{workflow.inputs.length ? ` · ${workflow.inputs.length} input${workflow.inputs.length === 1 ? '' : 's'}` : ''}</span>
-                </span>
-              </button>
-              {isRunning && (
                 <button
                   type="button"
-                  style={styles.stopButton}
-                  title={t('Stop workflow execution')}
-                  aria-label={`${t('Stop workflow execution')} ${workflow.name}`}
-                  onClick={() => window.__vscode__?.postMessage({
-                    type: 'command:stop',
-                    payload: { executionId: execution.executionId ?? '' },
-                  })}
+                  title={
+                    workflow.valid
+                      ? `${t('Run')} ${workflow.fileName}${workflow.inputs.length ? ` ${t('with inputs')}` : ''}`
+                      : workflow.error
+                  }
+                  style={styles.itemButton}
+                  onClick={() => runWorkflow(workflow)}
+                  disabled={!workflow.valid || isRunning}
                 >
-                  ■
+                  <span style={{ ...styles.icon, ...(isRunning ? styles.runningIcon : {}) }}>
+                    {isRunning ? (
+                      <span className="workflow-running-spinner" aria-hidden="true" />
+                    ) : workflow.valid ? (
+                      '▶'
+                    ) : (
+                      '!'
+                    )}
+                  </span>
+                  <span style={styles.itemText}>
+                    <span style={styles.itemName}>{workflow.name}</span>
+                    <span style={styles.itemMeta}>
+                      {workflow.fileName} · {workflow.jobs} job{workflow.jobs === 1 ? '' : 's'}
+                      {workflow.inputs.length
+                        ? ` · ${workflow.inputs.length} input${workflow.inputs.length === 1 ? '' : 's'}`
+                        : ''}
+                    </span>
+                  </span>
                 </button>
-              )}
-            </div>
-          );
-        })}
+                {isRunning && (
+                  <button
+                    type="button"
+                    style={styles.stopButton}
+                    title={t('Stop workflow execution')}
+                    aria-label={`${t('Stop workflow execution')} ${workflow.name}`}
+                    onClick={() =>
+                      window.__vscode__?.postMessage({
+                        type: 'command:stop',
+                        payload: { executionId: execution.executionId ?? '' },
+                      })
+                    }
+                  >
+                    ■
+                  </button>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </aside>
   );
@@ -184,7 +221,14 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'left',
   },
   repoIcon: { flexShrink: 0, fontSize: 13 },
-  repoText: { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12, fontWeight: 700 },
+  repoText: {
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    fontSize: 12,
+    fontWeight: 700,
+  },
   header: {
     display: 'flex',
     alignItems: 'center',
@@ -195,7 +239,15 @@ const styles: Record<string, React.CSSProperties> = {
   title: { color: '#e6edf3', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' },
   count: { color: '#8b949e', fontSize: 11 },
   list: { overflow: 'auto', padding: 8, display: 'flex', flexDirection: 'column', gap: 6 },
-  empty: { color: '#8b949e', fontSize: 12, padding: 8, lineHeight: 1.4, display: 'flex', flexDirection: 'column', gap: 10 },
+  empty: {
+    color: '#8b949e',
+    fontSize: 12,
+    padding: 8,
+    lineHeight: 1.4,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+  },
   emptyButton: {
     padding: '6px 8px',
     border: '1px solid #30363d',
@@ -250,6 +302,18 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 0,
   },
   itemText: { minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 },
-  itemName: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12, fontWeight: 700 },
-  itemMeta: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#8b949e', fontSize: 11 },
+  itemName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    fontSize: 12,
+    fontWeight: 700,
+  },
+  itemMeta: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    color: '#8b949e',
+    fontSize: 11,
+  },
 };

@@ -19,13 +19,13 @@ const MAX_SUMMARY_LINE_CHARS = 2000;
 
 // Caminhos candidatos para o binário do act em ordem de prioridade
 const ACT_CANDIDATE_PATHS: string[] = [
-  path.join(os.homedir(), '.act', 'act'),          // ~/.act/act  (seu caso)
+  path.join(os.homedir(), '.act', 'act'), // ~/.act/act  (seu caso)
   '/usr/local/bin/act',
   '/usr/bin/act',
-  path.join(os.homedir(), 'bin', 'act'),            // ~/bin/act
-  path.join(os.homedir(), '.local', 'bin', 'act'),  // ~/.local/bin/act
-  '/opt/homebrew/bin/act',                          // macOS Homebrew Apple Silicon
-  '/home/linuxbrew/.linuxbrew/bin/act',             // Linuxbrew
+  path.join(os.homedir(), 'bin', 'act'), // ~/bin/act
+  path.join(os.homedir(), '.local', 'bin', 'act'), // ~/.local/bin/act
+  '/opt/homebrew/bin/act', // macOS Homebrew Apple Silicon
+  '/home/linuxbrew/.linuxbrew/bin/act', // Linuxbrew
 ];
 
 const ANSI_RE = /\x1B[\[\]()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><~]/g;
@@ -48,17 +48,17 @@ function actLog(msg: string): void {
 }
 
 // Padrões de output do act CLI
-const RE_STEP_START   = /^\[([^\]]+)\]\s+⭐\s+Run\s+(.+)$/;
-const RE_STEP_OK      = /^\[([^\]]+)\]\s+✅\s+Success\s+-\s+(.+)$/;
-const RE_STEP_FAIL    = /^\[([^\]]+)\]\s+❌\s+Failure\s+-\s+(.+)$/;
-const RE_STEP_SKIP    = /^\[([^\]]+)\]\s+⏭️\s+Skipping\s+(.+)$/;
-const RE_LOG_LINE     = /^\[([^\]]+)\]\s+\|\s*(.*)$/;
-const RE_JOB_START    = /^\[([^\]]+)\]\s+(?:🚀|🐳)\s+Start(?:\s+image)?/;
+const RE_STEP_START = /^\[([^\]]+)\]\s+⭐\s+Run\s+(.+)$/;
+const RE_STEP_OK = /^\[([^\]]+)\]\s+✅\s+Success\s+-\s+(.+)$/;
+const RE_STEP_FAIL = /^\[([^\]]+)\]\s+❌\s+Failure\s+-\s+(.+)$/;
+const RE_STEP_SKIP = /^\[([^\]]+)\]\s+⏭️\s+Skipping\s+(.+)$/;
+const RE_LOG_LINE = /^\[([^\]]+)\]\s+\|\s*(.*)$/;
+const RE_JOB_START = /^\[([^\]]+)\]\s+(?:🚀|🐳)\s+Start(?:\s+image)?/;
 // Accept plain, 🐳/🚀 (docker/start) and 🏁 (racing flag used by act for sub-job completion)
-const RE_JOB_OK       = /^\[([^\]]+)\]\s+(?:[🐳🚀🏁]\s+)?(?:✅\s+)?Job\s+succeeded/u;
-const RE_JOB_FAIL     = /^\[([^\]]+)\]\s+(?:[🐳🚀🏁]\s+)?(?:❌\s+)?Job\s+failed/u;
+const RE_JOB_OK = /^\[([^\]]+)\]\s+(?:[🐳🚀🏁]\s+)?(?:✅\s+)?Job\s+succeeded/u;
+const RE_JOB_FAIL = /^\[([^\]]+)\]\s+(?:[🐳🚀🏁]\s+)?(?:❌\s+)?Job\s+failed/u;
 // Any bracket-prefixed line — used to detect outer-job transitions
-const RE_ANY_BRACKET  = /^\[([^\]]+)\]/;
+const RE_ANY_BRACKET = /^\[([^\]]+)\]/;
 
 /**
  * Para brackets de reusable workflows (3 partes: OuterJob/ReusableWorkflow/InnerJob),
@@ -66,8 +66,8 @@ const RE_ANY_BRACKET  = /^\[([^\]]+)\]/;
  * Para brackets normais (2 partes: Job/StepName), retorna OuterJob como effectiveJobId.
  */
 function parseEffectiveBracket(bracket: string): {
-  outerJobId: string;      // Usado para lifecycle tracking do job externo
-  effectiveJobId: string;  // Inner job para reusable, outer job para regular
+  outerJobId: string; // Usado para lifecycle tracking do job externo
+  effectiveJobId: string; // Inner job para reusable, outer job para regular
   isReusable: boolean;
 } {
   const parts = bracket.split('/');
@@ -153,9 +153,10 @@ export class ActRunner {
   }
 
   private pushAccumulatedLog(line: string): void {
-    const normalized = line.length > MAX_ACCUMULATED_LOG_LINE_CHARS
-      ? `${line.slice(0, MAX_ACCUMULATED_LOG_LINE_CHARS)} …[truncated]`
-      : line;
+    const normalized =
+      line.length > MAX_ACCUMULATED_LOG_LINE_CHARS
+        ? `${line.slice(0, MAX_ACCUMULATED_LOG_LINE_CHARS)} …[truncated]`
+        : line;
     this.accumulatedLogs.push(normalized);
     if (this.accumulatedLogs.length > MAX_ACCUMULATED_LOG_LINES) {
       this.accumulatedLogs = this.accumulatedLogs.slice(-MAX_ACCUMULATED_LOG_LINES);
@@ -196,9 +197,10 @@ export class ActRunner {
       this.summaryTruncated = true;
       return;
     }
-    const normalized = line.length > MAX_SUMMARY_LINE_CHARS
-      ? `${line.slice(0, MAX_SUMMARY_LINE_CHARS)} …[truncated]`
-      : line;
+    const normalized =
+      line.length > MAX_SUMMARY_LINE_CHARS
+        ? `${line.slice(0, MAX_SUMMARY_LINE_CHARS)} …[truncated]`
+        : line;
     this.summaryLines.push(normalized);
   }
 
@@ -225,7 +227,7 @@ export class ActRunner {
 
     // 2. Tentar caminhos candidatos conhecidos
     for (const candidate of ACT_CANDIDATE_PATHS) {
-      if (fs.existsSync(candidate) && await this.isActInstalled(candidate)) {
+      if (fs.existsSync(candidate) && (await this.isActInstalled(candidate))) {
         // Salvar automaticamente nas configurações globais
         await vscode.workspace
           .getConfiguration('actRunner')
@@ -251,12 +253,18 @@ export class ActRunner {
     return new Promise((resolve) => {
       const shell = process.env.SHELL ?? '/bin/bash';
       // -i = interactive (carrega .bashrc/.zshrc com aliases), -c = executa comando
-      const proc = spawn(shell, ['-i', '-c', 'command -v act 2>/dev/null || which act 2>/dev/null'], {
-        stdio: ['ignore', 'pipe', 'ignore'],
-        env: { ...process.env, TERM: 'dumb' },
-      });
+      const proc = spawn(
+        shell,
+        ['-i', '-c', 'command -v act 2>/dev/null || which act 2>/dev/null'],
+        {
+          stdio: ['ignore', 'pipe', 'ignore'],
+          env: { ...process.env, TERM: 'dumb' },
+        }
+      );
       let output = '';
-      proc.stdout.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+      proc.stdout.on('data', (chunk: Buffer) => {
+        output += chunk.toString();
+      });
       proc.on('close', (code: number | null) => {
         const resolved = output.trim().split('\n').pop()?.trim();
         if (code === 0 && resolved && resolved.length > 0 && !resolved.includes(' ')) {
@@ -267,20 +275,25 @@ export class ActRunner {
       });
       proc.on('error', () => resolve(undefined));
       // timeout de 5s para não travar
-      setTimeout(() => { proc.kill(); resolve(undefined); }, 5000);
+      setTimeout(() => {
+        proc.kill();
+        resolve(undefined);
+      }, 5000);
     });
   }
 
   async run(executionId: string, options: ExecutionOptions): Promise<void> {
-    const workspaceRoot = options.workspaceRoot ?? vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!workspaceRoot) throw new Error(t('No project selected. Use "Select Project" in the sidebar.'));
+    const workspaceRoot =
+      options.workspaceRoot ?? vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceRoot)
+      throw new Error(t('No project selected. Use "Select Project" in the sidebar.'));
 
     // actCwd: diretório de onde o act será invocado (pode ser pai do projeto para reusable workflows)
     const actCwd = options.actCwd ?? workspaceRoot;
 
     const config = vscode.workspace.getConfiguration('actRunner');
-    const actPath = (config.get<string>('actPath') ?? 'act');
-    const defaultImage = (config.get<string>('defaultImage') ?? 'catthehacker/ubuntu:act-latest');
+    const actPath = config.get<string>('actPath') ?? 'act';
+    const defaultImage = config.get<string>('defaultImage') ?? 'catthehacker/ubuntu:act-latest';
 
     const args = this.buildArgs(options, defaultImage, actCwd);
 
@@ -307,20 +320,31 @@ export class ActRunner {
       });
 
       this.activeProcess.stdout?.on('data', (chunk: Buffer) => {
-        chunk.toString().split('\n').forEach((line: string) => {
-          if (line.trim()) this.processLine(executionId, line);
-        });
+        chunk
+          .toString()
+          .split('\n')
+          .forEach((line: string) => {
+            if (line.trim()) this.processLine(executionId, line);
+          });
       });
 
       this.activeProcess.stderr?.on('data', (chunk: Buffer) => {
-        chunk.toString().split('\n').forEach((line: string) => {
-          const classified = this.classifyLogLine(line, 'error');
-          const clean = stripAnsi(classified.line);
-          if (clean.trim()) {
-            this.pushAccumulatedLog(clean);
-            this.dispatchLog({ executionId, line: this.toUiLogLine(classified.line), level: classified.level, timestamp: now() });
-          }
-        });
+        chunk
+          .toString()
+          .split('\n')
+          .forEach((line: string) => {
+            const classified = this.classifyLogLine(line, 'error');
+            const clean = stripAnsi(classified.line);
+            if (clean.trim()) {
+              this.pushAccumulatedLog(clean);
+              this.dispatchLog({
+                executionId,
+                line: this.toUiLogLine(classified.line),
+                level: classified.level,
+                timestamp: now(),
+              });
+            }
+          });
       });
 
       this.activeProcess.on('close', (code: number | null) => {
@@ -330,7 +354,16 @@ export class ActRunner {
         // their individual status (not just the global fallback)
         for (const [pendingJobId, pending] of this.pendingJobStatus) {
           actLog(`[act-runner] job:${pending.status} (flush on close) → jobId="${pendingJobId}"`);
-          eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: pendingJobId, jobName: pendingJobId, status: finalJobStatus, completedAt: pending.completedAt } });
+          eventBus.dispatch({
+            type: 'job:update',
+            payload: {
+              executionId,
+              jobId: pendingJobId,
+              jobName: pendingJobId,
+              status: finalJobStatus,
+              completedAt: pending.completedAt,
+            },
+          });
         }
         this.pendingJobStatus.clear();
 
@@ -353,7 +386,10 @@ export class ActRunner {
 
       this.activeProcess.on('error', (err: Error) => {
         this.activeProcess = null;
-        eventBus.dispatch({ type: 'execution:error', payload: { executionId, error: err.message } });
+        eventBus.dispatch({
+          type: 'execution:error',
+          payload: { executionId, error: err.message },
+        });
         reject(err);
       });
     });
@@ -373,8 +409,9 @@ export class ActRunner {
     this.activeProcess?.kill('SIGTERM');
     this.activeProcess = null;
     // Limpar containers act-* que ficaram ativos após o kill
-    this.cleanupActContainers()
-      .catch(() => { /* silencioso */ });
+    this.cleanupActContainers().catch(() => {
+      /* silencioso */
+    });
   }
 
   clearLogs(): void {
@@ -393,11 +430,16 @@ export class ActRunner {
         stdio: ['ignore', 'pipe', 'ignore'],
       });
       let ids = '';
-      find.stdout?.on('data', (chunk: Buffer) => { ids += chunk.toString(); });
+      find.stdout?.on('data', (chunk: Buffer) => {
+        ids += chunk.toString();
+      });
       find.on('error', () => resolve()); // docker não instalado ou indisponível
       find.on('close', () => {
         const containerIds = ids.trim().split('\n').filter(Boolean);
-        if (containerIds.length === 0) { resolve(); return; }
+        if (containerIds.length === 0) {
+          resolve();
+          return;
+        }
         actLog(`[act-runner] limpando ${containerIds.length} container(s) act-* residual(is)`);
         const rm = spawn('docker', ['rm', '-f', ...containerIds], { stdio: 'ignore' });
         rm.on('close', () => resolve());
@@ -422,7 +464,10 @@ export class ActRunner {
     return line;
   }
 
-  private classifyLogLine(rawLine: string, fallbackLevel: LogLevel = 'info'): { line: string; level: LogLevel } {
+  private classifyLogLine(
+    rawLine: string,
+    fallbackLevel: LogLevel = 'info'
+  ): { line: string; level: LogLevel } {
     const line = stripCarriageReturn(rawLine);
 
     const ghAnnotationRaw = line.match(RE_GITHUB_ANNOTATION);
@@ -439,10 +484,12 @@ export class ActRunner {
     if (levelPrefix) {
       const levelToken = levelPrefix[1].toLowerCase();
       const message = levelPrefix[2] ?? '';
-      if (levelToken === 'warning' || levelToken === 'warn') return { line: message, level: 'warn' };
+      if (levelToken === 'warning' || levelToken === 'warn')
+        return { line: message, level: 'warn' };
       if (levelToken === 'error') return { line: message, level: 'error' };
       if (levelToken === 'debug') return { line: message, level: 'debug' };
-      if (levelToken === 'notice' || levelToken === 'info') return { line: message, level: 'notice' };
+      if (levelToken === 'notice' || levelToken === 'info')
+        return { line: message, level: 'notice' };
     }
 
     return { line, level: fallbackLevel };
@@ -467,7 +514,11 @@ export class ActRunner {
     // - Pending resolve   → confirm/cancel pending status based on outer-job change
     const bracketM = cleanForParsingNoWorkflowPrefix.match(RE_ANY_BRACKET);
     if (bracketM) {
-      const { outerJobId: currentOuterJobId, effectiveJobId: currentEffectiveJobId, isReusable } = parseEffectiveBracket(bracketM[1]);
+      const {
+        outerJobId: currentOuterJobId,
+        effectiveJobId: currentEffectiveJobId,
+        isReusable,
+      } = parseEffectiveBracket(bracketM[1]);
 
       // Mark outer job as running on first bracket line seen for that job
       if (!this.runningJobs.has(currentOuterJobId)) {
@@ -478,14 +529,34 @@ export class ActRunner {
           const prevId = this.lastOuterJobId;
           if (!this.pendingJobStatus.has(prevId)) {
             const inferredStatus = this.failedInnerByOuter.has(prevId) ? 'failed' : 'success';
-            actLog(`[act-runner] outer job:${inferredStatus} (inferred on transition) → jobId="${prevId}"`);
-            eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: prevId, jobName: prevId, status: inferredStatus, completedAt: now() } });
+            actLog(
+              `[act-runner] outer job:${inferredStatus} (inferred on transition) → jobId="${prevId}"`
+            );
+            eventBus.dispatch({
+              type: 'job:update',
+              payload: {
+                executionId,
+                jobId: prevId,
+                jobName: prevId,
+                status: inferredStatus,
+                completedAt: now(),
+              },
+            });
           }
         }
         this.lastOuterJobId = currentOuterJobId;
         this.runningJobs.add(currentOuterJobId);
         actLog(`[act-runner] job:running (first bracket) → jobId="${currentOuterJobId}"`);
-        eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: currentOuterJobId, jobName: currentOuterJobId, status: 'running', startedAt: now() } });
+        eventBus.dispatch({
+          type: 'job:update',
+          payload: {
+            executionId,
+            jobId: currentOuterJobId,
+            jobName: currentOuterJobId,
+            status: 'running',
+            startedAt: now(),
+          },
+        });
       } else {
         // Atualiza o outer job mais recentemente visto (mesmo que já visto antes)
         this.lastOuterJobId = currentOuterJobId;
@@ -494,7 +565,17 @@ export class ActRunner {
       if (isReusable && !this.runningJobs.has(currentEffectiveJobId)) {
         this.runningJobs.add(currentEffectiveJobId);
         actLog(`[act-runner] inner job:running (first bracket) → jobId="${currentEffectiveJobId}"`);
-        eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: currentEffectiveJobId, jobName: currentEffectiveJobId, outerJobId: currentOuterJobId, status: 'running', startedAt: now() } });
+        eventBus.dispatch({
+          type: 'job:update',
+          payload: {
+            executionId,
+            jobId: currentEffectiveJobId,
+            jobName: currentEffectiveJobId,
+            outerJobId: currentOuterJobId,
+            status: 'running',
+            startedAt: now(),
+          },
+        });
       }
 
       // Pending confirmation: confirm/cancel based on outer-job change
@@ -502,12 +583,25 @@ export class ActRunner {
         for (const [pendingJobId, pending] of this.pendingJobStatus) {
           if (pendingJobId !== currentOuterJobId) {
             // Outer job changed → confirm the pending job as done
-            actLog(`[act-runner] job:${pending.status} (confirmed, outer changed) → jobId="${pendingJobId}"`);
-            eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: pendingJobId, jobName: pendingJobId, status: pending.status, completedAt: pending.completedAt } });
+            actLog(
+              `[act-runner] job:${pending.status} (confirmed, outer changed) → jobId="${pendingJobId}"`
+            );
+            eventBus.dispatch({
+              type: 'job:update',
+              payload: {
+                executionId,
+                jobId: pendingJobId,
+                jobName: pendingJobId,
+                status: pending.status,
+                completedAt: pending.completedAt,
+              },
+            });
             this.pendingJobStatus.delete(pendingJobId);
           } else {
             // Same outer job still has work → cancel pending (more sub-jobs running)
-            actLog(`[act-runner] job:pending cancelled (same outer job active) → jobId="${pendingJobId}"`);
+            actLog(
+              `[act-runner] job:pending cancelled (same outer job active) → jobId="${pendingJobId}"`
+            );
             this.pendingJobStatus.delete(pendingJobId);
           }
         }
@@ -519,42 +613,112 @@ export class ActRunner {
       const { outerJobId, effectiveJobId, isReusable } = parseEffectiveBracket(m[1]);
       const stepName = m[2].trim();
       this.currentStep.set(effectiveJobId, stepName);
-      eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: effectiveJobId, jobName: effectiveJobId, outerJobId: isReusable ? outerJobId : undefined, status: 'running', startedAt: now() } });
-      eventBus.dispatch({ type: 'step:update', payload: { executionId, jobId: effectiveJobId, stepId: stepName, stepName, status: 'running', startedAt: now() } });
+      eventBus.dispatch({
+        type: 'job:update',
+        payload: {
+          executionId,
+          jobId: effectiveJobId,
+          jobName: effectiveJobId,
+          outerJobId: isReusable ? outerJobId : undefined,
+          status: 'running',
+          startedAt: now(),
+        },
+      });
+      eventBus.dispatch({
+        type: 'step:update',
+        payload: {
+          executionId,
+          jobId: effectiveJobId,
+          stepId: stepName,
+          stepName,
+          status: 'running',
+          startedAt: now(),
+        },
+      });
       return;
     }
     if ((m = cleanForParsingNoWorkflowPrefix.match(RE_STEP_OK))) {
       const { effectiveJobId } = parseEffectiveBracket(m[1]);
       const stepName = stripTiming(m[2].trim()); // remove sufixo de timing: "Name [52ms]" → "Name"
       this.currentStep.delete(effectiveJobId);
-      eventBus.dispatch({ type: 'step:update', payload: { executionId, jobId: effectiveJobId, stepId: stepName, stepName, status: 'success', completedAt: now() } });
+      eventBus.dispatch({
+        type: 'step:update',
+        payload: {
+          executionId,
+          jobId: effectiveJobId,
+          stepId: stepName,
+          stepName,
+          status: 'success',
+          completedAt: now(),
+        },
+      });
       return;
     }
     if ((m = cleanForParsingNoWorkflowPrefix.match(RE_STEP_FAIL))) {
       const { effectiveJobId } = parseEffectiveBracket(m[1]);
       const stepName = stripTiming(m[2].trim());
       this.currentStep.delete(effectiveJobId);
-      eventBus.dispatch({ type: 'step:update', payload: { executionId, jobId: effectiveJobId, stepId: stepName, stepName, status: 'failed', completedAt: now() } });
+      eventBus.dispatch({
+        type: 'step:update',
+        payload: {
+          executionId,
+          jobId: effectiveJobId,
+          stepId: stepName,
+          stepName,
+          status: 'failed',
+          completedAt: now(),
+        },
+      });
       return;
     }
     if ((m = cleanForParsingNoWorkflowPrefix.match(RE_STEP_SKIP))) {
       const { effectiveJobId } = parseEffectiveBracket(m[1]);
       const stepName = stripTiming(m[2].trim());
       this.currentStep.delete(effectiveJobId);
-      eventBus.dispatch({ type: 'step:update', payload: { executionId, jobId: effectiveJobId, stepId: stepName, stepName, status: 'skipped', completedAt: now() } });
+      eventBus.dispatch({
+        type: 'step:update',
+        payload: {
+          executionId,
+          jobId: effectiveJobId,
+          stepId: stepName,
+          stepName,
+          status: 'skipped',
+          completedAt: now(),
+        },
+      });
       return;
     }
     if ((m = cleanForParsingNoWorkflowPrefix.match(RE_JOB_START))) {
       const { outerJobId, effectiveJobId, isReusable } = parseEffectiveBracket(m[1]);
       actLog(`[act-runner] job:running → jobId="${effectiveJobId}"`);
-      eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: effectiveJobId, jobName: effectiveJobId, outerJobId: isReusable ? outerJobId : undefined, status: 'running', startedAt: now() } });
+      eventBus.dispatch({
+        type: 'job:update',
+        payload: {
+          executionId,
+          jobId: effectiveJobId,
+          jobName: effectiveJobId,
+          outerJobId: isReusable ? outerJobId : undefined,
+          status: 'running',
+          startedAt: now(),
+        },
+      });
       return;
     }
     if ((m = cleanForParsingNoWorkflowPrefix.match(RE_JOB_OK))) {
       const { outerJobId, effectiveJobId, isReusable } = parseEffectiveBracket(m[1]);
       if (isReusable) {
         actLog(`[act-runner] inner job:success → jobId="${effectiveJobId}"`);
-        eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: effectiveJobId, jobName: effectiveJobId, outerJobId, status: 'success', completedAt: now() } });
+        eventBus.dispatch({
+          type: 'job:update',
+          payload: {
+            executionId,
+            jobId: effectiveJobId,
+            jobName: effectiveJobId,
+            outerJobId,
+            status: 'success',
+            completedAt: now(),
+          },
+        });
       } else {
         actLog(`[act-runner] job:success (pending) → jobId="${outerJobId}"`);
         this.pendingJobStatus.set(outerJobId, { status: 'success', completedAt: now() });
@@ -566,7 +730,17 @@ export class ActRunner {
       if (isReusable) {
         actLog(`[act-runner] inner job:failed → jobId="${effectiveJobId}"`);
         this.failedInnerByOuter.add(outerJobId); // registrar falha para inferir status do outer
-        eventBus.dispatch({ type: 'job:update', payload: { executionId, jobId: effectiveJobId, jobName: effectiveJobId, outerJobId, status: 'failed', completedAt: now() } });
+        eventBus.dispatch({
+          type: 'job:update',
+          payload: {
+            executionId,
+            jobId: effectiveJobId,
+            jobName: effectiveJobId,
+            outerJobId,
+            status: 'failed',
+            completedAt: now(),
+          },
+        });
       } else {
         actLog(`[act-runner] job:failed (pending) → jobId="${outerJobId}"`);
         this.pendingJobStatus.set(outerJobId, { status: 'failed', completedAt: now() });
@@ -581,7 +755,14 @@ export class ActRunner {
       const rawContent = rawLogMatch ? rawLogMatch[2] : m[2];
       const classified = this.classifyLogLine(rawContent, 'info');
       this.pushAccumulatedLog(stripAnsi(classified.line));
-      this.dispatchLog({ executionId, jobId: effectiveJobId, stepId, line: this.toUiLogLine(classified.line), level: classified.level, timestamp: now() });
+      this.dispatchLog({
+        executionId,
+        jobId: effectiveJobId,
+        stepId,
+        line: this.toUiLogLine(classified.line),
+        level: classified.level,
+        timestamp: now(),
+      });
       return;
     }
     // ── Detecção de GITHUB_STEP_SUMMARY via output do act ──────────────────
@@ -589,7 +770,9 @@ export class ActRunner {
     // Linhas seguintes sem bracket são continuação do summary.
     const bracketFallback = cleanForParsingNoWorkflowPrefix.match(RE_ANY_BRACKET);
     if (bracketFallback) {
-      const rawLineContent = cleanNoWorkflowPrefix.slice(cleanNoWorkflowPrefix.indexOf(']') + 1).trim();
+      const rawLineContent = cleanNoWorkflowPrefix
+        .slice(cleanNoWorkflowPrefix.indexOf(']') + 1)
+        .trim();
       const lineContent = stripAnsi(rawLineContent);
       // Detectar início de summary, tolerando ícones/símbolos antes de "Summary".
       const summaryMatch = lineContent.match(/^(?:[^A-Za-z0-9#|`*-]+\s*)?Summary\s*-\s*(.*)$/i);
@@ -605,7 +788,14 @@ export class ActRunner {
         const stepId = this.currentStep.get(effectiveJobId) ?? effectiveJobId;
         const classified = this.classifyLogLine(rawLineContent, 'info');
         this.pushAccumulatedLog(stripAnsi(classified.line));
-        this.dispatchLog({ executionId, jobId: effectiveJobId, stepId, line: this.toUiLogLine(classified.line), level: classified.level, timestamp: now() });
+        this.dispatchLog({
+          executionId,
+          jobId: effectiveJobId,
+          stepId,
+          line: this.toUiLogLine(classified.line),
+          level: classified.level,
+          timestamp: now(),
+        });
         return;
       }
       // Qualquer outra linha com bracket encerra a captura de summary
@@ -619,7 +809,14 @@ export class ActRunner {
       if (lineContent) {
         const classified = this.classifyLogLine(rawLineContent, 'info');
         this.pushAccumulatedLog(stripAnsi(classified.line));
-        this.dispatchLog({ executionId, jobId: effectiveJobId, stepId, line: this.toUiLogLine(classified.line), level: classified.level, timestamp: now() });
+        this.dispatchLog({
+          executionId,
+          jobId: effectiveJobId,
+          stepId,
+          line: this.toUiLogLine(classified.line),
+          level: classified.level,
+          timestamp: now(),
+        });
       }
       return;
     }
@@ -629,7 +826,12 @@ export class ActRunner {
     }
     const classified = this.classifyLogLine(clean, 'info');
     this.pushAccumulatedLog(stripAnsi(classified.line));
-    this.dispatchLog({ executionId, line: this.toUiLogLine(classified.line), level: classified.level, timestamp: now() });
+    this.dispatchLog({
+      executionId,
+      line: this.toUiLogLine(classified.line),
+      level: classified.level,
+      timestamp: now(),
+    });
   }
 
   /** Despacha o summary acumulado para o webview se houver conteúdo */
@@ -657,18 +859,19 @@ export class ActRunner {
       // Quando o CWD é diferente do projeto, -W deve ser relativo ao actCwd
       // (exatamente como: cd fean-projects/ && act -W sample-dotnet-api/.github/workflows/file.yaml)
       const effectiveCwd = actCwd ?? options.workspaceRoot ?? '';
-      const wfPath = effectiveCwd && effectiveCwd !== options.workspaceRoot
-        ? path.relative(effectiveCwd, path.resolve(options.workflowPath))
-        : sanitizePath(options.workflowPath);
+      const wfPath =
+        effectiveCwd && effectiveCwd !== options.workspaceRoot
+          ? path.relative(effectiveCwd, path.resolve(options.workflowPath))
+          : sanitizePath(options.workflowPath);
       args.push('-W', wfPath);
     }
-    if (options.jobId)        args.push('-j', sanitizeArg(options.jobId));
-    if (options.dryRun)       args.push('-n');
-    if (options.eventType)    args.push(sanitizeArg(options.eventType));
+    if (options.jobId) args.push('-j', sanitizeArg(options.jobId));
+    if (options.dryRun) args.push('-n');
+    if (options.eventType) args.push(sanitizeArg(options.eventType));
     if (options.eventPayloadPath) args.push('-e', sanitizePath(options.eventPayloadPath));
-    if (options.envFile)      args.push('--env-file', sanitizePath(options.envFile));
-    if (options.varFile)      args.push('--var-file', sanitizePath(options.varFile));
-    if (options.secretsFile)  args.push('--secret-file', sanitizePath(options.secretsFile));
+    if (options.envFile) args.push('--env-file', sanitizePath(options.envFile));
+    if (options.varFile) args.push('--var-file', sanitizePath(options.varFile));
+    if (options.secretsFile) args.push('--secret-file', sanitizePath(options.secretsFile));
 
     // Passa --rm para que act remova o container automaticamente ao finalizar
     // (cobre saída normal com sucesso ou falha gerenciada pelo próprio act)

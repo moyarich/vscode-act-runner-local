@@ -25,7 +25,7 @@ export class ExecutionEngine {
     }
 
     const actPath = vscode.workspace.getConfiguration('actRunner').get<string>('actPath', 'act');
-    if (!await actRunner.isActInstalled(actPath)) {
+    if (!(await actRunner.isActInstalled(actPath))) {
       const choice = await vscode.window.showErrorMessage(
         t('❌ The "act" executable was not found. Tell us where it is installed.'),
         t('Browse for file...'),
@@ -46,7 +46,8 @@ export class ExecutionEngine {
           const selected = uris[0].fsPath;
           const ok = await actRunner.isActInstalled(selected);
           if (ok) {
-            await vscode.workspace.getConfiguration('actRunner')
+            await vscode.workspace
+              .getConfiguration('actRunner')
               .update('actPath', selected, vscode.ConfigurationTarget.Global);
             vscode.window.showInformationMessage(`✅ act configurado: ${selected}`);
             // Retry with new path — fall through (don't return)
@@ -66,7 +67,8 @@ export class ExecutionEngine {
         if (!typed || typed.trim() === '') return 'cancelled';
         const ok = await actRunner.isActInstalled(typed.trim());
         if (ok) {
-          await vscode.workspace.getConfiguration('actRunner')
+          await vscode.workspace
+            .getConfiguration('actRunner')
             .update('actPath', typed.trim(), vscode.ConfigurationTarget.Global);
           vscode.window.showInformationMessage(`✅ act configurado: ${typed.trim()}`);
           // Fall through to run with new path
@@ -89,7 +91,8 @@ export class ExecutionEngine {
 
     // GitHub resolves remote reusable workflows (owner/repo/.github/workflows/file.yml@ref).
     // Only ./... references are local to the selected repository.
-    const workspaceRoot = options.workspaceRoot ?? path.resolve(path.dirname(options.workflowPath), '../..');
+    const workspaceRoot =
+      options.workspaceRoot ?? path.resolve(path.dirname(options.workflowPath), '../..');
     const actCwd = options.actCwd ?? workspaceRoot;
     const missingLocalJobs = findMissingLocalReusableJobs(workflow.jobs, workspaceRoot);
 
@@ -104,7 +107,10 @@ export class ExecutionEngine {
       ].join('\n');
 
       const choice = await vscode.window.showWarningMessage(
-        msg, { modal: true }, t('Run anyway'), t('Cancel')
+        msg,
+        { modal: true },
+        t('Run anyway'),
+        t('Cancel')
       );
       if (choice !== t('Run anyway')) return 'cancelled';
     }
@@ -133,9 +139,24 @@ export class ExecutionEngine {
         actCwd,
         workspaceRoot,
         workflowName: workflow.name,
-        envFile: options.envFile ?? findConfiguredOrExistingFile(workspaceRoot, envManager.getEnvFilePath(workspaceRoot), ['.env']),
-        varFile: options.varFile ?? findConfiguredOrExistingFile(workspaceRoot, envManager.getVarFilePath(workspaceRoot), ['.vars', '.env']),
-        secretsFile: options.secretsFile ?? findConfiguredOrExistingFile(workspaceRoot, envManager.getSecretsFilePath(workspaceRoot), ['.secrets']),
+        envFile:
+          options.envFile ??
+          findConfiguredOrExistingFile(workspaceRoot, envManager.getEnvFilePath(workspaceRoot), [
+            '.env',
+          ]),
+        varFile:
+          options.varFile ??
+          findConfiguredOrExistingFile(workspaceRoot, envManager.getVarFilePath(workspaceRoot), [
+            '.vars',
+            '.env',
+          ]),
+        secretsFile:
+          options.secretsFile ??
+          findConfiguredOrExistingFile(
+            workspaceRoot,
+            envManager.getSecretsFilePath(workspaceRoot),
+            ['.secrets']
+          ),
       });
       finalStatus = 'success';
     } catch (err) {
@@ -205,7 +226,11 @@ export class ExecutionEngine {
   }
 }
 
-function findConfiguredOrExistingFile(root: string, configuredFilePath: string, fallbackCandidates: string[]): string | undefined {
+function findConfiguredOrExistingFile(
+  root: string,
+  configuredFilePath: string,
+  fallbackCandidates: string[]
+): string | undefined {
   if (fs.existsSync(configuredFilePath)) return configuredFilePath;
   return findExistingFile(root, fallbackCandidates);
 }
@@ -221,9 +246,10 @@ function findExistingFile(root: string, candidates: string[]): string | undefine
 function buildPersistedLogSummary(logs: string[]): string {
   const omittedLines = Math.max(0, logs.length - MAX_PERSISTED_LOG_LINES);
   const selectedLogs = logs.slice(-MAX_PERSISTED_LOG_LINES);
-  const prefix = omittedLines > 0
-    ? [`[act-runner] ${omittedLines} older log line(s) omitted to keep history lightweight.`]
-    : [];
+  const prefix =
+    omittedLines > 0
+      ? [`[act-runner] ${omittedLines} older log line(s) omitted to keep history lightweight.`]
+      : [];
   const summary = [...prefix, ...selectedLogs].join('\n');
   if (summary.length <= MAX_PERSISTED_LOG_SUMMARY_CHARS) return summary;
   return `${summary.slice(-MAX_PERSISTED_LOG_SUMMARY_CHARS)}\n...[log summary truncated to keep history lightweight]`;

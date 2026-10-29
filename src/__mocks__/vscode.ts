@@ -54,21 +54,31 @@ const vscode = {
     joinPath: jest.fn((...parts: unknown[]) => parts[parts.length - 1]),
   },
   TreeItem: class {
-    constructor(public label: string, public collapsibleState?: number) {}
+    constructor(
+      public label: string,
+      public collapsibleState?: number
+    ) {}
   },
   TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
   StatusBarAlignment: { Left: 1, Right: 2 },
   ConfigurationTarget: { Global: 1, Workspace: 2, WorkspaceFolder: 3 },
   ViewColumn: { One: 1, Two: 2, Beside: -2 },
-  ThemeIcon: class { constructor(public id: string) {} },
-  ThemeColor: class { constructor(public id: string) {} },
+  ThemeIcon: class {
+    constructor(public id: string) {}
+  },
+  ThemeColor: class {
+    constructor(public id: string) {}
+  },
   EventEmitter: class {
     event = jest.fn();
     fire = jest.fn();
     dispose = jest.fn();
   },
   CodeLens: class {
-    constructor(public range: unknown, public command?: unknown) {}
+    constructor(
+      public range: unknown,
+      public command?: unknown
+    ) {}
   },
   Range: class {
     constructor(

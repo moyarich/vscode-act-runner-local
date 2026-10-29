@@ -138,5 +138,4 @@ describe('WorkflowExplorer', () => {
 
     expect(explorer.getChildren(item)).toEqual([]);
   });
-
 });

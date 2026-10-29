@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import type { ActEvent, ExecutionStartPayload } from '../../types/events.types';
-import type { ExecutionGraphHistory, ExecutionGraphSnapshot, ExecutionRecord } from '../../types/execution.types';
+import type {
+  ExecutionGraphHistory,
+  ExecutionGraphSnapshot,
+  ExecutionRecord,
+} from '../../types/execution.types';
 
 export type NodeStatus = 'idle' | 'running' | 'success' | 'failed' | 'skipped';
 export type AppView = 'graph' | 'history' | 'env' | 'summary' | 'analytics';
@@ -127,8 +131,15 @@ interface StoreState {
   setSelectedWorkflowPath: (workflowPath: string | null) => void;
   openWorkflowRunDialog: (workflowPath: string) => void;
   closeWorkflowRunDialog: () => void;
-  setWorkflowInputValue: (workflowPath: string, inputName: string, value: WorkflowInputValue) => void;
-  setWorkflowInputValues: (workflowPath: string, values: Record<string, WorkflowInputValue>) => void;
+  setWorkflowInputValue: (
+    workflowPath: string,
+    inputName: string,
+    value: WorkflowInputValue
+  ) => void;
+  setWorkflowInputValues: (
+    workflowPath: string,
+    values: Record<string, WorkflowInputValue>
+  ) => void;
   setWorkflowBranch: (workflowPath: string, branch: string) => void;
   setLogFilter: (filter: { jobId: string; stepLabel?: string; label: string } | null) => void;
   restoreGraphAtLog: (logId: string) => void;
@@ -172,34 +183,38 @@ export const useExecutionStore = create<StoreState>((set, get) => ({
 
   setView: (view) => set({ currentView: view }),
 
-  setHistory: (records) => set((s) => {
-    const activeExecutionIds = new Set(records.map((record) => record.id));
-    const persistedSnapshots = buildExecutionSnapshotIndex(records);
-    const liveSnapshots = Object.fromEntries(
-      Object.entries(s.graphSnapshotsByExecutionId).filter(([executionId]) => (
-        activeExecutionIds.has(executionId) && !persistedSnapshots[executionId]
-      ))
-    );
-    const historyLogs = Object.fromEntries(
-      Object.entries(s.historyLogs).filter(([executionId]) => activeExecutionIds.has(executionId))
-    );
+  setHistory: (records) =>
+    set((s) => {
+      const activeExecutionIds = new Set(records.map((record) => record.id));
+      const persistedSnapshots = buildExecutionSnapshotIndex(records);
+      const liveSnapshots = Object.fromEntries(
+        Object.entries(s.graphSnapshotsByExecutionId).filter(
+          ([executionId]) => activeExecutionIds.has(executionId) && !persistedSnapshots[executionId]
+        )
+      );
+      const historyLogs = Object.fromEntries(
+        Object.entries(s.historyLogs).filter(([executionId]) => activeExecutionIds.has(executionId))
+      );
 
-    return {
-      history: records,
-      historyLogs,
-      graphSnapshotsByExecutionId: {
-        ...liveSnapshots,
-        ...persistedSnapshots,
-      },
-    };
-  }),
+      return {
+        history: records,
+        historyLogs,
+        graphSnapshotsByExecutionId: {
+          ...liveSnapshots,
+          ...persistedSnapshots,
+        },
+      };
+    }),
 
-  setWorkflows: (records) => set((s) => ({
-    workflows: records,
-    selectedWorkflowPath: s.selectedWorkflowPath && records.some((record) => record.filePath === s.selectedWorkflowPath)
-      ? s.selectedWorkflowPath
-      : records[0]?.filePath ?? null,
-  })),
+  setWorkflows: (records) =>
+    set((s) => ({
+      workflows: records,
+      selectedWorkflowPath:
+        s.selectedWorkflowPath &&
+        records.some((record) => record.filePath === s.selectedWorkflowPath)
+          ? s.selectedWorkflowPath
+          : (records[0]?.filePath ?? null),
+    })),
 
   setRepository: (repository) => set({ repository }),
 
@@ -209,87 +224,98 @@ export const useExecutionStore = create<StoreState>((set, get) => ({
 
   closeWorkflowRunDialog: () => set({ workflowRunDialogPath: null }),
 
-  setWorkflowInputValue: (workflowPath, inputName, value) => set((s) => ({
-    workflowInputValues: {
-      ...s.workflowInputValues,
-      [workflowPath]: {
-        ...(s.workflowInputValues[workflowPath] ?? {}),
-        [inputName]: value,
+  setWorkflowInputValue: (workflowPath, inputName, value) =>
+    set((s) => ({
+      workflowInputValues: {
+        ...s.workflowInputValues,
+        [workflowPath]: {
+          ...(s.workflowInputValues[workflowPath] ?? {}),
+          [inputName]: value,
+        },
       },
-    },
-  })),
+    })),
 
-  setWorkflowInputValues: (workflowPath, values) => set((s) => ({
-    workflowInputValues: {
-      ...s.workflowInputValues,
-      [workflowPath]: values,
-    },
-  })),
+  setWorkflowInputValues: (workflowPath, values) =>
+    set((s) => ({
+      workflowInputValues: {
+        ...s.workflowInputValues,
+        [workflowPath]: values,
+      },
+    })),
 
-  setWorkflowBranch: (workflowPath, branch) => set((s) => ({
-    workflowBranches: {
-      ...s.workflowBranches,
-      [workflowPath]: branch,
-    },
-  })),
+  setWorkflowBranch: (workflowPath, branch) =>
+    set((s) => ({
+      workflowBranches: {
+        ...s.workflowBranches,
+        [workflowPath]: branch,
+      },
+    })),
 
   setLogFilter: (filter) => set({ logFilter: filter }),
 
-  restoreGraphAtLog: (logId) => set((s) => {
-    const snapshot = s.graphSnapshotsByLogId[logId];
-    if (!snapshot) return {};
-    return {
-      execution: { ...snapshot.execution },
-      nodes: cloneNodes(snapshot.nodes),
-      edges: cloneEdges(snapshot.edges),
-      summaryContent: snapshot.summaryContent,
-      selectedTimelineLogId: logId,
-      currentView: 'graph',
-    };
-  }),
+  restoreGraphAtLog: (logId) =>
+    set((s) => {
+      const snapshot = s.graphSnapshotsByLogId[logId];
+      if (!snapshot) return {};
+      return {
+        execution: { ...snapshot.execution },
+        nodes: cloneNodes(snapshot.nodes),
+        edges: cloneEdges(snapshot.edges),
+        summaryContent: snapshot.summaryContent,
+        selectedTimelineLogId: logId,
+        currentView: 'graph',
+      };
+    }),
 
-  restoreGraphForExecution: (executionId) => set((s) => {
-    if (s.execution.status === 'running') return {};
-    const record = s.history.find((item) => item.id === executionId);
-    const snapshot = record?.graphHistory?.final ?? s.graphSnapshotsByExecutionId[executionId];
-    if (!snapshot) return {};
-    const restoredLogs = record?.graphHistory?.timeline.map((entry, index) => ({
-      id: historicalLogId(executionId, index),
-      executionId,
-      jobId: entry.jobId,
-      stepId: entry.stepId,
-      line: entry.line,
-      level: entry.level,
-      timestamp: entry.timestamp,
-    })) ?? s.logs;
-    const restoredLogSnapshots = record?.graphHistory?.timeline.reduce<Record<string, GraphTimelineSnapshot>>((acc, entry, index) => {
-      acc[historicalLogId(executionId, index)] = fromPersistedSnapshot(entry.snapshot);
-      return acc;
-    }, {}) ?? s.graphSnapshotsByLogId;
-    return {
-      execution: { ...snapshot.execution },
-      nodes: cloneNodes(snapshot.nodes),
-      edges: cloneEdges(snapshot.edges),
-      logs: restoredLogs,
-      graphSnapshotsByLogId: restoredLogSnapshots,
-      summaryContent: snapshot.summaryContent,
-      selectedTimelineLogId: null,
-      currentView: 'graph',
-    };
-  }),
+  restoreGraphForExecution: (executionId) =>
+    set((s) => {
+      if (s.execution.status === 'running') return {};
+      const record = s.history.find((item) => item.id === executionId);
+      const snapshot = record?.graphHistory?.final ?? s.graphSnapshotsByExecutionId[executionId];
+      if (!snapshot) return {};
+      const restoredLogs =
+        record?.graphHistory?.timeline.map((entry, index) => ({
+          id: historicalLogId(executionId, index),
+          executionId,
+          jobId: entry.jobId,
+          stepId: entry.stepId,
+          line: entry.line,
+          level: entry.level,
+          timestamp: entry.timestamp,
+        })) ?? s.logs;
+      const restoredLogSnapshots =
+        record?.graphHistory?.timeline.reduce<Record<string, GraphTimelineSnapshot>>(
+          (acc, entry, index) => {
+            acc[historicalLogId(executionId, index)] = fromPersistedSnapshot(entry.snapshot);
+            return acc;
+          },
+          {}
+        ) ?? s.graphSnapshotsByLogId;
+      return {
+        execution: { ...snapshot.execution },
+        nodes: cloneNodes(snapshot.nodes),
+        edges: cloneEdges(snapshot.edges),
+        logs: restoredLogs,
+        graphSnapshotsByLogId: restoredLogSnapshots,
+        summaryContent: snapshot.summaryContent,
+        selectedTimelineLogId: null,
+        currentView: 'graph',
+      };
+    }),
 
-  restoreLatestGraphState: () => set((s) => {
-    const snapshot = s.liveGraphSnapshot;
-    if (!snapshot) return { selectedTimelineLogId: null };
-    return {
-      execution: { ...snapshot.execution },
-      nodes: cloneNodes(snapshot.nodes),
-      edges: cloneEdges(snapshot.edges),
-      summaryContent: snapshot.summaryContent,
-      selectedTimelineLogId: null,
-      currentView: 'graph',
-    };
-  }),
+  restoreLatestGraphState: () =>
+    set((s) => {
+      const snapshot = s.liveGraphSnapshot;
+      if (!snapshot) return { selectedTimelineLogId: null };
+      return {
+        execution: { ...snapshot.execution },
+        nodes: cloneNodes(snapshot.nodes),
+        edges: cloneEdges(snapshot.edges),
+        summaryContent: snapshot.summaryContent,
+        selectedTimelineLogId: null,
+        currentView: 'graph',
+      };
+    }),
 
   getExecutionGraphHistory: (executionId) => {
     const state = get();
@@ -355,37 +381,49 @@ export const useExecutionStore = create<StoreState>((set, get) => ({
             logFilter: null, // limpar filtro ao iniciar nova execução
             summaryContent: '', // limpar summary da execução anterior
             graphSnapshotsByLogId: {},
-            liveGraphSnapshot: createGraphSnapshot(s, { execution, nodes, edges, summaryContent: '' }),
+            liveGraphSnapshot: createGraphSnapshot(s, {
+              execution,
+              nodes,
+              edges,
+              summaryContent: '',
+            }),
             selectedTimelineLogId: null,
           };
         });
         break;
 
       case 'job:update': {
-        const { jobId, jobName, status, startedAt, completedAt, duration, outerJobId } = event.payload;
+        const { jobId, jobName, status, startedAt, completedAt, duration, outerJobId } =
+          event.payload;
         set((s) => {
           // Busca por id exato, label exato OU template match
           // (ex: "Build (dotnet)" casa com "Build (${{ needs.setup.outputs.language }})")
           const matchingNode = s.nodes.find(
-            n => n.type === 'job' && (
-              n.id === jobId ||
-              n.label === jobId ||
-              matchesTemplate(jobId, n.label)
-            )
+            (n) =>
+              n.type === 'job' &&
+              (n.id === jobId || n.label === jobId || matchesTemplate(jobId, n.label))
           );
           if (!matchingNode) {
             // Job não existe → criar dinamicamente (ex: inner job de reusable workflow)
             const newJob: GraphNode = {
-              id: jobId, type: 'job', label: jobName ?? jobId,
+              id: jobId,
+              type: 'job',
+              label: jobName ?? jobId,
               parentId: outerJobId,
-              status: status as NodeStatus, startedAt, completedAt,
+              status: status as NodeStatus,
+              startedAt,
+              completedAt,
               duration: duration ?? calculateDuration(startedAt, completedAt),
             };
             const nodes = [...s.nodes, newJob];
-            return { nodes, liveGraphSnapshot: createGraphSnapshot(s, { nodes }), selectedTimelineLogId: null };
+            return {
+              nodes,
+              liveGraphSnapshot: createGraphSnapshot(s, { nodes }),
+              selectedTimelineLogId: null,
+            };
           }
           const TERMINAL: NodeStatus[] = ['success', 'failed'];
-          const nodes = s.nodes.map(n => {
+          const nodes = s.nodes.map((n) => {
             if (n.id !== matchingNode.id) return n;
             if (status === 'running' && TERMINAL.includes(n.status)) return n;
             // Resolver label de template para o nome real
@@ -393,7 +431,8 @@ export const useExecutionStore = create<StoreState>((set, get) => ({
             const resolvedLabel = matchesTemplate(jobId, n.label) ? (jobName ?? jobId) : n.label;
             const nextStartedAt = startedAt ?? n.startedAt;
             const nextCompletedAt = completedAt ?? n.completedAt;
-            const nextDuration = duration ?? n.duration ?? calculateDuration(nextStartedAt, nextCompletedAt);
+            const nextDuration =
+              duration ?? n.duration ?? calculateDuration(nextStartedAt, nextCompletedAt);
             return {
               ...n,
               label: resolvedLabel,
@@ -421,33 +460,55 @@ export const useExecutionStore = create<StoreState>((set, get) => ({
         set((s) => {
           let nodes = s.nodes;
           // Garantir que o job pai existe (pode ser de reusable ou ter nome com template)
-          const parentExists = nodes.some(n => n.type === 'job' && (
-            n.id === jobId || n.label === jobId || matchesTemplate(jobId, n.label)
-          ));
+          const parentExists = nodes.some(
+            (n) =>
+              n.type === 'job' &&
+              (n.id === jobId || n.label === jobId || matchesTemplate(jobId, n.label))
+          );
           if (!parentExists) {
-            nodes = [...nodes, { id: jobId, type: 'job', label: jobId, status: 'running' as NodeStatus }];
+            nodes = [
+              ...nodes,
+              { id: jobId, type: 'job', label: jobId, status: 'running' as NodeStatus },
+            ];
           }
-          const parentNode = nodes.find(n => n.type === 'job' && (
-            n.id === jobId || n.label === jobId || matchesTemplate(jobId, n.label)
-          ));
+          const parentNode = nodes.find(
+            (n) =>
+              n.type === 'job' &&
+              (n.id === jobId || n.label === jobId || matchesTemplate(jobId, n.label))
+          );
           const realParentId = parentNode?.id ?? jobId;
           // Verificar se o step já existe — também tenta sem o prefixo "Main "
           const matchingStep = nodes.find(
-            n => n.type === 'step' && (
-              n.id === nodeId ||
-              (n.parentId === realParentId && (n.label === stepName || n.label === normalizedStep))
-            )
+            (n) =>
+              n.type === 'step' &&
+              (n.id === nodeId ||
+                (n.parentId === realParentId &&
+                  (n.label === stepName || n.label === normalizedStep)))
           );
           if (!matchingStep) {
             const newStep: GraphNode = {
-              id: nodeId, type: 'step', label: normalizedStep, parentId: realParentId,
-              status: status as NodeStatus, startedAt, completedAt, duration,
+              id: nodeId,
+              type: 'step',
+              label: normalizedStep,
+              parentId: realParentId,
+              status: status as NodeStatus,
+              startedAt,
+              completedAt,
+              duration,
             };
             const nextNodes = [...nodes, newStep];
-            return { nodes: nextNodes, liveGraphSnapshot: createGraphSnapshot(s, { nodes: nextNodes }), selectedTimelineLogId: null };
+            return {
+              nodes: nextNodes,
+              liveGraphSnapshot: createGraphSnapshot(s, { nodes: nextNodes }),
+              selectedTimelineLogId: null,
+            };
           }
           const nextNodes = updateNode(nodes, nodeId, event.payload);
-          return { nodes: nextNodes, liveGraphSnapshot: createGraphSnapshot(s, { nodes: nextNodes }), selectedTimelineLogId: null };
+          return {
+            nodes: nextNodes,
+            liveGraphSnapshot: createGraphSnapshot(s, { nodes: nextNodes }),
+            selectedTimelineLogId: null,
+          };
         });
         break;
       }
@@ -483,18 +544,25 @@ export const useExecutionStore = create<StoreState>((set, get) => ({
             ...s.execution,
             status: endStatus,
             completedAt,
-            duration: event.payload.duration > 0
-              ? event.payload.duration
-              : calculateDuration(s.execution.startedAt ?? undefined, completedAt) ?? null,
+            duration:
+              event.payload.duration > 0
+                ? event.payload.duration
+                : (calculateDuration(s.execution.startedAt ?? undefined, completedAt) ?? null),
           };
           // Fallback: any node still in 'running' at execution end transitions to final state.
-          const nodes = endStatus === 'cancelled'
-            ? s.nodes
-            : s.nodes.map((n) => {
-                if (n.status !== 'running') return n;
-                const duration = calculateDuration(n.startedAt, completedAt);
-                return { ...n, status: nodeStatus, completedAt, ...(duration !== undefined && { duration }) };
-              });
+          const nodes =
+            endStatus === 'cancelled'
+              ? s.nodes
+              : s.nodes.map((n) => {
+                  if (n.status !== 'running') return n;
+                  const duration = calculateDuration(n.startedAt, completedAt);
+                  return {
+                    ...n,
+                    status: nodeStatus,
+                    completedAt,
+                    ...(duration !== undefined && { duration }),
+                  };
+                });
           return {
             execution,
             nodes,
@@ -520,7 +588,9 @@ export const useExecutionStore = create<StoreState>((set, get) => ({
             ...s.execution,
             status: 'failed',
             completedAt: new Date().toISOString(),
-            duration: calculateDuration(s.execution.startedAt ?? undefined, new Date().toISOString()) ?? s.execution.duration,
+            duration:
+              calculateDuration(s.execution.startedAt ?? undefined, new Date().toISOString()) ??
+              s.execution.duration,
           };
           const id = `log-${++logCounter}`;
           const graphSnapshotsByLogId = {
@@ -570,9 +640,12 @@ function historicalLogId(executionId: string, index: number): string {
   return `history-${executionId}-${index}`;
 }
 
-function buildExecutionSnapshotIndex(records: ExecutionRecord[]): Record<string, GraphTimelineSnapshot> {
+function buildExecutionSnapshotIndex(
+  records: ExecutionRecord[]
+): Record<string, GraphTimelineSnapshot> {
   return records.reduce<Record<string, GraphTimelineSnapshot>>((acc, record) => {
-    if (record.graphHistory?.final) acc[record.id] = fromPersistedSnapshot(record.graphHistory.final);
+    if (record.graphHistory?.final)
+      acc[record.id] = fromPersistedSnapshot(record.graphHistory.final);
     return acc;
   }, {});
 }
@@ -683,7 +756,7 @@ function updateNode(
   // For compound step ids ("jobDisplayName/stepId"), try matching by parent label + step suffix
   const slash = nodeId.indexOf('/');
   const jobDisplayName = slash >= 0 ? nodeId.slice(0, slash) : null;
-  const stepSuffix     = slash >= 0 ? nodeId.slice(slash + 1) : null;
+  const stepSuffix = slash >= 0 ? nodeId.slice(slash + 1) : null;
 
   return nodes.map((n) => {
     let isTarget: boolean;
@@ -695,15 +768,22 @@ function updateNode(
     } else if (jobDisplayName !== null && stepSuffix !== null) {
       // Match step node: parent must have the job display name as id OR label,
       // and this node's id suffix (after YAML job key/) must match the step suffix.
-      const parentNode = nodes.find((p) => p.type === 'job' && (
-        p.id === jobDisplayName || p.label === jobDisplayName || matchesTemplate(jobDisplayName!, p.label)
-      ));
+      const parentNode = nodes.find(
+        (p) =>
+          p.type === 'job' &&
+          (p.id === jobDisplayName ||
+            p.label === jobDisplayName ||
+            matchesTemplate(jobDisplayName!, p.label))
+      );
       if (parentNode && n.parentId === parentNode.id) {
         // n.id = "yamlKey/stepId" — check if our stepSuffix is contained in n.id after the slash
         const nStepPart = n.id.slice(n.id.indexOf('/') + 1);
         const normalizedSuffix = normalizeStepName(stepSuffix!);
-        isTarget = nStepPart === stepSuffix || nStepPart === normalizedSuffix ||
-                   n.label === stepSuffix || n.label === normalizedSuffix;
+        isTarget =
+          nStepPart === stepSuffix ||
+          nStepPart === normalizedSuffix ||
+          n.label === stepSuffix ||
+          n.label === normalizedSuffix;
       } else {
         isTarget = false;
       }
@@ -716,7 +796,8 @@ function updateNode(
     if (update.status === 'running' && TERMINAL.includes(n.status)) return n;
     const nextStartedAt = update.startedAt ?? n.startedAt;
     const nextCompletedAt = update.completedAt ?? n.completedAt;
-    const nextDuration = update.duration ?? n.duration ?? calculateDuration(nextStartedAt, nextCompletedAt);
+    const nextDuration =
+      update.duration ?? n.duration ?? calculateDuration(nextStartedAt, nextCompletedAt);
     return { ...n, ...update, ...(nextDuration !== undefined && { duration: nextDuration }) };
   });
 }
@@ -725,6 +806,7 @@ function calculateDuration(startedAt?: string, completedAt?: string): number | u
   if (!startedAt || !completedAt) return undefined;
   const started = new Date(startedAt).getTime();
   const completed = new Date(completedAt).getTime();
-  if (!Number.isFinite(started) || !Number.isFinite(completed) || completed < started) return undefined;
+  if (!Number.isFinite(started) || !Number.isFinite(completed) || completed < started)
+    return undefined;
   return completed - started;
 }

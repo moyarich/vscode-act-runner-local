@@ -6,11 +6,27 @@ const ANSI_SGR_RE = /\x1b\[([0-9;]*)m/g;
 const HTML_TAG_RE = /<\/?[a-z][\s\S]*>/i;
 
 const ALLOWED_HTML_TAGS = new Set([
-  'b', 'strong', 'i', 'em', 'u', 's', 'br', 'span', 'div', 'p', 'code', 'pre', 'small',
+  'b',
+  'strong',
+  'i',
+  'em',
+  'u',
+  's',
+  'br',
+  'span',
+  'div',
+  'p',
+  'code',
+  'pre',
+  'small',
 ]);
 
 const ALLOWED_STYLE_PROPS = new Set([
-  'color', 'font-weight', 'font-style', 'text-decoration', 'background-color',
+  'color',
+  'font-weight',
+  'font-style',
+  'text-decoration',
+  'background-color',
 ]);
 
 interface AnsiStyleState {
@@ -220,19 +236,27 @@ export function LogPanel({ height }: { height: number }) {
   // Filtra logs pelo job/step selecionado no grafo
   const filteredLogs = logFilter
     ? logs.filter((l) => {
-      if (l.jobId !== logFilter.jobId) return false;
-      if (!logFilter.stepLabel) return true;
-      return (
-        l.stepId === logFilter.stepLabel ||
-        (l.stepId?.startsWith(logFilter.stepLabel + '/') ?? false)
-      );
-    })
+        if (l.jobId !== logFilter.jobId) return false;
+        if (!logFilter.stepLabel) return true;
+        return (
+          l.stepId === logFilter.stepLabel ||
+          (l.stepId?.startsWith(logFilter.stepLabel + '/') ?? false)
+        );
+      })
     : logs;
 
   // Agrupa linhas entre ::group:: e ::endgroup:: em seções colapsáveis
-  type LogLine = typeof filteredLogs[number];
-  interface FlatItem { type: 'line'; log: LogLine }
-  interface GroupItem { type: 'group'; id: string; title: string; lines: LogLine[] }
+  type LogLine = (typeof filteredLogs)[number];
+  interface FlatItem {
+    type: 'line';
+    log: LogLine;
+  }
+  interface GroupItem {
+    type: 'group';
+    id: string;
+    title: string;
+    lines: LogLine[];
+  }
   type DisplayItem = FlatItem | GroupItem;
 
   const displayItems = useMemo<DisplayItem[]>(() => {
@@ -274,7 +298,9 @@ export function LogPanel({ height }: { height: number }) {
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const searchMatches = useMemo(() => {
     if (!normalizedSearch) return [];
-    return filteredLogs.filter((log) => stripAnsi(log.line).toLowerCase().includes(normalizedSearch));
+    return filteredLogs.filter((log) =>
+      stripAnsi(log.line).toLowerCase().includes(normalizedSearch)
+    );
   }, [filteredLogs, normalizedSearch]);
   const activeMatchId = searchMatches[activeMatchIndex]?.id ?? null;
 
@@ -285,11 +311,13 @@ export function LogPanel({ height }: { height: number }) {
 
   const moveMatch = (direction: 1 | -1) => {
     if (searchMatches.length === 0) return;
-    setActiveMatchIndex((current) => (current + direction + searchMatches.length) % searchMatches.length);
+    setActiveMatchIndex(
+      (current) => (current + direction + searchMatches.length) % searchMatches.length
+    );
   };
 
   const toggleGroup = (id: string) =>
-    setExpandedGroups(prev => {
+    setExpandedGroups((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -312,7 +340,16 @@ export function LogPanel({ height }: { height: number }) {
   }, [activeMatchId]);
 
   return (
-    <div style={{ height, display: 'flex', flexDirection: 'column', borderTop: '1px solid #21262d', background: '#0d1117', overflow: 'hidden' }}>
+    <div
+      style={{
+        height,
+        display: 'flex',
+        flexDirection: 'column',
+        borderTop: '1px solid #21262d',
+        background: '#0d1117',
+        overflow: 'hidden',
+      }}
+    >
       <div style={styles.header}>
         <span style={styles.headerTitle}>Logs</span>
         {logFilter ? (
@@ -327,7 +364,10 @@ export function LogPanel({ height }: { height: number }) {
             </button>
           </span>
         ) : (
-          <span style={styles.headerHint}>Clique em um job/step para filtrar ou em uma linha para restaurar o grafo naquele momento</span>
+          <span style={styles.headerHint}>
+            Clique em um job/step para filtrar ou em uma linha para restaurar o grafo naquele
+            momento
+          </span>
         )}
         {selectedTimelineLogId && (
           <button
@@ -346,11 +386,29 @@ export function LogPanel({ height }: { height: number }) {
             placeholder="Buscar no log"
           />
           <span style={styles.searchCount}>
-            {normalizedSearch ? `${searchMatches.length ? activeMatchIndex + 1 : 0}/${searchMatches.length}` : '0/0'}
+            {normalizedSearch
+              ? `${searchMatches.length ? activeMatchIndex + 1 : 0}/${searchMatches.length}`
+              : '0/0'}
           </span>
-          <button style={styles.searchBtn} disabled={searchMatches.length === 0} onClick={() => moveMatch(-1)}>↑</button>
-          <button style={styles.searchBtn} disabled={searchMatches.length === 0} onClick={() => moveMatch(1)}>↓</button>
-          {searchQuery && <button style={styles.searchBtn} onClick={() => changeSearch('')}>limpar</button>}
+          <button
+            style={styles.searchBtn}
+            disabled={searchMatches.length === 0}
+            onClick={() => moveMatch(-1)}
+          >
+            ↑
+          </button>
+          <button
+            style={styles.searchBtn}
+            disabled={searchMatches.length === 0}
+            onClick={() => moveMatch(1)}
+          >
+            ↓
+          </button>
+          {searchQuery && (
+            <button style={styles.searchBtn} onClick={() => changeSearch('')}>
+              limpar
+            </button>
+          )}
         </div>
       </div>
       <div ref={bodyRef} style={styles.body}>
@@ -362,7 +420,9 @@ export function LogPanel({ height }: { height: number }) {
           displayItems.map((item) => {
             if (item.type === 'line') {
               const color = levelColor(item.log.level);
-              const isSearchMatch = normalizedSearch && stripAnsi(item.log.line).toLowerCase().includes(normalizedSearch);
+              const isSearchMatch =
+                normalizedSearch &&
+                stripAnsi(item.log.line).toLowerCase().includes(normalizedSearch);
               const isActiveMatch = activeMatchId === item.log.id;
               return (
                 <div
@@ -371,8 +431,18 @@ export function LogPanel({ height }: { height: number }) {
                   style={{
                     ...styles.logLine,
                     color,
-                    background: isActiveMatch ? '#d2992233' : isSearchMatch ? '#d2992218' : selectedTimelineLogId === item.log.id ? '#1f6feb22' : undefined,
-                    borderLeftColor: isActiveMatch ? '#d29922' : selectedTimelineLogId === item.log.id ? '#58a6ff' : 'transparent',
+                    background: isActiveMatch
+                      ? '#d2992233'
+                      : isSearchMatch
+                        ? '#d2992218'
+                        : selectedTimelineLogId === item.log.id
+                          ? '#1f6feb22'
+                          : undefined,
+                    borderLeftColor: isActiveMatch
+                      ? '#d29922'
+                      : selectedTimelineLogId === item.log.id
+                        ? '#58a6ff'
+                        : 'transparent',
                   }}
                   onClick={() => restoreGraphAtLog(item.log.id)}
                   title="Restaurar o grafo neste ponto do log"
@@ -382,14 +452,15 @@ export function LogPanel({ height }: { height: number }) {
               );
             }
             // Grupo colapsável (::group:: ... ::endgroup::)
-            const groupHasMatch = normalizedSearch && item.lines.some((line) => stripAnsi(line.line).toLowerCase().includes(normalizedSearch));
+            const groupHasMatch =
+              normalizedSearch &&
+              item.lines.some((line) =>
+                stripAnsi(line.line).toLowerCase().includes(normalizedSearch)
+              );
             const isExpanded = expandedGroups.has(item.id) || !!groupHasMatch;
             return (
               <div key={item.id} style={{ margin: '2px 0' }}>
-                <div
-                  onClick={() => toggleGroup(item.id)}
-                  style={styles.groupHeader}
-                >
+                <div onClick={() => toggleGroup(item.id)} style={styles.groupHeader}>
                   <span style={{ fontSize: 10, color: '#6e7681', marginRight: 4 }}>
                     {isExpanded ? '▾' : '▸'}
                   </span>
@@ -402,10 +473,12 @@ export function LogPanel({ height }: { height: number }) {
                 </div>
                 {isExpanded && (
                   <div style={styles.groupBody}>
-                    {item.lines.map((l) => (
+                    {item.lines.map((l) =>
                       (() => {
                         const color = levelColor(l.level);
-                        const isSearchMatch = normalizedSearch && stripAnsi(l.line).toLowerCase().includes(normalizedSearch);
+                        const isSearchMatch =
+                          normalizedSearch &&
+                          stripAnsi(l.line).toLowerCase().includes(normalizedSearch);
                         const isActiveMatch = activeMatchId === l.id;
                         return (
                           <div
@@ -414,8 +487,18 @@ export function LogPanel({ height }: { height: number }) {
                             style={{
                               ...styles.logLine,
                               color,
-                              background: isActiveMatch ? '#d2992233' : isSearchMatch ? '#d2992218' : selectedTimelineLogId === l.id ? '#1f6feb22' : undefined,
-                              borderLeftColor: isActiveMatch ? '#d29922' : selectedTimelineLogId === l.id ? '#58a6ff' : 'transparent',
+                              background: isActiveMatch
+                                ? '#d2992233'
+                                : isSearchMatch
+                                  ? '#d2992218'
+                                  : selectedTimelineLogId === l.id
+                                    ? '#1f6feb22'
+                                    : undefined,
+                              borderLeftColor: isActiveMatch
+                                ? '#d29922'
+                                : selectedTimelineLogId === l.id
+                                  ? '#58a6ff'
+                                  : 'transparent',
                             }}
                             onClick={() => restoreGraphAtLog(l.id)}
                             title="Restaurar o grafo neste ponto do log"
@@ -424,7 +507,7 @@ export function LogPanel({ height }: { height: number }) {
                           </div>
                         );
                       })()
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
@@ -436,24 +519,83 @@ export function LogPanel({ height }: { height: number }) {
   );
 }
 
-function setLineRef(refs: Map<string, HTMLDivElement>, id: string, element: HTMLDivElement | null): void {
+function setLineRef(
+  refs: Map<string, HTMLDivElement>,
+  id: string,
+  element: HTMLDivElement | null
+): void {
   if (element) refs.set(id, element);
   else refs.delete(id);
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  header: { padding: '4px 12px', fontSize: 11, color: '#8b949e', background: '#161b22', borderBottom: '1px solid #21262d', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 },
+  header: {
+    padding: '4px 12px',
+    fontSize: 11,
+    color: '#8b949e',
+    background: '#161b22',
+    borderBottom: '1px solid #21262d',
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerTitle: { fontWeight: 600, color: '#c9d1d9' },
   headerHint: { color: '#484f58', fontStyle: 'italic' },
   breadcrumb: { display: 'flex', alignItems: 'center', gap: 6 },
   breadcrumbLabel: { color: '#58a6ff', fontWeight: 500 },
-  clearBtn: { padding: '1px 7px', border: '1px solid #30363d', borderRadius: 3, background: 'transparent', color: '#6e7681', cursor: 'pointer', fontSize: 10 },
+  clearBtn: {
+    padding: '1px 7px',
+    border: '1px solid #30363d',
+    borderRadius: 3,
+    background: 'transparent',
+    color: '#6e7681',
+    cursor: 'pointer',
+    fontSize: 10,
+  },
   searchWrap: { marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 },
-  searchInput: { width: 180, padding: '2px 7px', border: '1px solid #30363d', borderRadius: 4, background: '#0d1117', color: '#c9d1d9', fontSize: 11 },
+  searchInput: {
+    width: 180,
+    padding: '2px 7px',
+    border: '1px solid #30363d',
+    borderRadius: 4,
+    background: '#0d1117',
+    color: '#c9d1d9',
+    fontSize: 11,
+  },
   searchCount: { minWidth: 42, color: '#8b949e', textAlign: 'right', fontSize: 10 },
-  searchBtn: { padding: '1px 6px', border: '1px solid #30363d', borderRadius: 3, background: 'transparent', color: '#8b949e', cursor: 'pointer', fontSize: 10 },
-  body: { flex: 1, overflowY: 'auto', padding: '6px 10px', fontFamily: 'monospace', fontSize: 12, color: '#c9d1d9' },
-  logLine: { lineHeight: 1.5, cursor: 'pointer', borderLeft: '2px solid transparent', paddingLeft: 6, marginLeft: -6 },
-  groupHeader: { display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none', padding: '1px 0', borderLeft: '2px solid #21262d', paddingLeft: 6 },
+  searchBtn: {
+    padding: '1px 6px',
+    border: '1px solid #30363d',
+    borderRadius: 3,
+    background: 'transparent',
+    color: '#8b949e',
+    cursor: 'pointer',
+    fontSize: 10,
+  },
+  body: {
+    flex: 1,
+    overflowY: 'auto',
+    padding: '6px 10px',
+    fontFamily: 'monospace',
+    fontSize: 12,
+    color: '#c9d1d9',
+  },
+  logLine: {
+    lineHeight: 1.5,
+    cursor: 'pointer',
+    borderLeft: '2px solid transparent',
+    paddingLeft: 6,
+    marginLeft: -6,
+  },
+  groupHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+    padding: '1px 0',
+    borderLeft: '2px solid #21262d',
+    paddingLeft: 6,
+  },
   groupBody: { paddingLeft: 14, borderLeft: '2px solid #21262d', marginLeft: 6 },
 };

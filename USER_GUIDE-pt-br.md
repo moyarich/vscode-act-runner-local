@@ -36,13 +36,13 @@ O grafo visual abre automaticamente e é atualizado em tempo real.
 
 O grafo exibe os **jobs** como cards coloridos com suas dependências:
 
-| Cor | Status |
-|---|---|
-| Cinza | Aguardando |
-| Azul pulsante | Em execução |
-| Verde | Concluído com sucesso |
-| Vermelho | Falhou |
-| Amarelo | Ignorado |
+| Cor           | Status                |
+| ------------- | --------------------- |
+| Cinza         | Aguardando            |
+| Azul pulsante | Em execução           |
+| Verde         | Concluído com sucesso |
+| Vermelho      | Falhou                |
+| Amarelo       | Ignorado              |
 
 - **Clique em um card** para expandir seus steps internos.
 - **Arraste** os cards para reposicioná-los no canvas.
@@ -53,6 +53,7 @@ O grafo exibe os **jobs** como cards coloridos com suas dependências:
 Crie estes arquivos na raiz do repositório:
 
 **`.secrets`** - secrets passados ao act:
+
 ```
 GITHUB_TOKEN=ghp_...
 SONAR_TOKEN=sqa_...
@@ -60,12 +61,14 @@ DOCKER_PASSWORD=...
 ```
 
 **`.env`** - variáveis de ambiente:
+
 ```
 ENV=local
 APP_URL=http://localhost:3000
 ```
 
 **`.actrc`** - configuração padrão do act:
+
 ```
 --platform ubuntu-latest=catthehacker/ubuntu:act-latest
 --secret-file .secrets
@@ -105,14 +108,14 @@ Ou use `Ctrl+Shift+P` -> **Act: Localizar Executável do act**.
 
 ## Problemas comuns
 
-| Problema | Solução |
-|---|---|
-| `act: command not found` | Configure `actRunner.actPath` ou instale o act |
-| `Cannot connect to Docker` | Inicie o Docker Desktop / Rancher Desktop |
-| `ERROR: image not found` | Adicione `--pull=missing` ao `.actrc` |
-| O workflow não aparece no explorador | Confirme que existem arquivos em `.github/workflows/` |
+| Problema                                                      | Solução                                                       |
+| ------------------------------------------------------------- | ------------------------------------------------------------- |
+| `act: command not found`                                      | Configure `actRunner.actPath` ou instale o act                |
+| `Cannot connect to Docker`                                    | Inicie o Docker Desktop / Rancher Desktop                     |
+| `ERROR: image not found`                                      | Adicione `--pull=missing` ao `.actrc`                         |
+| O workflow não aparece no explorador                          | Confirme que existem arquivos em `.github/workflows/`         |
 | `Connect Timeout Error` em actions que chamam a API do GitHub | Adicione `github-token: ${{ github.token \|\| '' }}` à action |
-| O grafo não é atualizado | Use **Act: Resetar Estado (forçar)** na Command Palette |
+| O grafo não é atualizado                                      | Use **Act: Resetar Estado (forçar)** na Command Palette       |
 
 ## Alternativas ao Docker Desktop
 
