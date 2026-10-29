@@ -96,9 +96,7 @@ export function HistoryPanel() {
         <div>
           <div style={styles.title}>{t('history.title')}</div>
           <div style={styles.subtitle}>{t('history.subtitle')}</div>
-          <div style={styles.retentionNote}>
-            {t('history.retentionNote')}
-          </div>
+          <div style={styles.retentionNote}>{t('history.retentionNote')}</div>
         </div>
         <input
           style={styles.search}
@@ -271,9 +269,7 @@ export function HistoryPanel() {
         >
           {t('previous')}
         </button>
-        <span style={styles.pageInfo}>
-          {t('history.pageOf', currentPage, totalPages)}
-        </span>
+        <span style={styles.pageInfo}>{t('history.pageOf', currentPage, totalPages)}</span>
         <button
           style={styles.pageButton}
           disabled={currentPage >= totalPages}
