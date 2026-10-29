@@ -140,7 +140,7 @@ export function HistoryPanel() {
               {t('history.deleteSelected')}
             </button>
           </div>
-          <span style={styles.headerColumns}>Workflow · Event · Status · Branch · Action</span>
+          <span style={styles.headerColumns}>{t('history.columns')}</span>
         </div>
 
         {pagedHistory.map((r) => {
@@ -324,7 +324,7 @@ function HistoryLogPanel({
           style={styles.logSearchInput}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Buscar neste log"
+          placeholder={t('log.searchWithin')}
         />
         <span style={styles.logSearchCount}>
           {normalizedQuery
