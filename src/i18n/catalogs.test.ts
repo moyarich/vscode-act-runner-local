@@ -9,8 +9,8 @@ const read = (file: string): Record<string, string> =>
   JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')) as Record<string, string>;
 
 describe.each([
-  ['manifest', 'package.nls', ''],
-  ['extension host', 'l10n/bundle.l10n', ''],
+  ['manifest', 'package.nls'],
+  ['extension host', 'l10n/bundle.l10n'],
 ])('%s translation catalogs', (_name, stem) => {
   const english = read(`${stem}.json`);
   test.each(languages)('%s matches English keys and interpolation tokens', (locale) => {
