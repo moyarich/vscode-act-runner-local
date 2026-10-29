@@ -1,4 +1,8 @@
 import { getLocale, resolveLocale, setLocale, t } from './i18n';
+import english from './locales/en.json';
+import portuguese from './locales/pt-BR.json';
+import spanish from './locales/es.json';
+import french from './locales/fr.json';
 describe('webview localization', () => {
   afterEach(() => setLocale('en'));
   test.each([
@@ -30,21 +34,21 @@ describe('webview localization', () => {
 });
 
 describe('translation catalog integrity', () => {
-  const english = require('./locales/en.json') as Record<string, string>;
+  const source: Record<string, string> = english;
   const dictionaries = {
-    'pt-BR': require('./locales/pt-BR.json') as Record<string, string>,
-    es: require('./locales/es.json') as Record<string, string>,
-    fr: require('./locales/fr.json') as Record<string, string>,
+    'pt-BR': portuguese as Record<string, string>,
+    es: spanish as Record<string, string>,
+    fr: french as Record<string, string>,
   };
   const placeholders = (value: string) =>
     Array.from(value.matchAll(/\{\d+\}/g), (match) => match[0]).sort();
   it.each(Object.entries(dictionaries))(
     '%s has valid translations and placeholders',
     (_locale, entries) => {
-      expect(Object.keys(entries).sort()).toEqual(Object.keys(english).sort());
+      expect(Object.keys(entries).sort()).toEqual(Object.keys(source).sort());
       for (const [key, translation] of Object.entries(entries)) {
         expect(translation.trim()).not.toBe('');
-        expect(placeholders(translation)).toEqual(placeholders(english[key]));
+        expect(placeholders(translation)).toEqual(placeholders(source[key]));
       }
     }
   );
