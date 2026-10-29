@@ -37,15 +37,15 @@ export function WebhookSimulator() {
       });
       setError(null);
     } catch {
-      setError(t('Invalid JSON - fix the payload before simulating.'));
+      setError(t('webhook.invalidJson'));
     }
   };
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>{t('Simulador de Webhook')}</div>
+      <div style={styles.header}>{t('webhook.title')}</div>
       <div style={styles.row}>
-        <label style={styles.label}>{t('Tipo de evento')}</label>
+        <label style={styles.label}>{t('webhook.eventType')}</label>
         <select
           style={styles.select}
           value={eventType}
@@ -61,7 +61,7 @@ export function WebhookSimulator() {
           Carregar Template
         </button>
       </div>
-      <label style={styles.label}>{t('Payload JSON')}</label>
+      <label style={styles.label}>{t('webhook.payload')}</label>
       {/* TODO @frontend: substituir por editor com syntax highlighting (Monaco ou CodeMirror) */}
       <textarea
         style={styles.textarea}
