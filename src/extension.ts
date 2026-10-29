@@ -41,7 +41,10 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration('actRunner.language') && webviewPanel) {
-        webviewPanel.webview.postMessage({ type: 'locale:change', payload: { language: getRuntimeLocale() } });
+        webviewPanel.webview.postMessage({
+          type: 'locale:change',
+          payload: { language: getRuntimeLocale() },
+        });
       }
     })
   );

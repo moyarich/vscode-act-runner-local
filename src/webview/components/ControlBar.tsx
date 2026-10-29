@@ -65,7 +65,14 @@ export function ControlBar() {
               }
             }}
           >
-            {({ graph: `🗺 ${t('Graph')}`, history: `📜 ${t('History')}`, analytics: `📊 ${t('Analytics')}`, env: `⚙️ ${t('Settings')}` })[view]}
+            {
+              {
+                graph: `🗺 ${t('Graph')}`,
+                history: `📜 ${t('History')}`,
+                analytics: `📊 ${t('Analytics')}`,
+                env: `⚙️ ${t('Settings')}`,
+              }[view]
+            }
           </button>
         ))}
         <button
@@ -82,7 +89,6 @@ export function ControlBar() {
     </div>
   );
 }
-
 
 const styles: Record<string, React.CSSProperties> = {
   bar: {

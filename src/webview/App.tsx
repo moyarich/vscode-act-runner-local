@@ -68,7 +68,7 @@ export function App() {
         if (language) {
           setLocale(language);
           document.documentElement.lang = language;
-          setLocaleVersion(version => version + 1);
+          setLocaleVersion((version) => version + 1);
         }
         return;
       }
