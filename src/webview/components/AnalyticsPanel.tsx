@@ -162,13 +162,13 @@ export function AnalyticsPanel() {
 
           <section style={styles.chartGrid}>
             <ChartPanel
-              title="Builds Over Time"
+              title={t('analytics.builds')}
               buckets={buckets}
               mode="count"
               averageLabel={`Average: ${Math.round(metrics.averageBuildsPerBucket)} jobs`}
             />
             <ChartPanel
-              title="Minutes Over Time"
+              title={t('analytics.minutes')}
               buckets={buckets}
               mode="minutes"
               averageLabel={`Average: ${Math.round(metrics.averageMinutesPerBucket)} min`}
@@ -204,7 +204,7 @@ export function AnalyticsPanel() {
                       <div style={styles.slowestDuration}>
                         {formatDuration(item.averageDuration)}
                       </div>
-                      <div style={styles.slowestSubRight}>avg duration</div>
+                      <div style={styles.slowestSubRight}>{t('analytics.avgDuration')}</div>
                     </div>
                   ))
                 ) : (
@@ -290,13 +290,13 @@ function ChartPanel({
         </div>
         <div style={styles.successErrors}>
           <div style={styles.successErrorsTitle}>{t('analytics.outcomes')}</div>
-          <div style={styles.successErrorsSub}>by day</div>
+          <div style={styles.successErrorsSub}>{t('analytics.byDay')}</div>
           <div style={styles.successNumber}>
             {formatNumber(valueTotal)}{' '}
             <span style={styles.successText}>{mode === 'count' ? 'successful' : 'minutes'}</span>
           </div>
           <div style={styles.failedNumber}>
-            {failedTotal} <span style={styles.failedText}>errored</span>
+            {failedTotal} <span style={styles.failedText}>{t('analytics.errored')}</span>
           </div>
         </div>
       </div>
