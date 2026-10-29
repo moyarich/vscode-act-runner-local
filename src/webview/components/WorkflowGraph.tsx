@@ -293,7 +293,7 @@ function OuterJobCard({
               flexShrink: 0,
             }}
           >
-            {t('running')}
+            {t('status.running')}
           </span>
         )}
         {outerJob.duration !== undefined && outerJob.duration > 0 && !isRunning && (
@@ -646,7 +646,7 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
           <div style={styles.summary}>
             {runningCount > 0 && (
               <span style={{ color: '#fb923c' }}>
-                ◉ {runningCount} {t('running')}
+                ◉ {runningCount} {t('status.running')}
               </span>
             )}
             {successCount > 0 && (
