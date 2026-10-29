@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { getLocale, resolveLocale, setLocale, t } from './i18n';
 import english from './locales/en.json';
 import portuguese from './locales/pt-BR.json';
@@ -69,5 +71,18 @@ describe('translation catalog integrity', () => {
     expect(resolveLocale('essay')).toBe('en');
     expect(resolveLocale('FR_ca')).toBe('fr');
     expect(resolveLocale('pt-PT')).toBe('pt-PT');
+  });
+});
+
+describe('webview translation references', () => {
+  const source = english as Record<string, string>;
+  const components = path.join(__dirname, 'components');
+  it('requires every statically referenced translation key in the source catalog', () => {
+    for (const file of fs.readdirSync(components).filter(name => name.endsWith('.tsx'))) {
+      const content = fs.readFileSync(path.join(components, file), 'utf8');
+      for (const match of content.matchAll(/\\bt\\(\\s*['"]([^'"]+)['"]/g)) {
+        expect(source).toHaveProperty(match[1]);
+      }
+    }
   });
 });
