@@ -30,57 +30,57 @@ interface TabConfig {
 
 const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
   secrets: {
-    label: 'Secrets',
-    sectionTitle: 'Repository secrets',
-    newBtnLabel: 'New repository secret',
-    nameLabel: 'Name',
-    valueLabel: 'Secret',
+    label: 'env.secrets',
+    sectionTitle: 'env.repoSecrets',
+    newBtnLabel: 'env.newSecret',
+    nameLabel: 'env.name',
+    valueLabel: 'env.secret',
     fileKindLabel: 'secrets',
     filePlaceholder: '.secrets ou config/local.secrets',
     isSecret: true,
     description:
-      'Secrets are encrypted and are used for sensitive data. They are not passed to workflows triggered by a pull request from a fork.',
+      'env.secretsDescription',
   },
   vars: {
     label: '.vars',
-    sectionTitle: 'Repository variables',
-    newBtnLabel: 'New repository variable',
-    nameLabel: 'Name',
-    valueLabel: 'Value',
+    sectionTitle: 'env.repoVariables',
+    newBtnLabel: 'env.newRepoVariable',
+    nameLabel: 'env.name',
+    valueLabel: 'value',
     fileKindLabel: 'vars',
     filePlaceholder: '.vars ou my.variables',
     isSecret: false,
     description:
-      'Variables loaded from a .vars file. Shown as plain text and used for non-sensitive configuration data.',
+      'env.varsDescription',
   },
   env: {
     label: '.env',
-    sectionTitle: 'Environment variables',
-    newBtnLabel: 'New variable',
-    nameLabel: 'Name',
-    valueLabel: 'Value',
+    sectionTitle: 'env.variables',
+    newBtnLabel: 'env.newVariable',
+    nameLabel: 'env.name',
+    valueLabel: 'value',
     fileKindLabel: 'env',
     filePlaceholder: '.env ou my.env',
     isSecret: false,
     description:
-      'Environment variables loaded from a .env file and passed to the act runner at execution time.',
+      'env.envDescription',
   },
   actrc: {
-    label: 'Args do ACT',
-    sectionTitle: 'Act runner arguments',
-    newBtnLabel: 'New argument',
-    nameLabel: 'Argument',
+    label: 'env.actArgs',
+    sectionTitle: 'env.actArguments',
+    newBtnLabel: 'env.newArgument',
+    nameLabel: 'env.argument',
     valueLabel: null,
     fileKindLabel: 'actrc',
     filePlaceholder: '.actrc',
     isSecret: false,
     description:
-      'Configure act runner flags and platform mappings used when running GitHub Actions locally.',
+      'env.argsDescription',
   },
 };
 
 const SIDEBAR_ITEMS: { key: SidebarSection; label: string; icon: string }[] = [
-  { key: 'actions', label: 'Actions', icon: '⚡' },
+  { key: 'actions', label: 'actions', icon: '⚡' },
 ];
 
 export function EnvEditor() {
@@ -128,7 +128,8 @@ export function EnvEditor() {
     }
   }, [mode]);
 
-  const config = FILE_TAB_CONFIGS[fileTab];
+  const configSource = FILE_TAB_CONFIGS[fileTab];
+  const config = { ...configSource, label: t(configSource.label), sectionTitle: t(configSource.sectionTitle), newBtnLabel: t(configSource.newBtnLabel), nameLabel: t(configSource.nameLabel), valueLabel: configSource.valueLabel ? t(configSource.valueLabel) : null, description: t(configSource.description) };
 
   const saveAll = (newRows: EnvEntry[]) => {
     window.__vscode__?.postMessage({
@@ -214,7 +215,7 @@ export function EnvEditor() {
               onClick={() => setSidebarSection(item.key)}
             >
               <span style={s.sidebarIcon}>{item.icon}</span>
-              {item.label}
+              {t(item.label)}
             </button>
           ))}
         </div>
@@ -239,9 +240,9 @@ export function EnvEditor() {
         <div style={s.navTabs}>
           {(
             [
-              { key: 'secrets', label: 'Secrets' },
-              { key: 'variables', label: 'Variables' },
-              { key: 'actrc', label: 'Args do ACT' },
+              { key: 'secrets', label: 'env.secrets' },
+              { key: 'variables', label: 'env.variablesTab' },
+              { key: 'actrc', label: 'env.actArgs' },
             ] as { key: MainTab; label: string }[]
           ).map((t) => (
             <button
