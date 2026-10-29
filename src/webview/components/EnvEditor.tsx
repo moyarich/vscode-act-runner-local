@@ -224,12 +224,12 @@ export function EnvEditor() {
       <div style={s.main}>
         {/* Page header */}
         <div style={s.pageHeader}>
-          <h2 style={s.pageTitle}>{t("Actions secrets and variables")}</h2>
+          <h2 style={s.pageTitle}>{t('Actions secrets and variables')}</h2>
           <p style={s.pageDesc}>
             Secrets and variables allow you to manage reusable configuration data.{' '}
-            <strong style={{ color: '#c9d1d9' }}>{t("Secrets are encrypted")}</strong> and are used for
-            sensitive data. Variables are shown as plain text and are used for{' '}
-            <strong style={{ color: '#c9d1d9' }}>{t("non-sensitive data")}</strong>. Anyone with
+            <strong style={{ color: '#c9d1d9' }}>{t('Secrets are encrypted')}</strong> and are used
+            for sensitive data. Variables are shown as plain text and are used for{' '}
+            <strong style={{ color: '#c9d1d9' }}>{t('non-sensitive data')}</strong>. Anyone with
             collaborator access can use these secrets and variables for actions. They are not passed
             to workflows triggered by a pull request from a fork.
           </p>
@@ -382,7 +382,7 @@ export function EnvEditor() {
 
               {loading ? (
                 <div style={s.emptyBox}>
-                  <span style={s.emptyText}>{t("Loading…")}</span>
+                  <span style={s.emptyText}>{t('Loading…')}</span>
                 </div>
               ) : rows.length === 0 ? (
                 <div style={s.emptyBox}>
@@ -396,8 +396,8 @@ export function EnvEditor() {
               ) : (
                 <div style={s.table}>
                   <div style={s.tableHead}>
-                    <div style={s.thName}>{t("Name ↕")}</div>
-                    {config.valueLabel !== null && <div style={s.thValue}>{t("Value")}</div>}
+                    <div style={s.thName}>{t('Name ↕')}</div>
+                    {config.valueLabel !== null && <div style={s.thValue}>{t('Value')}</div>}
                     <div style={s.thActions} />
                   </div>
                   {rows.map((row, i) => (

@@ -93,7 +93,7 @@ export function TemplateSelector() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <span>{t("Templates")}</span>
+        <span>{t('Templates')}</span>
         <div style={styles.toggle}>
           <button
             style={{ ...styles.btn, ...(section === 'workflow' ? styles.btnActive : {}) }}
