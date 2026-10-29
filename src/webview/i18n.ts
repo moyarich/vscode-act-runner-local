@@ -51,76 +51,88 @@ const portuguese: Record<string, string> = {
   'with inputs': 'com inputs',
 };
 const spanish: Record<string, string> = {
-  "Run": "Ejecutar",
-  "Stop": "Detener",
-  "Graph": "Gráfico",
-  "History": "Historial",
-  "Analytics": "Análisis",
-  "Settings": "Configuración",
-  "Cancel": "Cancelar",
-  "Actions": "Acciones",
-  "Rerun": "Volver a ejecutar",
-  "Delete": "Eliminar",
-  "Select repository": "Seleccionar repositorio",
-  "Workflows": "Flujos de trabajo",
-  "Scripts": "Scripts",
-  "No workflow running": "No hay flujos de trabajo en ejecución",
-  "Select...": "Seleccionar...",
-  "Repository": "Repositorio",
-  "Summary": "Resumen",
-  "Previous": "Anterior",
-  "Next": "Siguiente",
-  "All workflow runs": "Todas las ejecuciones",
-  "Showing runs from all workflows": "Mostrando ejecuciones de todos los flujos",
-  "No workflow runs recorded yet.": "Todavía no hay ejecuciones registradas.",
-  "Filter workflow runs": "Filtrar ejecuciones",
-  "Delete selected": "Eliminar seleccionados",
-  "View log": "Ver registro",
-  "Hide log": "Ocultar registro",
-  "Waiting for execution...": "Esperando la ejecución..."
+  Run: 'Ejecutar',
+  Stop: 'Detener',
+  Graph: 'Gráfico',
+  History: 'Historial',
+  Analytics: 'Análisis',
+  Settings: 'Configuración',
+  Cancel: 'Cancelar',
+  Actions: 'Acciones',
+  Rerun: 'Volver a ejecutar',
+  Delete: 'Eliminar',
+  'Select repository': 'Seleccionar repositorio',
+  Workflows: 'Flujos de trabajo',
+  Scripts: 'Scripts',
+  'No workflow running': 'No hay flujos de trabajo en ejecución',
+  'Select...': 'Seleccionar...',
+  Repository: 'Repositorio',
+  Summary: 'Resumen',
+  Previous: 'Anterior',
+  Next: 'Siguiente',
+  'All workflow runs': 'Todas las ejecuciones',
+  'Showing runs from all workflows': 'Mostrando ejecuciones de todos los flujos',
+  'No workflow runs recorded yet.': 'Todavía no hay ejecuciones registradas.',
+  'Filter workflow runs': 'Filtrar ejecuciones',
+  'Delete selected': 'Eliminar seleccionados',
+  'View log': 'Ver registro',
+  'Hide log': 'Ocultar registro',
+  'Waiting for execution...': 'Esperando la ejecución...',
 };
 const french: Record<string, string> = {
-  "Run": "Exécuter",
-  "Stop": "Arrêter",
-  "Graph": "Graphe",
-  "History": "Historique",
-  "Analytics": "Analyses",
-  "Settings": "Paramètres",
-  "Cancel": "Annuler",
-  "Actions": "Actions",
-  "Rerun": "Relancer",
-  "Delete": "Supprimer",
-  "Select repository": "Choisir un dépôt",
-  "Workflows": "Workflows",
-  "Scripts": "Scripts",
-  "No workflow running": "Aucun workflow en cours",
-  "Select...": "Sélectionner...",
-  "Repository": "Dépôt",
-  "Summary": "Résumé",
-  "Previous": "Précédent",
-  "Next": "Suivant",
-  "All workflow runs": "Toutes les exécutions",
-  "Showing runs from all workflows": "Affichage des exécutions de tous les workflows",
-  "No workflow runs recorded yet.": "Aucune exécution enregistrée.",
-  "Filter workflow runs": "Filtrer les exécutions",
-  "Delete selected": "Supprimer la sélection",
-  "View log": "Afficher le journal",
-  "Hide log": "Masquer le journal",
-  "Waiting for execution...": "En attente d’exécution..."
+  Run: 'Exécuter',
+  Stop: 'Arrêter',
+  Graph: 'Graphe',
+  History: 'Historique',
+  Analytics: 'Analyses',
+  Settings: 'Paramètres',
+  Cancel: 'Annuler',
+  Actions: 'Actions',
+  Rerun: 'Relancer',
+  Delete: 'Supprimer',
+  'Select repository': 'Choisir un dépôt',
+  Workflows: 'Workflows',
+  Scripts: 'Scripts',
+  'No workflow running': 'Aucun workflow en cours',
+  'Select...': 'Sélectionner...',
+  Repository: 'Dépôt',
+  Summary: 'Résumé',
+  Previous: 'Précédent',
+  Next: 'Suivant',
+  'All workflow runs': 'Toutes les exécutions',
+  'Showing runs from all workflows': 'Affichage des exécutions de tous les workflows',
+  'No workflow runs recorded yet.': 'Aucune exécution enregistrée.',
+  'Filter workflow runs': 'Filtrer les exécutions',
+  'Delete selected': 'Supprimer la sélection',
+  'View log': 'Afficher le journal',
+  'Hide log': 'Masquer le journal',
+  'Waiting for execution...': 'En attente d’exécution...',
 };
-const catalogs: Record<string, Record<string,string>> = {es:spanish, fr:french, 'pt-BR':portuguese};
+const catalogs: Record<string, Record<string, string>> = {
+  es: spanish,
+  fr: french,
+  'pt-BR': portuguese,
+};
 export type SupportedLocale = 'en' | 'es' | 'fr' | 'pt-BR';
 export function resolveLocale(language: string | undefined): SupportedLocale {
- const candidate=(language || 'en').toLowerCase().replace('_','-');
- if(candidate.startsWith('pt')) return 'pt-BR';
- if(candidate.startsWith('es')) return 'es';
- if(candidate.startsWith('fr')) return 'fr';
- return 'en';
+  const candidate = (language || 'en').toLowerCase().replace('_', '-');
+  if (candidate.startsWith('pt')) return 'pt-BR';
+  if (candidate.startsWith('es')) return 'es';
+  if (candidate.startsWith('fr')) return 'fr';
+  return 'en';
 }
-let locale: SupportedLocale = resolveLocale(typeof navigator === 'undefined' ? 'en' : navigator.language);
-export function setLocale(value: string): void { locale=resolveLocale(value); }
-export function getLocale(): SupportedLocale { return locale; }
-export function t(message: string, ...args: Array<string|number>): string {
- const value=catalogs[locale]?.[message] ?? message;
- return value.replace(/\{(\d+)\}/g, (_: string, i: string)=>String(args[Number(i)] ?? '{'+i+'}'));
+let locale: SupportedLocale = resolveLocale(
+  typeof navigator === 'undefined' ? 'en' : navigator.language
+);
+export function setLocale(value: string): void {
+  locale = resolveLocale(value);
+}
+export function getLocale(): SupportedLocale {
+  return locale;
+}
+export function t(message: string, ...args: Array<string | number>): string {
+  const value = catalogs[locale]?.[message] ?? message;
+  return value.replace(/\{(\d+)\}/g, (_: string, i: string) =>
+    String(args[Number(i)] ?? '{' + i + '}')
+  );
 }

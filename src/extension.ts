@@ -24,7 +24,13 @@ function getRuntimeLocale(): string {
   const configured = vscode.workspace.getConfiguration('actRunner').get<string>('language', 'auto');
   const language = configured === 'auto' ? vscode.env.language : configured;
   const normalized = language.toLowerCase();
-  return normalized.startsWith('pt') ? 'pt-BR' : normalized.startsWith('es') ? 'es' : normalized.startsWith('fr') ? 'fr' : 'en';
+  return normalized.startsWith('pt')
+    ? 'pt-BR'
+    : normalized.startsWith('es')
+      ? 'es'
+      : normalized.startsWith('fr')
+        ? 'fr'
+        : 'en';
 }
 
 /** Execução pendente: inicia quando o webview enviar state:request (React montado) */
@@ -32,12 +38,14 @@ function getRuntimeLocale(): string {
 let pendingExecution: (() => void) | undefined;
 
 export function activate(context: vscode.ExtensionContext): void {
-  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
-    if (event.affectsConfiguration('actRunner.language') && webviewPanel) {
-      // Recreate the webview to ensure all module-level labels use the new locale.
-      webviewPanel.webview.html = buildWebviewHtml(context, webviewPanel.webview, 'graph');
-    }
-  }));
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('actRunner.language') && webviewPanel) {
+        // Recreate the webview to ensure all module-level labels use the new locale.
+        webviewPanel.webview.html = buildWebviewHtml(context, webviewPanel.webview, 'graph');
+      }
+    })
+  );
   historyService.initialize(context);
   envManager.initialize(context);
 
@@ -802,10 +810,13 @@ function openWebviewPanel(
   });
 
   webviewPanel.webview.html = buildWebviewHtml(context, webviewPanel.webview, initialView);
-
 }
 
-function buildWebviewHtml(context: vscode.ExtensionContext, webview: vscode.Webview, initialView: string): string {
+function buildWebviewHtml(
+  context: vscode.ExtensionContext,
+  webview: vscode.Webview,
+  initialView: string
+): string {
   const scriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview', 'webview.js')
   );
