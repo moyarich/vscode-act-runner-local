@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useExecutionStore } from '../store/executionStore';
-import { t } from '../i18n';
+import { t, formatNumber } from '../i18n';
 import type { ExecutionRecord, JobResult } from '../../types/execution.types';
 
 type Timeframe = '7' | '30' | '90' | 'all';
@@ -450,7 +450,7 @@ function formatDuration(ms: number): string {
 }
 
 function formatNumber(value: number): string {
-  return Math.round(value).toLocaleString('en-US');
+  return formatNumber(Math.round(value));
 }
 
 const styles: Record<string, React.CSSProperties> = {
