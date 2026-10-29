@@ -12,7 +12,7 @@ export function RunSummaryHeader() {
   return (
     <section style={styles.card}>
       <div style={styles.identity}>
-        <div style={styles.muted}>{t('Triggered locally by act')}</div>
+        <div style={styles.muted}>{t('execution.localTrigger')}</div>
         <div style={styles.titleRow}>
           <StatusIcon status={status} />
           <span style={styles.title}>{execution.workflowName || 'Workflow run'}</span>
