@@ -16,7 +16,7 @@ export function RunSummaryHeader() {
         <div style={styles.titleRow}>
           <StatusIcon status={status} />
           <span style={styles.title}>{execution.workflowName || 'Workflow run'}</span>
-          {execution.executionId && <span style={styles.badge}>local</span>}
+          {execution.executionId && <span style={styles.badge}>{t('execution.local')}</span>}
         </div>
       </div>
       <Metric label="Status" value={formatStatus(execution.status)} />
