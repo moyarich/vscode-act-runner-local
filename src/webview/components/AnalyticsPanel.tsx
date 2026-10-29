@@ -66,19 +66,19 @@ export function AnalyticsPanel() {
       <div style={styles.topbar}>
         <div style={styles.brand}>Act Visual Runner</div>
         <div style={styles.tabs}>
-          <span style={styles.tabActive}>{t('Analytics')}</span>
+          <span style={styles.tabActive}>{t('nav.analytics')}</span>
         </div>
         <label style={styles.timeframe}>
-          <span>{t('Timeframe:')}</span>
+          <span>{t('analytics.timeframe')}</span>
           <select
             value={timeframe}
             onChange={(event) => setTimeframe(event.target.value as Timeframe)}
             style={styles.select}
           >
-            <option value="7">{t('Past 7 days')}</option>
-            <option value="30">{t('Past 30 days')}</option>
-            <option value="90">{t('Past 90 days')}</option>
-            <option value="all">{t('All time')}</option>
+            <option value="7">{t('analytics.7d')}</option>
+            <option value="30">{t('analytics.30d')}</option>
+            <option value="90">{t('analytics.90d')}</option>
+            <option value="all">{t('analytics.allTime')}</option>
           </select>
         </label>
       </div>
@@ -89,7 +89,7 @@ export function AnalyticsPanel() {
           onChange={(event) => setWorkflow(event.target.value)}
           style={styles.filterSelect}
         >
-          <option value="all">{t('Workflow')}</option>
+          <option value="all">{t('workflow')}</option>
           {workflows.map((item) => (
             <option key={item} value={item}>
               {item}
@@ -101,7 +101,7 @@ export function AnalyticsPanel() {
           onChange={(event) => setJob(event.target.value)}
           style={styles.filterSelect}
         >
-          <option value="all">{t('Job')}</option>
+          <option value="all">{t('job')}</option>
           {jobNames.map((item) => (
             <option key={item} value={item}>
               {item}
@@ -113,10 +113,10 @@ export function AnalyticsPanel() {
           onChange={(event) => setStatus(event.target.value)}
           style={styles.filterSelect}
         >
-          <option value="all">{t('Status')}</option>
-          <option value="success">{t('Success')}</option>
-          <option value="failed">{t('Failed')}</option>
-          <option value="cancelled">{t('Cancelled')}</option>
+          <option value="all">{t('status')}</option>
+          <option value="success">{t('status.success')}</option>
+          <option value="failed">{t('status.failed')}</option>
+          <option value="cancelled">{t('status.cancelled')}</option>
         </select>
         <button type="button" onClick={clearFilters} style={styles.clearBtn}>
           clear all filters
@@ -125,12 +125,12 @@ export function AnalyticsPanel() {
 
       {history.length === 0 ? (
         <div style={styles.empty}>
-          {t('No history available yet. Run workflows to populate Analytics.')}
+          {t('analytics.empty')}
         </div>
       ) : (
         <div style={styles.content}>
           <section>
-            <h2 style={styles.sectionTitle}>{t('Overview')}</h2>
+            <h2 style={styles.sectionTitle}>{t('analytics.overview')}</h2>
             <div style={styles.metricGrid}>
               <MetricCard
                 label="Average duration"
@@ -179,7 +179,7 @@ export function AnalyticsPanel() {
 
           <section style={styles.bottomGrid}>
             <div style={styles.panel}>
-              <h2 style={styles.sectionTitle}>{t('Job Duration Distribution')}</h2>
+              <h2 style={styles.sectionTitle}>{t('analytics.duration')}</h2>
               <div style={styles.distributionList}>
                 {distribution.map((item) => (
                   <div key={item.label} style={styles.distributionRow}>
@@ -194,7 +194,7 @@ export function AnalyticsPanel() {
             </div>
 
             <div style={styles.panel}>
-              <h2 style={styles.sectionTitle}>{t('Top 5 Slowest Jobs')}</h2>
+              <h2 style={styles.sectionTitle}>{t('analytics.slowest')}</h2>
               <div style={styles.slowestList}>
                 {slowestJobs.length > 0 ? (
                   slowestJobs.map((item) => (
@@ -210,7 +210,7 @@ export function AnalyticsPanel() {
                     </div>
                   ))
                 ) : (
-                  <div style={styles.muted}>{t('No jobs with recorded duration.')}</div>
+                  <div style={styles.muted}>{t('analytics.noDuration')}</div>
                 )}
               </div>
             </div>
@@ -291,7 +291,7 @@ function ChartPanel({
           })}
         </div>
         <div style={styles.successErrors}>
-          <div style={styles.successErrorsTitle}>{t('Success & Errors')}</div>
+          <div style={styles.successErrorsTitle}>{t('analytics.outcomes')}</div>
           <div style={styles.successErrorsSub}>by day</div>
           <div style={styles.successNumber}>
             {formatNumber(valueTotal)}{' '}
