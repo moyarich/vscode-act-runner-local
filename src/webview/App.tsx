@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
+import { setLocale } from './i18n';
 import { useExecutionStore, type AppView } from './store/executionStore';
 import type { ActEvent, WebviewMessage } from '../types/events.types';
 
@@ -28,6 +29,7 @@ export function App() {
   const { currentView, setView, handleEvent, setHistory, setWorkflows, setRepository } =
     useExecutionStore();
   const [logHeight, setLogHeight] = useState(200);
+  const [, setLocaleVersion] = useState(0);
 
   const startResize = useCallback(
     (e: React.MouseEvent) => {
@@ -60,6 +62,16 @@ export function App() {
     const handler = (event: MessageEvent<WebviewMessage>) => {
       const msg = event.data;
       if (!msg?.type) return;
+
+      if (msg.type === 'locale:change') {
+        const language = (msg.payload as { language?: string }).language;
+        if (language) {
+          setLocale(language);
+          document.documentElement.lang = language;
+          setLocaleVersion(version => version + 1);
+        }
+        return;
+      }
 
       if (msg.type === 'navigate') {
         setView(msg.payload.view as Parameters<typeof setView>[0]);
