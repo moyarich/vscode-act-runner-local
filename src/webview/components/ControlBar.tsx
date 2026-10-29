@@ -76,7 +76,7 @@ export function ControlBar() {
           }}
           onClick={() => setView('summary')}
         >
-          📋 Summary
+          📋 {t('Summary')}
         </button>
       </div>
     </div>
