@@ -124,9 +124,7 @@ export function AnalyticsPanel() {
       </div>
 
       {history.length === 0 ? (
-        <div style={styles.empty}>
-          {t('analytics.empty')}
-        </div>
+        <div style={styles.empty}>{t('analytics.empty')}</div>
       ) : (
         <div style={styles.content}>
           <section>
