@@ -320,7 +320,7 @@ export function SummaryPanel() {
 
         <section style={styles.workflowCard}>
           <div style={styles.workflowTitle}>{workflowFile}</div>
-          <div style={styles.workflowSubtitle}>on: act</div>
+          <div style={styles.workflowSubtitle}>{t('summary.actEvent')}</div>
           <div style={styles.workflowGraphFrame}>
             <WorkflowGraph showHeader={false} />
           </div>
