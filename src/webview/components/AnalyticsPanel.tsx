@@ -119,7 +119,7 @@ export function AnalyticsPanel() {
           <option value="cancelled">{t('status.cancelled')}</option>
         </select>
         <button type="button" onClick={clearFilters} style={styles.clearBtn}>
-          clear all filters
+          {t('analytics.clearFilters')}
         </button>
       </div>
 
@@ -131,31 +131,31 @@ export function AnalyticsPanel() {
             <h2 style={styles.sectionTitle}>{t('analytics.overview')}</h2>
             <div style={styles.metricGrid}>
               <MetricCard
-                label="Average duration"
+                label={t('analytics.metricDuration')}
                 value={formatDuration(metrics.averageDuration)}
               />
               <MetricCard
-                label="Average failure rate"
+                label={t('analytics.failureRate')}
                 value={`${metrics.failureRate.toFixed(1)}%`}
-                sub={`${metrics.failedRuns} of ${metrics.totalRuns} jobs`}
+                sub={t('analytics.failedOfTotal', formatNumber(metrics.failedRuns), formatNumber(metrics.totalRuns))}
               />
               <MetricCard
-                label="Total minutes"
+                label={t('analytics.totalMinutes')}
                 value={`${formatNumber(metrics.totalMinutes)} min`}
               />
               <MetricCard
-                label="Billable minutes"
+                label={t('analytics.billableMinutes')}
                 value={`${formatNumber(metrics.billableMinutes)} min`}
               />
               <MetricCard
-                label="Est. time saved"
+                label={t('analytics.timeSaved')}
                 value={`${formatNumber(metrics.estimatedSavedMinutes)} min`}
-                sub="vs GitHub-hosted"
+                sub={t('analytics.vsHosted')}
               />
               <MetricCard
-                label="Est. cost savings"
+                label={t('analytics.costSaved')}
                 value={`$${metrics.estimatedCostSavings.toFixed(2)}`}
-                sub="vs GitHub-hosted"
+                sub={t('analytics.vsHosted')}
               />
             </div>
           </section>
@@ -165,13 +165,13 @@ export function AnalyticsPanel() {
               title={t('analytics.builds')}
               buckets={buckets}
               mode="count"
-              averageLabel={`Average: ${Math.round(metrics.averageBuildsPerBucket)} jobs`}
+              averageLabel={t('analytics.averageJobs', formatNumber(Math.round(metrics.averageBuildsPerBucket)))}
             />
             <ChartPanel
               title={t('analytics.minutes')}
               buckets={buckets}
               mode="minutes"
-              averageLabel={`Average: ${Math.round(metrics.averageMinutesPerBucket)} min`}
+              averageLabel={t('analytics.averageMinutes', formatNumber(Math.round(metrics.averageMinutesPerBucket)))}
             />
           </section>
 
