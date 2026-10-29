@@ -24,8 +24,10 @@ function getRuntimeLocale(): string {
   const configured = vscode.workspace.getConfiguration('actRunner').get<string>('language', 'auto');
   const language = configured === 'auto' ? vscode.env.language : configured;
   const normalized = language.toLowerCase();
-  return normalized.startsWith('pt')
-    ? 'pt-BR'
+  return normalized === 'pt-pt' || normalized.startsWith('pt-pt-')
+    ? 'pt-PT'
+    : normalized === 'pt' || normalized === 'pt-br' || normalized.startsWith('pt-br-')
+      ? 'pt-BR'
     : normalized.startsWith('es')
       ? 'es'
       : normalized.startsWith('fr')
