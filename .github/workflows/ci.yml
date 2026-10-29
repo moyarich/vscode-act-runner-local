@@ -49,6 +49,12 @@ jobs:
       - name: Build extension with Webpack
         run: npm run build
 
+      - name: Verify Webpack VSIX localization assets
+        run: |
+          npm run package -- --no-dependencies
+          node scripts/check-localization-vsix.mjs
+          rm -f ./*.vsix
+
       - name: Build extension with Vite
         run: npm run build:vite
 
@@ -56,5 +62,7 @@ jobs:
         if: matrix.node-version == 22
         run: xvfb-run -a npm run test:integration
 
-      - name: Validate VSIX packaging
-        run: npm run package -- --no-dependencies
+      - name: Validate Vite VSIX localization assets
+        run: |
+          npm run package -- --no-dependencies
+          node scripts/check-localization-vsix.mjs
