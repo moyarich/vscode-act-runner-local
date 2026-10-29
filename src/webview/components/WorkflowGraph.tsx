@@ -293,7 +293,7 @@ function OuterJobCard({
               flexShrink: 0,
             }}
           >
-            {t('running')}
+            {t('status.running')}
           </span>
         )}
         {outerJob.duration !== undefined && outerJob.duration > 0 && !isRunning && (
@@ -589,10 +589,8 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
     return (
       <div style={styles.empty}>
         <div style={styles.emptyIcon}>▶</div>
-        <p style={{ fontWeight: 600, marginBottom: 4 }}>{t('No workflow running')}</p>
-        <p style={{ fontSize: 12, color: '#6e7681' }}>
-          {t('Select a workflow and click Run to view progress here.')}
-        </p>
+        <p style={{ fontWeight: 600, marginBottom: 4 }}>{t('execution.idle')}</p>
+        <p style={{ fontSize: 12, color: '#6e7681' }}>{t('workflow.selectHint')}</p>
       </div>
     );
   }
@@ -648,17 +646,17 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
           <div style={styles.summary}>
             {runningCount > 0 && (
               <span style={{ color: '#fb923c' }}>
-                ◉ {runningCount} {t('running')}
+                ◉ {runningCount} {t('status.running')}
               </span>
             )}
             {successCount > 0 && (
               <span style={{ color: '#3fb950' }}>
-                ✓ {successCount} {t('completed')}
+                ✓ {successCount} {t('status.completed')}
               </span>
             )}
             {failedCount > 0 && (
               <span style={{ color: '#f85149' }}>
-                ✕ {failedCount} {t('failed plural')}
+                ✕ {failedCount} {t('status.failedPlural')}
               </span>
             )}
             <span style={{ color: '#6e7681', fontSize: 11 }}>

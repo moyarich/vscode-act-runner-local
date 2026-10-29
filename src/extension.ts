@@ -20,11 +20,36 @@ import type { WorkflowDefinition } from './types/workflow.types';
 import { t } from './i18n/messages';
 
 let webviewPanel: vscode.WebviewPanel | undefined;
+function getRuntimeLocale(): string {
+  const configured = vscode.workspace.getConfiguration('actRunner').get<string>('language', 'auto');
+  const language = configured === 'auto' ? vscode.env.language : configured;
+  const normalized = language.toLowerCase();
+  return normalized === 'pt-pt' || normalized.startsWith('pt-pt-')
+    ? 'pt-PT'
+    : normalized === 'pt' || normalized === 'pt-br' || normalized.startsWith('pt-br-')
+      ? 'pt-BR'
+      : normalized.startsWith('es')
+        ? 'es'
+        : normalized.startsWith('fr')
+          ? 'fr'
+          : 'en';
+}
+
 /** Execução pendente: inicia quando o webview enviar state:request (React montado) */
 /* Start */
 let pendingExecution: (() => void) | undefined;
 
 export function activate(context: vscode.ExtensionContext): void {
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('actRunner.language') && webviewPanel) {
+        webviewPanel.webview.postMessage({
+          type: 'locale:change',
+          payload: { language: getRuntimeLocale() },
+        });
+      }
+    })
+  );
   historyService.initialize(context);
   envManager.initialize(context);
 
@@ -107,7 +132,7 @@ export function activate(context: vscode.ExtensionContext): void {
         const wf = workflowParser.parse(wfPath);
         const items = Object.values(wf.jobs).map((j) => ({
           label: j.name ?? j.id,
-          description: `${j.steps.length} steps`,
+          description: t('{0} steps', j.steps.length),
           detail: j.needs?.length ? `needs: ${j.needs.join(', ')}` : undefined,
         }));
         await vscode.window.showQuickPick(items, { placeHolder: t('Available jobs (read-only)') });
@@ -489,18 +514,18 @@ async function pickWorkflow(): Promise<string | undefined> {
   const root = workspaceRoot();
   if (!root) {
     vscode.window.showErrorMessage(
-      'Selecione um projeto primeiro (botão 📂 na sidebar do Act Runner).'
+      t('Select a project first using the folder button in the Act Runner sidebar.')
     );
     return;
   }
   const paths = workflowParser.discoverWorkflows(root);
   if (paths.length === 0) {
-    vscode.window.showErrorMessage('Nenhum workflow encontrado em .github/workflows/');
+    vscode.window.showErrorMessage(t('No workflows found in .github/workflows/'));
     return;
   }
   if (paths.length === 1) return paths[0];
   const items = paths.map((p) => ({ label: path.basename(p), description: p, _path: p }));
-  const pick = await vscode.window.showQuickPick(items, { placeHolder: 'Selecione o workflow' });
+  const pick = await vscode.window.showQuickPick(items, { placeHolder: t('Select workflow') });
   return pick?._path;
 }
 
@@ -509,7 +534,7 @@ async function pickJob(wfPath: string): Promise<string | undefined> {
     const wf = workflowParser.parse(wfPath);
     const jobs = Object.keys(wf.jobs);
     if (jobs.length === 1) return jobs[0];
-    return vscode.window.showQuickPick(jobs, { placeHolder: 'Selecione o job' });
+    return vscode.window.showQuickPick(jobs, { placeHolder: t('Select job') });
   } catch {
     return undefined;
   }
@@ -520,7 +545,9 @@ async function safeRun(fn: () => Promise<unknown>): Promise<void> {
     await fn();
     sendWorkflowSnapshot();
   } catch (err) {
-    vscode.window.showErrorMessage(`Erro: ${err instanceof Error ? err.message : String(err)}`);
+    vscode.window.showErrorMessage(
+      t('Error: {0}', err instanceof Error ? err.message : String(err))
+    );
   }
 }
 
@@ -586,7 +613,7 @@ function openWebviewPanel(
           (msg.payload as Partial<ExecutionOptions>).workflowPath
         );
         if (!workflowPath) {
-          vscode.window.showErrorMessage('Nenhum workflow encontrado.');
+          vscode.window.showErrorMessage(t('No workflows found.'));
           break;
         }
         await safeRun(() =>
@@ -681,9 +708,9 @@ function openWebviewPanel(
           canSelectFolders: false,
           canSelectMany: false,
           defaultUri: vscode.Uri.file(root),
-          openLabel: 'Selecionar arquivo',
-          title: `Selecionar arquivo de ${tab}`,
-          filters: { 'Arquivos de variáveis': ['env', 'vars', 'variables', 'secrets', '*'] },
+          openLabel: t('Select file'),
+          title: t('Select file for {0}', tab),
+          filters: { [t('Variable files')]: ['env', 'vars', 'variables', 'secrets', '*'] },
         });
         const filePath = selected?.[0]?.fsPath;
         if (!filePath) break;
@@ -724,7 +751,7 @@ function openWebviewPanel(
               : resolveEnvEditorFilePath(root, tab);
             if (!filePath) {
               vscode.window.showErrorMessage(
-                `Selecione um arquivo para salvar ${tab === 'vars' ? 'vars' : `.${tab}`}.`
+                t('Select a file to save {0}.', tab === 'vars' ? 'vars' : `.${tab}`)
               );
               break;
             }
@@ -735,11 +762,15 @@ function openWebviewPanel(
             await rememberEnvFilePath(root, tab, filePath);
           }
           vscode.window.showInformationMessage(
-            `✅ ${tab === 'vars' ? 'vars' : `.${tab}`} salvo com sucesso.`
+            t('✅ {0} saved successfully.', tab === 'vars' ? 'vars' : `.${tab}`)
           );
         } catch (e) {
           vscode.window.showErrorMessage(
-            `Erro ao salvar ${tab === 'vars' ? 'vars' : `.${tab}`}: ${e instanceof Error ? e.message : e}`
+            t(
+              'Failed to save {0}: {1}',
+              tab === 'vars' ? 'vars' : `.${tab}`,
+              e instanceof Error ? e.message : String(e)
+            )
           );
         }
         break;
@@ -788,19 +819,27 @@ function openWebviewPanel(
     webviewPanel = undefined;
   });
 
-  const scriptUri = webviewPanel.webview.asWebviewUri(
+  webviewPanel.webview.html = buildWebviewHtml(context, webviewPanel.webview, initialView);
+}
+
+function buildWebviewHtml(
+  context: vscode.ExtensionContext,
+  webview: vscode.Webview,
+  initialView: string
+): string {
+  const scriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview', 'webview.js')
   );
 
-  const csp = webviewPanel.webview.cspSource;
+  const csp = webview.cspSource;
   const nonce = Array.from({ length: 32 }, () =>
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'.charAt(
       Math.floor(Math.random() * 62)
     )
   ).join('');
 
-  webviewPanel.webview.html = `<!DOCTYPE html>
-<html lang="pt-BR">
+  return `<!DOCTYPE html>
+<html lang="${getRuntimeLocale()}">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy"

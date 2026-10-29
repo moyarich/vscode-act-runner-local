@@ -81,6 +81,7 @@ export type PayloadOf<T extends ActEventType> = Extract<ActEvent, { type: T }>['
 export type WebviewMessage =
   | ActEvent
   | { type: 'navigate'; payload: { view: string } }
+  | { type: 'locale:change'; payload: { language: string } }
   | { type: 'state:snapshot'; payload: Record<string, unknown> };
 
 // Comandos enviados da Webview para o Extension Host

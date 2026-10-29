@@ -225,6 +225,19 @@
           "type": "string",
           "default": ".vars",
           "description": "%configuration.varFile%"
+        },
+        "actRunner.language": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "en",
+            "es",
+            "fr",
+            "pt-BR",
+            "pt-PT"
+          ],
+          "default": "auto",
+          "description": "%configuration.language%"
         }
       }
     }

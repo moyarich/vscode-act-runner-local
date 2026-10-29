@@ -1,6 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './global.css';
+import { setLocale } from './i18n';
+setLocale(document.documentElement.lang || navigator.language);
 import { App } from './App';
 
 /** Error boundary para capturar crashes do React e exibir mensagem útil */

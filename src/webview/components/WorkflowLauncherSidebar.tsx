@@ -37,7 +37,7 @@ export function WorkflowLauncherSidebar() {
           type="button"
           style={styles.toggleCollapsedBtn}
           onClick={() => setIsOpen(true)}
-          title={t('Open workflow sidebar')}
+          title={t('workflow.openSidebar')}
         >
           ▸
         </button>
@@ -51,32 +51,32 @@ export function WorkflowLauncherSidebar() {
         type="button"
         style={styles.toggleOpenBtn}
         onClick={() => setIsOpen(false)}
-        title={t('Close workflow sidebar')}
+        title={t('workflow.closeSidebar')}
       >
         ◂
       </button>
       <div style={styles.repoBox}>
-        <div style={styles.repoLabel}>{t('Repository')}</div>
+        <div style={styles.repoLabel}>{t('repository')}</div>
         <button
           type="button"
           style={styles.repoButton}
           onClick={selectRepository}
-          title={repository?.root ?? t('Select repository')}
+          title={repository?.root ?? t('repository.select')}
         >
           <span style={styles.repoIcon}>📁</span>
-          <span style={styles.repoText}>{repository?.name ?? t('Select repository')}</span>
+          <span style={styles.repoText}>{repository?.name ?? t('repository.select')}</span>
         </button>
       </div>
       <div style={styles.header}>
-        <span style={styles.title}>Workflows</span>
+        <span style={styles.title}>{t('workflow.list')}</span>
         <span style={styles.count}>{workflows.length}</span>
       </div>
       <div style={styles.list}>
         {workflows.length === 0 ? (
           <div style={styles.empty}>
-            {t('No workflow found in .github/workflows.')}
+            {t('workflow.notFound')}
             <button type="button" style={styles.emptyButton} onClick={selectRepository}>
-              {t('Select repository')}
+              {t('repository.select')}
             </button>
           </div>
         ) : (
@@ -97,7 +97,7 @@ export function WorkflowLauncherSidebar() {
                   type="button"
                   title={
                     workflow.valid
-                      ? `${t('Run')} ${workflow.fileName}${workflow.inputs.length ? ` ${t('with inputs')}` : ''}`
+                      ? `${t('run')} ${workflow.fileName}${workflow.inputs.length ? ` ${t('workflow.withInputs')}` : ''}`
                       : workflow.error
                   }
                   style={styles.itemButton}
@@ -118,7 +118,7 @@ export function WorkflowLauncherSidebar() {
                     <span style={styles.itemMeta}>
                       {workflow.fileName} · {workflow.jobs} job{workflow.jobs === 1 ? '' : 's'}
                       {workflow.inputs.length
-                        ? ` · ${workflow.inputs.length} input${workflow.inputs.length === 1 ? '' : 's'}`
+                        ? ` · ${t(workflow.inputs.length === 1 ? 'workflow.inputOne' : 'workflow.inputOther', workflow.inputs.length)}`
                         : ''}
                     </span>
                   </span>
@@ -127,8 +127,8 @@ export function WorkflowLauncherSidebar() {
                   <button
                     type="button"
                     style={styles.stopButton}
-                    title={t('Stop workflow execution')}
-                    aria-label={`${t('Stop workflow execution')} ${workflow.name}`}
+                    title={t('workflow.stop')}
+                    aria-label={`${t('workflow.stop')} ${workflow.name}`}
                     onClick={() =>
                       window.__vscode__?.postMessage({
                         type: 'command:stop',

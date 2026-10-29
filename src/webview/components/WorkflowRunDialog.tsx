@@ -80,7 +80,7 @@ export function WorkflowRunDialog() {
       <div style={styles.dialog} onMouseDown={(event) => event.stopPropagation()}>
         <div style={styles.header}>
           <div>
-            <div style={styles.title}>Run workflow</div>
+            <div style={styles.title}>{t('workflow.run')}</div>
             <div style={styles.subtitle}>
               {workflow.name} · {workflow.fileName}
             </div>
@@ -91,7 +91,7 @@ export function WorkflowRunDialog() {
         </div>
 
         <div style={styles.branchBox}>
-          <div style={styles.label}>Use workflow from</div>
+          <div style={styles.label}>{t('workflow.from')}</div>
           {branchOptions.length > 0 ? (
             <select
               style={styles.input}
@@ -127,7 +127,7 @@ export function WorkflowRunDialog() {
 
         <div style={styles.footer}>
           <button type="button" style={styles.secondaryButton} onClick={closeWorkflowRunDialog}>
-            {t('Cancel')}
+            {t('cancel')}
           </button>
           <button
             type="button"
@@ -164,7 +164,7 @@ function InputField({
           value={String(value ?? '')}
           onChange={(event) => onChange(event.target.value)}
         >
-          {!input.required && <option value="">{t('Select...')}</option>}
+          {!input.required && <option value="">{t('select')}</option>}
           {input.options.map((option) => (
             <option key={option} value={option}>
               {option}

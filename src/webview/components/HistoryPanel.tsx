@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useExecutionStore } from '../store/executionStore';
-import { t } from '../i18n';
+import { t, getLocale } from '../i18n';
 
 const PAGE_SIZE = 20;
 
@@ -53,7 +53,7 @@ export function HistoryPanel() {
         record.jobId,
         record.status,
         record.trigger,
-        new Date(record.startedAt).toLocaleString('pt-BR'),
+        new Date(record.startedAt).toLocaleString(getLocale()),
       ].some((value) =>
         String(value ?? '')
           .toLowerCase()
@@ -87,15 +87,15 @@ export function HistoryPanel() {
   };
 
   if (history.length === 0) {
-    return <div style={styles.empty}>{t('No workflow runs recorded yet.')}</div>;
+    return <div style={styles.empty}>{t('history.empty')}</div>;
   }
 
   return (
     <div style={styles.container}>
       <div style={styles.topBar}>
         <div>
-          <div style={styles.title}>All workflow runs</div>
-          <div style={styles.subtitle}>Showing runs from all workflows</div>
+          <div style={styles.title}>{t('history.title')}</div>
+          <div style={styles.subtitle}>{t('history.subtitle')}</div>
           <div style={styles.retentionNote}>
             For performance, only the latest 40 workflow runs are kept. Older runs are removed
             automatically.
@@ -105,7 +105,7 @@ export function HistoryPanel() {
           style={styles.search}
           value={query}
           onChange={(event) => updateQuery(event.target.value)}
-          placeholder={t('Filter workflow runs')}
+          placeholder={t('history.filter')}
         />
       </div>
 
@@ -125,11 +125,14 @@ export function HistoryPanel() {
                     return next;
                   });
                 }}
-                aria-label={t('Select all runs on this page')}
+                aria-label={t('history.selectPage')}
               />
               {selectedIds.size > 0
-                ? `${selectedIds.size} selected`
-                : `${filteredHistory.length} workflow ${filteredHistory.length === 1 ? 'run' : 'runs'}`}
+                ? t('history.selected', selectedIds.size)
+                : t(
+                    filteredHistory.length === 1 ? 'history.runCountOne' : 'history.runCountOther',
+                    filteredHistory.length
+                  )}
             </label>
             <button
               type="button"
@@ -137,10 +140,10 @@ export function HistoryPanel() {
               disabled={selectedIds.size === 0}
               onClick={deleteSelected}
             >
-              {t('Delete selected')}
+              {t('history.deleteSelected')}
             </button>
           </div>
-          <span style={styles.headerColumns}>Workflow · Event · Status · Branch · Action</span>
+          <span style={styles.headerColumns}>{t('history.columns')}</span>
         </div>
 
         {pagedHistory.map((r) => {
@@ -174,7 +177,7 @@ export function HistoryPanel() {
                       return next;
                     });
                   }}
-                  aria-label={`${t('Select run')} ${r.workflowName}`}
+                  aria-label={`${t('history.select')} ${r.workflowName}`}
                 />
                 <span style={{ color: statusColor(r.status), fontSize: 14 }}>
                   {statusIcon(r.status)}
@@ -182,13 +185,13 @@ export function HistoryPanel() {
                 <div style={styles.runMain}>
                   <div style={styles.runTitle}>{r.workflowName}</div>
                   <div style={styles.runSubline}>
-                    {eventLabel(r)} · {r.jobId ?? 'todos os jobs'} · {r.trigger}
+                    {eventLabel(r)} · {r.jobId ?? t('job.all')} · {r.trigger}
                   </div>
                 </div>
                 <span style={styles.statusText}>{capitalize(r.status)}</span>
                 <span style={styles.branchPill}>{branch}</span>
                 <span style={styles.metaBlock}>
-                  {new Date(r.startedAt).toLocaleString('pt-BR')}
+                  {new Date(r.startedAt).toLocaleString(getLocale())}
                   <br />
                   {r.duration != null ? `${(r.duration / 1000).toFixed(1)}s` : '—'}
                 </span>
@@ -199,7 +202,7 @@ export function HistoryPanel() {
                       event.stopPropagation();
                       setOpenMenuId(menuOpen ? null : r.id);
                     }}
-                    title={t('Actions')}
+                    title={t('actions')}
                   >
                     ...
                   </button>
@@ -217,7 +220,7 @@ export function HistoryPanel() {
                           setOpenMenuId(null);
                         }}
                       >
-                        {isExpanded ? t('Hide log') : t('View log')}
+                        {isExpanded ? t('log.hide') : t('log.view')}
                       </button>
                       <button
                         type="button"
@@ -227,7 +230,7 @@ export function HistoryPanel() {
                           setOpenMenuId(null);
                         }}
                       >
-                        {t('Rerun')}
+                        {t('rerun')}
                       </button>
                       <button
                         type="button"
@@ -237,7 +240,7 @@ export function HistoryPanel() {
                           setOpenMenuId(null);
                         }}
                       >
-                        {t('Delete')}
+                        {t('delete')}
                       </button>
                     </div>
                   )}
@@ -258,9 +261,7 @@ export function HistoryPanel() {
             </div>
           );
         })}
-        {pagedHistory.length === 0 && (
-          <div style={styles.noResults}>{t('No runs found for this filter.')}</div>
-        )}
+        {pagedHistory.length === 0 && <div style={styles.noResults}>{t('history.noResults')}</div>}
       </div>
 
       <div style={styles.pagination}>
@@ -326,7 +327,7 @@ function HistoryLogPanel({
           style={styles.logSearchInput}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Buscar neste log"
+          placeholder={t('log.searchWithin')}
         />
         <span style={styles.logSearchCount}>
           {normalizedQuery
@@ -390,10 +391,8 @@ function setHistoryLineRef(
 }
 
 function historyRowTitle(canRestoreGraph: boolean, isWorkflowRunning: boolean): string {
-  if (isWorkflowRunning) return 'Execução em andamento: o grafo ao vivo permanece protegido.';
-  return canRestoreGraph
-    ? 'Abrir grafo desta execução'
-    : 'Grafo detalhado disponível para execuções feitas nesta sessão';
+  if (isWorkflowRunning) return t('history.graphRunning');
+  return canRestoreGraph ? t('history.openGraph') : t('history.graphSessionOnly');
 }
 
 function highlightLogText(line: string, normalizedQuery: string): React.ReactNode {

@@ -1,57 +1,54 @@
-const portuguese: Record<string, string> = {
-  Run: 'Executar',
-  Stop: 'Parar',
-  'Configure the act executable path': 'Configurar caminho do executável act',
-  Graph: 'Grafo',
-  History: 'Histórico',
-  Analytics: 'Analytics',
-  Settings: 'Configurações',
-  'No workflow runs recorded yet.': 'Nenhuma execução registrada ainda.',
-  'Filter workflow runs': 'Filtrar execuções de workflow',
-  Actions: 'Ações',
-  'Hide log': 'Ocultar log',
-  'View log': 'Ver log',
-  Rerun: 'Reexecutar',
-  Delete: 'Deletar',
-  'Delete selected': 'Deletar selecionados',
-  'Select all runs on this page': 'Selecionar todas as execuções desta página',
-  'Select run': 'Selecionar execução',
-  'Stop workflow execution': 'Parar execução do workflow',
-  Repository: 'Repositório',
-  'Select repository': 'Selecionar repositório',
-  Cancel: 'Cancelar',
-  'Select...': 'Selecione...',
-  'Open workflow sidebar': 'Abrir sidebar de workflows',
-  'No workflow found in .github/workflows.': 'Nenhum workflow encontrado em .github/workflows.',
-  'No logs for this step.': 'Nenhum log para este step.',
-  'Waiting for execution...': 'Aguardando execução...',
-  'No job loaded': 'Nenhum job carregado',
-  'No GITHUB_STEP_SUMMARY detected in this execution.':
-    'Nenhum GITHUB_STEP_SUMMARY detectado nesta execução.',
-  'Invalid JSON - fix the payload before simulating.':
-    'JSON inválido - corrija o payload antes de simular.',
-  'Secrets should never be committed. Make sure':
-    'Secrets nunca devem ser commitados. Verifique se',
-  'is in': 'está no',
-  'No history available yet. Run workflows to populate Analytics.':
-    'Nenhum histórico disponível ainda. Execute workflows para alimentar o Analytics.',
-  'No jobs with recorded duration.': 'Sem jobs com duração registrada.',
-  Execution: 'Execução',
-  all: 'todos',
-  'No workflow running': 'Nenhum workflow em execução',
-  'Select a workflow and click Run to view progress here.':
-    'Selecione um workflow e clique em Executar para visualizar o progresso aqui.',
-  Workflows: 'Workflows',
-  Scripts: 'Scripts',
-  'Apply template': 'Aplicar template',
-  'No runs found for this filter.': 'Nenhuma execução encontrada para este filtro.',
-  completed: 'concluído',
-  'failed plural': 'falharam',
-  'with inputs': 'com inputs',
+import english from './locales/en.json';
+import portuguese from './locales/pt-BR.json';
+import europeanPortuguese from './locales/pt-PT.json';
+import spanish from './locales/es.json';
+import french from './locales/fr.json';
+
+export type SupportedLocale = 'en' | 'es' | 'fr' | 'pt-BR' | 'pt-PT';
+type Dictionary = Record<string, string>;
+const catalogs: Record<SupportedLocale, Dictionary> = {
+  en: english,
+  es: spanish,
+  fr: french,
+  'pt-BR': portuguese,
+  'pt-PT': europeanPortuguese,
 };
 
-export function t(message: string): string {
-  return typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('pt')
-    ? (portuguese[message] ?? message)
-    : message;
+/** Match language subtags rather than prefixes (e.g. "essay" is not Spanish). */
+export function resolveLocale(language: string | undefined): SupportedLocale {
+  const normalized = (language ?? 'en').trim().replace(/_/g, '-').toLowerCase();
+  const [primary, region] = normalized.split('-');
+  if (primary === 'pt') return region === 'pt' ? 'pt-PT' : 'pt-BR';
+  if (primary === 'es' || primary === 'fr') return primary;
+  return 'en';
+}
+
+let locale: SupportedLocale = 'en';
+export function setLocale(language: string): void {
+  locale = resolveLocale(language);
+}
+export function getLocale(): SupportedLocale {
+  return locale;
+}
+export function t(message: string, ...args: Array<string | number>): string {
+  const value = catalogs[locale]?.[message] ?? catalogs.en[message] ?? message;
+  return value.replace(/\{(\d+)\}/g, (_match, index: string) =>
+    String(args[Number(index)] ?? '{' + index + '}')
+  );
+}
+/** Formatting belongs to the active locale, never a hardcoded language. */
+export function formatDate(value: string | number | Date): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+    new Date(value)
+  );
+}
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat(locale).format(value);
+}
+export function formatCount(
+  value: number,
+  forms: Partial<Record<Intl.LDMLPluralRule, string>>
+): string {
+  const rule = new Intl.PluralRules(locale).select(value);
+  return (forms[rule] ?? forms.other ?? '').replace(/\{0\}/g, formatNumber(value));
 }

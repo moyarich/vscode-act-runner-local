@@ -37,17 +37,17 @@ export function ControlBar() {
       <div style={styles.left}>
         {!isRunning && (
           <button style={styles.btnPrimary} onClick={runSelectedWorkflow}>
-            ▶ {t('Run')}
+            ▶ {t('run')}
           </button>
         )}
         {isRunning && (
           <button style={styles.btnDanger} onClick={() => send('command:stop', {})}>
-            ⏹ {t('Stop')}
+            ⏹ {t('stop')}
           </button>
         )}
         <button
           style={styles.btnAct}
-          title={t('Configure the act executable path')}
+          title={t('act.configure')}
           onClick={() => send('command:locateAct', {})}
         >
           ⚙ act
@@ -65,7 +65,14 @@ export function ControlBar() {
               }
             }}
           >
-            {VIEW_LABELS[view]}
+            {
+              {
+                graph: `🗺 ${t('nav.graph')}`,
+                history: `📜 ${t('nav.history')}`,
+                analytics: `📊 ${t('nav.analytics')}`,
+                env: `⚙️ ${t('nav.settings')}`,
+              }[view]
+            }
           </button>
         ))}
         <button
@@ -76,19 +83,12 @@ export function ControlBar() {
           }}
           onClick={() => setView('summary')}
         >
-          📋 Summary
+          📋 {t('nav.summary')}
         </button>
       </div>
     </div>
   );
 }
-
-const VIEW_LABELS: Record<string, string> = {
-  graph: `🗺 ${t('Graph')}`,
-  history: `📜 ${t('History')}`,
-  analytics: `📊 ${t('Analytics')}`,
-  env: `⚙️ ${t('Settings')}`,
-};
 
 const styles: Record<string, React.CSSProperties> = {
   bar: {

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useExecutionStore } from '../store/executionStore';
-import { t } from '../i18n';
+import { t, formatNumber } from '../i18n';
 import type { ExecutionRecord, JobResult } from '../../types/execution.types';
 
 type Timeframe = '7' | '30' | '90' | 'all';
@@ -66,19 +66,19 @@ export function AnalyticsPanel() {
       <div style={styles.topbar}>
         <div style={styles.brand}>Act Visual Runner</div>
         <div style={styles.tabs}>
-          <span style={styles.tabActive}>Analytics</span>
+          <span style={styles.tabActive}>{t('nav.analytics')}</span>
         </div>
         <label style={styles.timeframe}>
-          <span>Timeframe:</span>
+          <span>{t('analytics.timeframe')}</span>
           <select
             value={timeframe}
             onChange={(event) => setTimeframe(event.target.value as Timeframe)}
             style={styles.select}
           >
-            <option value="7">Past 7 days</option>
-            <option value="30">Past 30 days</option>
-            <option value="90">Past 90 days</option>
-            <option value="all">All time</option>
+            <option value="7">{t('analytics.7d')}</option>
+            <option value="30">{t('analytics.30d')}</option>
+            <option value="90">{t('analytics.90d')}</option>
+            <option value="all">{t('analytics.allTime')}</option>
           </select>
         </label>
       </div>
@@ -89,7 +89,7 @@ export function AnalyticsPanel() {
           onChange={(event) => setWorkflow(event.target.value)}
           style={styles.filterSelect}
         >
-          <option value="all">Workflow</option>
+          <option value="all">{t('workflow')}</option>
           {workflows.map((item) => (
             <option key={item} value={item}>
               {item}
@@ -101,7 +101,7 @@ export function AnalyticsPanel() {
           onChange={(event) => setJob(event.target.value)}
           style={styles.filterSelect}
         >
-          <option value="all">Job</option>
+          <option value="all">{t('job')}</option>
           {jobNames.map((item) => (
             <option key={item} value={item}>
               {item}
@@ -113,73 +113,81 @@ export function AnalyticsPanel() {
           onChange={(event) => setStatus(event.target.value)}
           style={styles.filterSelect}
         >
-          <option value="all">{t('Status')}</option>
-          <option value="success">Success</option>
-          <option value="failed">Failed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="all">{t('status')}</option>
+          <option value="success">{t('status.success')}</option>
+          <option value="failed">{t('status.failed')}</option>
+          <option value="cancelled">{t('status.cancelled')}</option>
         </select>
         <button type="button" onClick={clearFilters} style={styles.clearBtn}>
-          clear all filters
+          {t('analytics.clearFilters')}
         </button>
       </div>
 
       {history.length === 0 ? (
-        <div style={styles.empty}>
-          {t('No history available yet. Run workflows to populate Analytics.')}
-        </div>
+        <div style={styles.empty}>{t('analytics.empty')}</div>
       ) : (
         <div style={styles.content}>
           <section>
-            <h2 style={styles.sectionTitle}>Overview</h2>
+            <h2 style={styles.sectionTitle}>{t('analytics.overview')}</h2>
             <div style={styles.metricGrid}>
               <MetricCard
-                label="Average duration"
+                label={t('analytics.metricDuration')}
                 value={formatDuration(metrics.averageDuration)}
               />
               <MetricCard
-                label="Average failure rate"
+                label={t('analytics.failureRate')}
                 value={`${metrics.failureRate.toFixed(1)}%`}
-                sub={`${metrics.failedRuns} of ${metrics.totalRuns} jobs`}
+                sub={t(
+                  'analytics.failedOfTotal',
+                  formatNumber(metrics.failedRuns),
+                  formatNumber(metrics.totalRuns)
+                )}
               />
               <MetricCard
-                label="Total minutes"
+                label={t('analytics.totalMinutes')}
                 value={`${formatNumber(metrics.totalMinutes)} min`}
               />
               <MetricCard
-                label="Billable minutes"
+                label={t('analytics.billableMinutes')}
                 value={`${formatNumber(metrics.billableMinutes)} min`}
               />
               <MetricCard
-                label="Est. time saved"
+                label={t('analytics.timeSaved')}
                 value={`${formatNumber(metrics.estimatedSavedMinutes)} min`}
-                sub="vs GitHub-hosted"
+                sub={t('analytics.vsHosted')}
               />
               <MetricCard
-                label="Est. cost savings"
+                label={t('analytics.costSaved')}
                 value={`$${metrics.estimatedCostSavings.toFixed(2)}`}
-                sub="vs GitHub-hosted"
+                sub={t('analytics.vsHosted')}
               />
             </div>
           </section>
 
           <section style={styles.chartGrid}>
             <ChartPanel
-              title="Builds Over Time"
+              title={t('analytics.builds')}
               buckets={buckets}
               mode="count"
-              averageLabel={`Average: ${Math.round(metrics.averageBuildsPerBucket)} jobs`}
+              averageLabel={t(
+                'analytics.averageJobs',
+                formatNumber(Math.round(metrics.averageBuildsPerBucket))
+              )}
             />
             <ChartPanel
-              title="Minutes Over Time"
+              title={t('analytics.minutes')}
               buckets={buckets}
               mode="minutes"
-              averageLabel={`Average: ${Math.round(metrics.averageMinutesPerBucket)} min`}
+              averageLabel={t(
+                'analytics.averageMinutes',
+                formatNumber(Math.round(metrics.averageMinutesPerBucket))
+              )}
             />
           </section>
 
           <section style={styles.bottomGrid}>
             <div style={styles.panel}>
-              <h2 style={styles.sectionTitle}>Job Duration Distribution</h2>
+              <h2 style={styles.sectionTitle}>{t('analytics.duration')}</h2>
               <div style={styles.distributionList}>
                 {distribution.map((item) => (
                   <div key={item.label} style={styles.distributionRow}>
@@ -194,7 +202,7 @@ export function AnalyticsPanel() {
             </div>
 
             <div style={styles.panel}>
-              <h2 style={styles.sectionTitle}>Top 5 Slowest Jobs</h2>
+              <h2 style={styles.sectionTitle}>{t('analytics.slowest')}</h2>
               <div style={styles.slowestList}>
                 {slowestJobs.length > 0 ? (
                   slowestJobs.map((item) => (
@@ -206,11 +214,11 @@ export function AnalyticsPanel() {
                       <div style={styles.slowestDuration}>
                         {formatDuration(item.averageDuration)}
                       </div>
-                      <div style={styles.slowestSubRight}>avg duration</div>
+                      <div style={styles.slowestSubRight}>{t('analytics.avgDuration')}</div>
                     </div>
                   ))
                 ) : (
-                  <div style={styles.muted}>{t('No jobs with recorded duration.')}</div>
+                  <div style={styles.muted}>{t('analytics.noDuration')}</div>
                 )}
               </div>
             </div>
@@ -291,14 +299,14 @@ function ChartPanel({
           })}
         </div>
         <div style={styles.successErrors}>
-          <div style={styles.successErrorsTitle}>Success & Errors</div>
-          <div style={styles.successErrorsSub}>by day</div>
+          <div style={styles.successErrorsTitle}>{t('analytics.outcomes')}</div>
+          <div style={styles.successErrorsSub}>{t('analytics.byDay')}</div>
           <div style={styles.successNumber}>
             {formatNumber(valueTotal)}{' '}
             <span style={styles.successText}>{mode === 'count' ? 'successful' : 'minutes'}</span>
           </div>
           <div style={styles.failedNumber}>
-            {failedTotal} <span style={styles.failedText}>errored</span>
+            {failedTotal} <span style={styles.failedText}>{t('analytics.errored')}</span>
           </div>
         </div>
       </div>
@@ -449,10 +457,6 @@ function formatDuration(ms: number): string {
   const hours = Math.floor(minutes / 60);
   const remainder = minutes % 60;
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
-}
-
-function formatNumber(value: number): string {
-  return Math.round(value).toLocaleString('en-US');
 }
 
 const styles: Record<string, React.CSSProperties> = {

@@ -296,9 +296,9 @@ export function SummaryPanel() {
       <aside style={styles.sidebar}>
         <div style={styles.sidebarActive}>
           <span style={styles.sidebarIcon}>⌂</span>
-          <span>Summary</span>
+          <span>{t('nav.summary')}</span>
         </div>
-        <div style={styles.sidebarSection}>Jobs</div>
+        <div style={styles.sidebarSection}>{t('job.list')}</div>
         <div style={styles.sidebarJobs}>
           {jobs.length > 0 ? (
             jobs.map((job) => (
@@ -308,7 +308,7 @@ export function SummaryPanel() {
               </div>
             ))
           ) : (
-            <div style={styles.sidebarEmpty}>{t('No job loaded')}</div>
+            <div style={styles.sidebarEmpty}>{t('job.empty')}</div>
           )}
         </div>
       </aside>
@@ -320,7 +320,7 @@ export function SummaryPanel() {
 
         <section style={styles.workflowCard}>
           <div style={styles.workflowTitle}>{workflowFile}</div>
-          <div style={styles.workflowSubtitle}>on: act</div>
+          <div style={styles.workflowSubtitle}>{t('summary.actEvent')}</div>
           <div style={styles.workflowGraphFrame}>
             <WorkflowGraph showHeader={false} />
           </div>
@@ -334,9 +334,7 @@ export function SummaryPanel() {
           {summaryContent ? (
             <div style={styles.body} dangerouslySetInnerHTML={{ __html: htmlContent }} />
           ) : (
-            <div style={{ ...styles.body, ...styles.empty }}>
-              {t('No GITHUB_STEP_SUMMARY detected in this execution.')}
-            </div>
+            <div style={{ ...styles.body, ...styles.empty }}>{t('summary.empty')}</div>
           )}
         </section>
       </main>

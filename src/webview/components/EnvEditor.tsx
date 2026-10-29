@@ -30,57 +30,53 @@ interface TabConfig {
 
 const FILE_TAB_CONFIGS: Record<FileTab, TabConfig> = {
   secrets: {
-    label: 'Secrets',
-    sectionTitle: 'Repository secrets',
-    newBtnLabel: 'New repository secret',
-    nameLabel: 'Name',
-    valueLabel: 'Secret',
+    label: 'env.secrets',
+    sectionTitle: 'env.repoSecrets',
+    newBtnLabel: 'env.newSecret',
+    nameLabel: 'env.name',
+    valueLabel: 'env.secret',
     fileKindLabel: 'secrets',
-    filePlaceholder: '.secrets ou config/local.secrets',
+    filePlaceholder: '.secrets or config/local.secrets',
     isSecret: true,
-    description:
-      'Secrets are encrypted and are used for sensitive data. They are not passed to workflows triggered by a pull request from a fork.',
+    description: 'env.secretsDescription',
   },
   vars: {
     label: '.vars',
-    sectionTitle: 'Repository variables',
-    newBtnLabel: 'New repository variable',
-    nameLabel: 'Name',
-    valueLabel: 'Value',
+    sectionTitle: 'env.repoVariables',
+    newBtnLabel: 'env.newRepoVariable',
+    nameLabel: 'env.name',
+    valueLabel: 'value',
     fileKindLabel: 'vars',
-    filePlaceholder: '.vars ou my.variables',
+    filePlaceholder: '.vars or my.variables',
     isSecret: false,
-    description:
-      'Variables loaded from a .vars file. Shown as plain text and used for non-sensitive configuration data.',
+    description: 'env.varsDescription',
   },
   env: {
     label: '.env',
-    sectionTitle: 'Environment variables',
-    newBtnLabel: 'New variable',
-    nameLabel: 'Name',
-    valueLabel: 'Value',
+    sectionTitle: 'env.variables',
+    newBtnLabel: 'env.newVariable',
+    nameLabel: 'env.name',
+    valueLabel: 'value',
     fileKindLabel: 'env',
-    filePlaceholder: '.env ou my.env',
+    filePlaceholder: '.env or my.env',
     isSecret: false,
-    description:
-      'Environment variables loaded from a .env file and passed to the act runner at execution time.',
+    description: 'env.envDescription',
   },
   actrc: {
-    label: 'Args do ACT',
-    sectionTitle: 'Act runner arguments',
-    newBtnLabel: 'New argument',
-    nameLabel: 'Argument',
+    label: 'env.actArgs',
+    sectionTitle: 'env.actArguments',
+    newBtnLabel: 'env.newArgument',
+    nameLabel: 'env.argument',
     valueLabel: null,
     fileKindLabel: 'actrc',
     filePlaceholder: '.actrc',
     isSecret: false,
-    description:
-      'Configure act runner flags and platform mappings used when running GitHub Actions locally.',
+    description: 'env.argsDescription',
   },
 };
 
 const SIDEBAR_ITEMS: { key: SidebarSection; label: string; icon: string }[] = [
-  { key: 'actions', label: 'Actions', icon: '⚡' },
+  { key: 'actions', label: 'actions', icon: '⚡' },
 ];
 
 export function EnvEditor() {
@@ -128,7 +124,16 @@ export function EnvEditor() {
     }
   }, [mode]);
 
-  const config = FILE_TAB_CONFIGS[fileTab];
+  const configSource = FILE_TAB_CONFIGS[fileTab];
+  const config = {
+    ...configSource,
+    label: t(configSource.label),
+    sectionTitle: t(configSource.sectionTitle),
+    newBtnLabel: t(configSource.newBtnLabel),
+    nameLabel: t(configSource.nameLabel),
+    valueLabel: configSource.valueLabel ? t(configSource.valueLabel) : null,
+    description: t(configSource.description),
+  };
 
   const saveAll = (newRows: EnvEntry[]) => {
     window.__vscode__?.postMessage({
@@ -214,7 +219,7 @@ export function EnvEditor() {
               onClick={() => setSidebarSection(item.key)}
             >
               <span style={s.sidebarIcon}>{item.icon}</span>
-              {item.label}
+              {t(item.label)}
             </button>
           ))}
         </div>
@@ -224,12 +229,12 @@ export function EnvEditor() {
       <div style={s.main}>
         {/* Page header */}
         <div style={s.pageHeader}>
-          <h2 style={s.pageTitle}>Actions secrets and variables</h2>
+          <h2 style={s.pageTitle}>{t('env.title')}</h2>
           <p style={s.pageDesc}>
             Secrets and variables allow you to manage reusable configuration data.{' '}
-            <strong style={{ color: '#c9d1d9' }}>Secrets are encrypted</strong> and are used for
+            <strong style={{ color: '#c9d1d9' }}>{t('secret.encrypted')}</strong> and are used for
             sensitive data. Variables are shown as plain text and are used for{' '}
-            <strong style={{ color: '#c9d1d9' }}>non-sensitive data</strong>. Anyone with
+            <strong style={{ color: '#c9d1d9' }}>{t('env.publicData')}</strong>. Anyone with
             collaborator access can use these secrets and variables for actions. They are not passed
             to workflows triggered by a pull request from a fork.
           </p>
@@ -239,9 +244,9 @@ export function EnvEditor() {
         <div style={s.navTabs}>
           {(
             [
-              { key: 'secrets', label: 'Secrets' },
-              { key: 'variables', label: 'Variables' },
-              { key: 'actrc', label: 'Args do ACT' },
+              { key: 'secrets', label: 'env.secrets' },
+              { key: 'variables', label: 'env.variablesTab' },
+              { key: 'actrc', label: 'env.actArgs' },
             ] as { key: MainTab; label: string }[]
           ).map((t) => (
             <button
@@ -308,7 +313,9 @@ export function EnvEditor() {
             <div style={s.formBox}>
               <div style={s.formHeader}>
                 <h3 style={s.formTitle}>
-                  {mode === 'add' ? config.newBtnLabel : `Update ${config.label.toLowerCase()}`}
+                  {mode === 'add'
+                    ? config.newBtnLabel
+                    : t('env.update', config.label.toLowerCase())}
                 </h3>
               </div>
               <div style={s.formBody}>
@@ -335,7 +342,9 @@ export function EnvEditor() {
                     <textarea
                       style={s.formTextarea}
                       value={formValue}
-                      placeholder={config.isSecret ? 'Enter secret value' : 'Enter value'}
+                      placeholder={t(
+                        config.isSecret ? 'env.secretPlaceholder' : 'env.valuePlaceholder'
+                      )}
                       onChange={(e) => setFormValue(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Escape') cancelForm();
@@ -345,9 +354,8 @@ export function EnvEditor() {
                     />
                     {config.isSecret && (
                       <p style={s.formHint}>
-                        ⚠️ {t('Secrets should never be committed. Make sure')}{' '}
-                        <code style={s.code}>.secrets</code> {t('is in')}{' '}
-                        <code style={s.code}>.gitignore</code>.
+                        ⚠️ {t('secret.warning')} <code style={s.code}>.secrets</code>{' '}
+                        {t('common.isIn')} <code style={s.code}>.gitignore</code>.
                       </p>
                     )}
                   </div>
@@ -359,7 +367,7 @@ export function EnvEditor() {
                     disabled={!formKey.trim()}
                   >
                     {mode === 'add'
-                      ? `Add ${config.label.toLowerCase()}`
+                      ? t('env.add', config.label.toLowerCase())
                       : `Update ${config.label.toLowerCase()}`}
                   </button>
                   <button style={s.btnOutline} onClick={cancelForm}>
@@ -382,13 +390,11 @@ export function EnvEditor() {
 
               {loading ? (
                 <div style={s.emptyBox}>
-                  <span style={s.emptyText}>Loading…</span>
+                  <span style={s.emptyText}>{t('loading')}</span>
                 </div>
               ) : rows.length === 0 ? (
                 <div style={s.emptyBox}>
-                  <p style={s.emptyText}>
-                    There are no {config.label.toLowerCase()} for this repository.
-                  </p>
+                  <p style={s.emptyText}>{t('env.empty', config.label.toLowerCase())}</p>
                   <button style={s.btnGreenSm} onClick={openAdd}>
                     {config.newBtnLabel}
                   </button>
@@ -396,8 +402,8 @@ export function EnvEditor() {
               ) : (
                 <div style={s.table}>
                   <div style={s.tableHead}>
-                    <div style={s.thName}>Name ↕</div>
-                    {config.valueLabel !== null && <div style={s.thValue}>Value</div>}
+                    <div style={s.thName}>{t('nameSort')}</div>
+                    {config.valueLabel !== null && <div style={s.thValue}>{t('value')}</div>}
                     <div style={s.thActions} />
                   </div>
                   {rows.map((row, i) => (
@@ -421,12 +427,12 @@ export function EnvEditor() {
                         </div>
                       )}
                       <div style={s.tdActions}>
-                        <button style={s.iconBtn} title="Edit" onClick={() => openEdit(i)}>
+                        <button style={s.iconBtn} title={t('edit')} onClick={() => openEdit(i)}>
                           ✏️
                         </button>
                         <button
                           style={{ ...s.iconBtn, ...s.iconBtnDanger }}
-                          title="Delete"
+                          title={t('delete')}
                           onClick={() => deleteRow(i)}
                         >
                           🗑️

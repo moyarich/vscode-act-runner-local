@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import React from 'react';
 import { useExecutionStore, type NodeStatus } from '../store/executionStore';
 
@@ -11,11 +12,11 @@ export function RunSummaryHeader() {
   return (
     <section style={styles.card}>
       <div style={styles.identity}>
-        <div style={styles.muted}>Triggered locally by act</div>
+        <div style={styles.muted}>{t('execution.localTrigger')}</div>
         <div style={styles.titleRow}>
           <StatusIcon status={status} />
           <span style={styles.title}>{execution.workflowName || 'Workflow run'}</span>
-          {execution.executionId && <span style={styles.badge}>local</span>}
+          {execution.executionId && <span style={styles.badge}>{t('execution.local')}</span>}
         </div>
       </div>
       <Metric label="Status" value={formatStatus(execution.status)} />

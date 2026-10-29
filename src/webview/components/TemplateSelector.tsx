@@ -17,32 +17,32 @@ interface Template {
 const WORKFLOW_TEMPLATES: Template[] = [
   {
     id: 'ci-nodejs',
-    name: 'CI — Node.js',
-    description: 'Build, lint, and tests for Node.js projects',
+    name: 'template.ci.nodejs.name',
+    description: 'template.ci.nodejs.description',
     category: 'workflow',
   },
   {
     id: 'ci-python',
-    name: 'CI — Python',
-    description: 'Build and pytest tests for Python projects',
+    name: 'template.ci.python.name',
+    description: 'template.ci.python.description',
     category: 'workflow',
   },
   {
     id: 'cd-docker',
-    name: 'CD — Docker',
-    description: 'Build and push a Docker image to a registry',
+    name: 'template.cd.docker.name',
+    description: 'template.cd.docker.description',
     category: 'workflow',
   },
   {
     id: 'release-auto',
-    name: 'Automated Release',
-    description: 'Semantic release with an automated changelog',
+    name: 'template.release.auto.name',
+    description: 'template.release.auto.description',
     category: 'workflow',
   },
   {
     id: 'lint',
-    name: 'Lint & Format',
-    description: 'Code quality verification',
+    name: 'template.lint.name',
+    description: 'template.lint.description',
     category: 'workflow',
   },
 ];
@@ -50,29 +50,29 @@ const WORKFLOW_TEMPLATES: Template[] = [
 const SCRIPT_TEMPLATES: Template[] = [
   {
     id: 'bash-deploy',
-    name: 'Deploy Bash',
-    description: 'Script de deploy genérico em Bash',
+    name: 'template.bash.deploy.name',
+    description: 'template.bash.deploy.description',
     category: 'script',
     language: 'bash',
   },
   {
     id: 'ps-azure',
-    name: 'Azure PowerShell',
-    description: 'Deploy Azure resources with PowerShell',
+    name: 'template.ps.azure.name',
+    description: 'template.ps.azure.description',
     category: 'script',
     language: 'powershell',
   },
   {
     id: 'python-api',
-    name: 'Python API',
-    description: 'Python integration script for REST APIs',
+    name: 'template.python.api.name',
+    description: 'template.python.api.description',
     category: 'script',
     language: 'python',
   },
   {
     id: 'bicep-appservice',
-    name: 'Bicep App Service',
-    description: 'Infrastructure as code for Azure App Service',
+    name: 'template.bicep.appservice.name',
+    description: 'template.bicep.appservice.description',
     category: 'script',
     language: 'bicep',
   },
@@ -93,19 +93,19 @@ export function TemplateSelector() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <span>Templates</span>
+        <span>{t('template.list')}</span>
         <div style={styles.toggle}>
           <button
             style={{ ...styles.btn, ...(section === 'workflow' ? styles.btnActive : {}) }}
             onClick={() => setSection('workflow')}
           >
-            📋 {t('Workflows')}
+            📋 {t('workflow.list')}
           </button>
           <button
             style={{ ...styles.btn, ...(section === 'script' ? styles.btnActive : {}) }}
             onClick={() => setSection('script')}
           >
-            📜 {t('Scripts')}
+            📜 {t('script.list')}
           </button>
         </div>
       </div>
@@ -116,12 +116,12 @@ export function TemplateSelector() {
             style={{ ...styles.card, ...(selected === template.id ? styles.cardSelected : {}) }}
             onClick={() => setSelected(template.id)}
           >
-            <div style={styles.cardName}>{template.name}</div>
-            <div style={styles.cardDesc}>{template.description}</div>
+            <div style={styles.cardName}>{t(template.name)}</div>
+            <div style={styles.cardDesc}>{t(template.description)}</div>
             {template.language && <div style={styles.tag}>{template.language}</div>}
             {selected === template.id && (
               <button style={styles.applyBtn} onClick={() => apply(template.id)}>
-                {t('Apply template')}
+                {t('template.apply')}
               </button>
             )}
           </div>
