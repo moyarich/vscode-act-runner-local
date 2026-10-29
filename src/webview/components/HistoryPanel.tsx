@@ -388,10 +388,10 @@ function setHistoryLineRef(
 }
 
 function historyRowTitle(canRestoreGraph: boolean, isWorkflowRunning: boolean): string {
-  if (isWorkflowRunning) return 'Execução em andamento: o grafo ao vivo permanece protegido.';
+  if (isWorkflowRunning) return t('history.graphRunning');
   return canRestoreGraph
-    ? 'Abrir grafo desta execução'
-    : 'Grafo detalhado disponível para execuções feitas nesta sessão';
+    ? t('history.openGraph')
+    : t('history.graphSessionOnly');
 }
 
 function highlightLogText(line: string, normalizedQuery: string): React.ReactNode {
