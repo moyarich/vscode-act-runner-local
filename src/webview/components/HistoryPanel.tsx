@@ -389,9 +389,7 @@ function setHistoryLineRef(
 
 function historyRowTitle(canRestoreGraph: boolean, isWorkflowRunning: boolean): string {
   if (isWorkflowRunning) return t('history.graphRunning');
-  return canRestoreGraph
-    ? t('history.openGraph')
-    : t('history.graphSessionOnly');
+  return canRestoreGraph ? t('history.openGraph') : t('history.graphSessionOnly');
 }
 
 function highlightLogText(line: string, normalizedQuery: string): React.ReactNode {
