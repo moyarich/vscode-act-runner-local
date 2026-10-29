@@ -18,7 +18,7 @@ VS Code command titles, view names, and configuration descriptions are controlle
 
 - `package.nls.json` and `package.nls.<locale>.json` contain manifest contributions.
 - `l10n/bundle.l10n.json` and `l10n/bundle.l10n.<locale>.json` contain extension-host messages consumed through `vscode.l10n`.
-- `src/webview/locales/{es,fr,pt-BR}.json` stores the webview translations, while `src/webview/i18n.ts` implements locale resolution, fallback and `Intl` formatting. Use `t('Source English string')` for user-facing React labels.
+- `src/webview/locales/{en,es,fr,pt-BR}.json` stores the webview translations, while `src/webview/i18n.ts` implements locale resolution, fallback and `Intl` formatting. Use short semantic IDs such as `t('run')`, `t('history.empty')`, or `t('workflow.run')` for React labels. The canonical `src/webview/locales/en.json` maps IDs to English source messages. Keep identical keys in `es.json`, `fr.json`, and `pt-BR.json`.
 
 Preserve interpolation placeholders such as `{0}`; do not translate workflow names, action output, user content or logs. Use locale-aware date and number formatting for presentation.
 
