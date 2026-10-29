@@ -65,7 +65,7 @@ export function ControlBar() {
               }
             }}
           >
-            {VIEW_LABELS[view]}
+            {({ graph: `🗺 ${t('Graph')}`, history: `📜 ${t('History')}`, analytics: `📊 ${t('Analytics')}`, env: `⚙️ ${t('Settings')}` })[view]}
           </button>
         ))}
         <button
@@ -83,12 +83,6 @@ export function ControlBar() {
   );
 }
 
-const VIEW_LABELS: Record<string, string> = {
-  graph: `🗺 ${t('Graph')}`,
-  history: `📜 ${t('History')}`,
-  analytics: `📊 ${t('Analytics')}`,
-  env: `⚙️ ${t('Settings')}`,
-};
 
 const styles: Record<string, React.CSSProperties> = {
   bar: {
