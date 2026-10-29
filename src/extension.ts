@@ -41,8 +41,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration('actRunner.language') && webviewPanel) {
-        // Recreate the webview to ensure all module-level labels use the new locale.
-        webviewPanel.webview.html = buildWebviewHtml(context, webviewPanel.webview, 'graph');
+        webviewPanel.webview.postMessage({ type: 'locale:change', payload: { language: getRuntimeLocale() } });
       }
     })
   );
