@@ -37,9 +37,7 @@ export function t(
   const value = catalogs[locale]?.[message] ?? catalogs.en[message] ?? message;
   const named = args.length === 1 && typeof args[0] === 'object' ? args[0] : undefined;
   return value.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*|\d+)\}/g, (placeholder, key: string) => {
-    const replacement = named
-      ? named[key]
-      : /^\d+$/.test(key) ? args[Number(key)] : undefined;
+    const replacement = named ? named[key] : /^\d+$/.test(key) ? args[Number(key)] : undefined;
     return replacement === undefined ? placeholder : String(replacement);
   });
 }
