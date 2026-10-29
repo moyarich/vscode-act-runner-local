@@ -856,14 +856,29 @@ export class ActRunner {
     const args: string[] = [];
 
     if (options.workflowPath) {
-      // Quando o CWD é diferente do projeto, -W deve ser relativo ao actCwd
-      // (exatamente como: cd fean-projects/ && act -W sample-dotnet-api/.github/workflows/file.yaml)
+      // Resolve relative workflow paths against the workspace, not the extension process.
+      // Windows paths must use win32 semantics even when tests run on another OS.
       const effectiveCwd = actCwd ?? options.workspaceRoot ?? '';
-      const wfPath =
-        effectiveCwd && effectiveCwd !== options.workspaceRoot
-          ? path.relative(effectiveCwd, path.resolve(options.workflowPath))
-          : sanitizePath(options.workflowPath);
-      args.push('-W', wfPath);
+      const pathApi =
+        path.win32.isAbsolute(options.workflowPath) || path.win32.isAbsolute(effectiveCwd)
+          ? path.win32
+          : path;
+      const absoluteWorkflow = pathApi.resolve(
+        options.workspaceRoot || effectiveCwd || '.',
+        options.workflowPath
+      );
+      const relativeWorkflow = effectiveCwd
+        ? pathApi.relative(pathApi.resolve(effectiveCwd), absoluteWorkflow)
+        : '';
+      // A workflow outside the act root (or on another Windows drive) needs
+      // its absolute path. spawn() passes arguments directly without a shell.
+      const withinActRoot =
+        relativeWorkflow &&
+        relativeWorkflow !== '..' &&
+        !relativeWorkflow.startsWith(`..${pathApi.sep}`) &&
+        !pathApi.isAbsolute(relativeWorkflow);
+      const workflowArg = withinActRoot ? relativeWorkflow : absoluteWorkflow;
+      args.push('-W', workflowArg.replace(/\\/g, '/'));
     }
     if (options.jobId) args.push('-j', sanitizeArg(options.jobId));
     if (options.dryRun) args.push('-n');
