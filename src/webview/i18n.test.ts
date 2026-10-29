@@ -36,6 +36,12 @@ describe('webview localization', () => {
     setLocale('en');
     expect(t('run')).toBe('Run');
   });
+  it('supports named and positional placeholders without replacing unknown values', () => {
+    expect(t('Hello {name}', { name: 'Alex' })).toBe('Hello Alex');
+    expect(t('Value {0}', 42)).toBe('Value 42');
+    expect(t('Unknown {missing}', { name: 'Alex' })).toBe('Unknown {missing}');
+    expect(t('Reordered {last} {first}', { first: 'A', last: 'B' })).toBe('Reordered B A');
+  });
   it('preserves placeholders', () => {
     setLocale('fr');
     expect(t('Value {0}', 42)).toBe('Value 42');
@@ -51,7 +57,7 @@ describe('translation catalog integrity', () => {
     fr: french as Record<string, string>,
   };
   const placeholders = (value: string) =>
-    Array.from(value.matchAll(/\{\d+\}/g), (match) => match[0]).sort();
+    Array.from(value.matchAll(/\{(?:\d+|[a-zA-Z_][a-zA-Z0-9_]*)\}/g), (match) => match[0]).sort();
   it.each(Object.entries(dictionaries))(
     '%s has valid translations and placeholders',
     (_locale, entries) => {
