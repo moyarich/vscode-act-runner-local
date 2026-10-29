@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { getLocale, resolveLocale, setLocale, t } from './i18n';
+import { formatCount, formatNumber, getLocale, resolveLocale, setLocale, t } from './i18n';
 import english from './locales/en.json';
 import portuguese from './locales/pt-BR.json';
 import europeanPortuguese from './locales/pt-PT.json';
@@ -41,6 +41,12 @@ describe('webview localization', () => {
     expect(t('Value {0}', 42)).toBe('Value 42');
     expect(t('Unknown {missing}', { name: 'Alex' })).toBe('Unknown {missing}');
     expect(t('Reordered {last} {first}', { first: 'A', last: 'B' })).toBe('Reordered B A');
+  });
+  it('formats numbers and plural forms in the selected language', () => {
+    setLocale('fr');
+    expect(formatNumber(1234.5)).toBe(new Intl.NumberFormat('fr').format(1234.5));
+    expect(formatCount(1, { one: '{0} élément', other: '{0} éléments' })).toBe('1 élément');
+    expect(formatCount(2, { one: '{0} élément', other: '{0} éléments' })).toBe('2 éléments');
   });
   it('preserves placeholders', () => {
     setLocale('fr');
