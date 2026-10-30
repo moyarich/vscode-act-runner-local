@@ -210,7 +210,7 @@ export function AnalyticsPanel() {
                       <div style={styles.slowestName}>
                         {item.workflowName}/{item.jobName}
                       </div>
-                      <div style={styles.slowestSub}>{item.runs} runs</div>
+                      <div style={styles.slowestSub}>{t('analytics.runCount', item.runs)}</div>
                       <div style={styles.slowestDuration}>
                         {formatDuration(item.averageDuration)}
                       </div>
