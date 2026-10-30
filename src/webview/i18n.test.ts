@@ -139,6 +139,20 @@ describe('webview translation references', () => {
     expect(sidebar).not.toMatch(/\} job\{/);
   });
 
+  it('sets the HTML document language from the supported resolved locale', () => {
+    const app = fs.readFileSync(path.resolve(__dirname, 'App.tsx'), 'utf8');
+    expect(app).toContain("document.documentElement.lang = getLocale()");
+    expect(app).not.toContain('document.documentElement.lang = language');
+    for (const [input, expected] of [
+      ['pt-PT', 'pt-PT'],
+      ['es-MX', 'es'],
+      ['de-DE', 'en'],
+    ]) {
+      setLocale(input);
+      expect(getLocale()).toBe(expected);
+    }
+  });
+
   it('requires catalog coverage for keys referenced outside components', () => {
     const webview = path.resolve(__dirname);
     for (const file of fs.readdirSync(webview).filter((name) => name.endsWith('.tsx'))) {
