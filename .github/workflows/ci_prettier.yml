@@ -1,40 +1,14 @@
 name: CI / Prettier
-# Prettier is installed by the reusable workflow; consumer repositories need no local dependency.
 
 on:
   push:
     branches: [main]
-    paths:
-      - "**/*.js"
-      - "**/*.jsx"
-      - "**/*.ts"
-      - "**/*.tsx"
-      - "**/*.mjs"
-      - "**/*.json"
-      - "**/*.yml"
-      - "**/*.yaml"
-      - "**/*.md"
-      - "**/*.mdx"
+    paths: &prettier_paths
+      - "**/*.{js,jsx,ts,tsx,mjs,json,yml,yaml,md,mdx}"
       - ".prettier*"
-      - "package.json"
-      - "package-lock.json"
       - ".github/workflows/ci_prettier.yml"
   pull_request:
-    paths:
-      - "**/*.js"
-      - "**/*.jsx"
-      - "**/*.ts"
-      - "**/*.tsx"
-      - "**/*.mjs"
-      - "**/*.json"
-      - "**/*.yml"
-      - "**/*.yaml"
-      - "**/*.md"
-      - "**/*.mdx"
-      - ".prettier*"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/ci_prettier.yml"
+    paths: *prettier_paths
   workflow_dispatch:
     inputs:
       repair:
