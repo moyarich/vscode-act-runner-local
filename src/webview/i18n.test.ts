@@ -124,6 +124,31 @@ describe('translation catalog integrity', () => {
 describe('webview translation references', () => {
   const source = english as Record<string, string>;
   const components = path.join(__dirname, 'components');
+  it('keeps history navigation and workflow counts catalog-driven', () => {
+    const history = fs.readFileSync(path.join(components, 'HistoryPanel.tsx'), 'utf8');
+    const sidebar = fs.readFileSync(path.join(components, 'WorkflowLauncherSidebar.tsx'), 'utf8');
+
+    for (const key of ['history.retentionNote', 'history.pageOf', 'previous', 'next']) {
+      expect(history).toContain(`t('${key}'`);
+    }
+    for (const key of ['workflow.jobOne', 'workflow.jobOther']) {
+      expect(sidebar).toContain(`'${key}'`);
+    }
+    expect(history).not.toMatch(/>\s*Previous\s*</);
+    expect(history).not.toMatch(/>\s*Next\s*</);
+    expect(sidebar).not.toMatch(/\} job\{/);
+  });
+
+  it('requires catalog coverage for keys referenced outside components', () => {
+    const webview = path.resolve(__dirname);
+    for (const file of fs.readdirSync(webview).filter((name) => name.endsWith('.tsx'))) {
+      const content = fs.readFileSync(path.join(webview, file), 'utf8');
+      for (const match of content.matchAll(/\bt\(\s*['"]([^'"]+)['"]/g)) {
+        expect(Object.prototype.hasOwnProperty.call(source, match[1])).toBe(true);
+      }
+    }
+  });
+
   it('requires every statically referenced translation key in the source catalog', () => {
     for (const file of fs.readdirSync(components).filter((name) => name.endsWith('.tsx'))) {
       const content = fs.readFileSync(path.join(components, file), 'utf8');
