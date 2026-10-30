@@ -58,7 +58,7 @@ export function WebhookSimulator() {
           ))}
         </select>
         <button style={styles.btnSecondary} onClick={() => loadTemplate(eventType)}>
-          Carregar Template
+          {t('webhook.loadTemplate')}
         </button>
       </div>
       <label style={styles.label}>{t('webhook.payload')}</label>
@@ -74,7 +74,7 @@ export function WebhookSimulator() {
       />
       {error && <div style={styles.error}>{error}</div>}
       <button style={styles.btnPrimary} onClick={simulate}>
-        📡 Simular Evento
+        📡 {t('webhook.simulate')}
       </button>
     </div>
   );

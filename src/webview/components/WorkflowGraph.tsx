@@ -660,8 +660,8 @@ export function WorkflowGraph({ showHeader = true }: WorkflowGraphProps) {
               </span>
             )}
             <span style={{ color: '#6e7681', fontSize: 11 }}>
-              {allJobs.length} job{allJobs.length !== 1 ? 's' : ''} · {steps.length} step
-              {steps.length !== 1 ? 's' : ''}
+              {t(allJobs.length === 1 ? 'workflow.jobOne' : 'workflow.jobOther', allJobs.length)} ·{' '}
+              {t(steps.length === 1 ? 'workflow.stepOne' : 'workflow.stepOther', steps.length)}
             </span>
           </div>
         </div>

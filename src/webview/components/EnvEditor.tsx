@@ -230,14 +230,7 @@ export function EnvEditor() {
         {/* Page header */}
         <div style={s.pageHeader}>
           <h2 style={s.pageTitle}>{t('env.title')}</h2>
-          <p style={s.pageDesc}>
-            Secrets and variables allow you to manage reusable configuration data.{' '}
-            <strong style={{ color: '#c9d1d9' }}>{t('secret.encrypted')}</strong> and are used for
-            sensitive data. Variables are shown as plain text and are used for{' '}
-            <strong style={{ color: '#c9d1d9' }}>{t('env.publicData')}</strong>. Anyone with
-            collaborator access can use these secrets and variables for actions. They are not passed
-            to workflows triggered by a pull request from a fork.
-          </p>
+          <p style={s.pageDesc}>{t('env.securityDescription')}</p>
         </div>
 
         {/* Top nav tabs: Secrets | Variables | Args do ACT */}
@@ -299,10 +292,10 @@ export function EnvEditor() {
                   onChange={(e) => setFilePath(e.target.value)}
                 />
                 <button style={s.btnOutline} onClick={selectFile}>
-                  Selecionar
+                  {t('select')}
                 </button>
                 <button style={s.btnOutline} onClick={loadCurrentFile}>
-                  Carregar
+                  {t('load')}
                 </button>
               </div>
             )}
@@ -368,10 +361,10 @@ export function EnvEditor() {
                   >
                     {mode === 'add'
                       ? t('env.add', config.label.toLowerCase())
-                      : `Update ${config.label.toLowerCase()}`}
+                      : t('env.update', config.label.toLowerCase())}
                   </button>
                   <button style={s.btnOutline} onClick={cancelForm}>
-                    Cancel
+                    {t('cancel')}
                   </button>
                 </div>
               </div>

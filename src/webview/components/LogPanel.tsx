@@ -360,14 +360,11 @@ export function LogPanel({ height }: { height: number }) {
               onClick={() => setLogFilter(null)}
               title={t('log.showAll')}
             >
-              ✕ todos
+              ✕ {t('all')}
             </button>
           </span>
         ) : (
-          <span style={styles.headerHint}>
-            Clique em um job/step para filtrar ou em uma linha para restaurar o grafo naquele
-            momento
-          </span>
+          <span style={styles.headerHint}>{t('log.filterHint')}</span>
         )}
         {selectedTimelineLogId && (
           <button
@@ -375,7 +372,7 @@ export function LogPanel({ height }: { height: number }) {
             onClick={restoreLatestGraphState}
             title={t('graph.latest')}
           >
-            voltar ao atual
+            {t('graph.latest')}
           </button>
         )}
         <div style={styles.searchWrap}>
@@ -406,7 +403,7 @@ export function LogPanel({ height }: { height: number }) {
           </button>
           {searchQuery && (
             <button style={styles.searchBtn} onClick={() => changeSearch('')}>
-              limpar
+              {t('log.clearSearch')}
             </button>
           )}
         </div>
