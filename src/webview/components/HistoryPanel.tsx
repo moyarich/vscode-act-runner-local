@@ -345,7 +345,7 @@ function HistoryLogPanel({
         </button>
         {query && (
           <button style={styles.logSearchButton} onClick={() => onQueryChange('')}>
-            limpar
+            {t('log.clearSearch')}
           </button>
         )}
       </div>
