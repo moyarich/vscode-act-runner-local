@@ -23,7 +23,13 @@ describe('webview static UI text localization', () => {
     for (const file of files) {
       const location = file === 'App.tsx' ? path.join(__dirname, file) : path.join(dir, file);
       const source = fs.readFileSync(location, 'utf8');
-      const tree = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+      const tree = ts.createSourceFile(
+        file,
+        source,
+        ts.ScriptTarget.Latest,
+        true,
+        ts.ScriptKind.TSX
+      );
       const verify = (value: string, node: ts.Node) => {
         const text = value.trim();
         if (!/[a-zA-Z]{3}/.test(text) || allowedValues.has(text)) return;
