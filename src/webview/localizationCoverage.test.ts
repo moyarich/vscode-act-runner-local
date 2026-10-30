@@ -39,7 +39,10 @@ describe('webview static UI text localization', () => {
       const visit = (node: ts.Node): void => {
         if (ts.isJsxText(node)) verify(node.getText(tree), node);
         if (ts.isJsxAttribute(node) && node.initializer && ts.isStringLiteral(node.initializer)) {
-          if (ts.isIdentifier(node.name) && ['title', 'placeholder', 'aria-label', 'alt'].includes(node.name.text)) {
+          if (
+            ts.isIdentifier(node.name) &&
+            ['title', 'placeholder', 'aria-label', 'alt'].includes(node.name.text)
+          ) {
             verify(node.initializer.text, node);
           }
         }
