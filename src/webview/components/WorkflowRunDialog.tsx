@@ -135,7 +135,7 @@ export function WorkflowRunDialog() {
             disabled={missingRequired}
             onClick={run}
           >
-            Run workflow
+            {t('workflow.run')}
           </button>
         </div>
       </div>
