@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { setLocale } from './i18n';
+import { getLocale, setLocale } from './i18n';
 import { useExecutionStore, type AppView } from './store/executionStore';
 import type { ActEvent, WebviewMessage } from '../types/events.types';
 
@@ -67,7 +67,7 @@ export function App() {
         const language = (msg.payload as { language?: string }).language;
         if (language) {
           setLocale(language);
-          document.documentElement.lang = language;
+          document.documentElement.lang = getLocale();
           setLocaleVersion((version) => version + 1);
         }
         return;
