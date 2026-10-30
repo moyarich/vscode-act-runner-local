@@ -6,6 +6,7 @@ import * as ts from 'typescript';
  * and Git reference examples are data, not localizable interface copy. */
 const allowedValues = new Set([
   'Act Visual Runner',
+  '⚙ act',
   '.secrets',
   '.gitignore',
   'true',
