@@ -295,7 +295,7 @@ export function EnvEditor() {
                   {t('select')}
                 </button>
                 <button style={s.btnOutline} onClick={loadCurrentFile}>
-                  {t('loading')}
+                  {t('load')}
                 </button>
               </div>
             )}
