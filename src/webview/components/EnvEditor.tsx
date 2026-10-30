@@ -230,9 +230,7 @@ export function EnvEditor() {
         {/* Page header */}
         <div style={s.pageHeader}>
           <h2 style={s.pageTitle}>{t('env.title')}</h2>
-          <p style={s.pageDesc}>
-            {t('env.securityDescription')}
-          </p>
+          <p style={s.pageDesc}>{t('env.securityDescription')}</p>
         </div>
 
         {/* Top nav tabs: Secrets | Variables | Args do ACT */}

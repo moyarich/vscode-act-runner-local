@@ -364,9 +364,7 @@ export function LogPanel({ height }: { height: number }) {
             </button>
           </span>
         ) : (
-          <span style={styles.headerHint}>
-            {t('log.filterHint')}
-          </span>
+          <span style={styles.headerHint}>{t('log.filterHint')}</span>
         )}
         {selectedTimelineLogId && (
           <button
