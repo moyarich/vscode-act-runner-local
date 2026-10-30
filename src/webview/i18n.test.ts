@@ -141,7 +141,7 @@ describe('webview translation references', () => {
 
   it('sets the HTML document language from the supported resolved locale', () => {
     const app = fs.readFileSync(path.resolve(__dirname, 'App.tsx'), 'utf8');
-    expect(app).toContain("document.documentElement.lang = getLocale()");
+    expect(app).toContain('document.documentElement.lang = getLocale()');
     expect(app).not.toContain('document.documentElement.lang = language');
     for (const [input, expected] of [
       ['pt-PT', 'pt-PT'],
